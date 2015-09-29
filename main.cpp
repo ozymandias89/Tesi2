@@ -13,7 +13,7 @@ using std::cout;
 using std::endl;
 using std::cerr;
 
-// error status and message buffer
+// error status and message buffer  aaa
 int status;
 char errmsg[BUF_SIZE];
 
