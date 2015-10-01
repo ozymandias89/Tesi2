@@ -1,5 +1,5 @@
 /**
- * @file cpx_macro.h
+ * @file cpxmacro.h
  * CPLEX Helper Macros
  *
  */
