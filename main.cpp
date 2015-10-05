@@ -15,12 +15,12 @@
 // Includes:
 #include <cstdio>
 #include <iostream>
+#include <sstream>
 #include <ctime>
 #include <sys/time.h>
 #include <vector>
 #include <fstream>
 #include "cpxmacro.h"
-
 
 using std::ifstream;
 using std::ofstream;
@@ -36,58 +36,148 @@ char errmsg[BUF_SIZE];
 timeval start, stop;
 double elapsedTime;
 
-
 const int NAME_SIZE = 512;
 char name[NAME_SIZE];
 
 //number of variable
-int const N = 10;
+int N;
 
 //number of constraint
-int const num_constraint = 5;
+int num_constraint;
 
 //Coefficient cost
-double c[N];
+double* c;
 
 //price matrix
 double** A;
 
 //known terms
-double b[num_constraint];
+double* b;
 
 void load_problem(ifstream &myfile) {
 
-    if (!myfile.is_open())
-        cerr << "Unable to open file!!!!!";
+	bool flag_obb = true;
+	bool flag_known = true;
 
-    for(int i = 0; i < N; ++i){
-    	myfile >> c[i];
-        cout << "numero letto funz. ob" << c[i] << endl;
-    }
+	std::string line;
+	std::string number;
 
+	if (!myfile.is_open())
+		cerr << "Unable to open file!!!!!";
 
-    A = new double* [N];
-        for(int i = 0; i < N; ++i)
-            A[i] = new double[N];
+	cout << endl;
 
+	do {
+		getline(myfile, line);
+		//if aren't a comment or empty line
+		if ((line[0] != '/' && line[1] != '/') && line.length() != 0) {
 
-    for (int i=0; i<N; i++){
-        for (int j=0; j<N; j++){
-           myfile >> A[i][j];
-            cout << "numero letto mat A" << A[i][j] << endl;
-        }
-    }
+			std::istringstream is(line);
 
-    for(int i = 0; i < num_constraint; ++i){
-       	myfile >> b[i];
-           cout << "numero letto termin noto" << c[i] << endl;
-       }
+			int count = 0;
+			while (is >> number) {
+				count++;
+			}
 
+			N = count;
 
+			c = new double[N];
+
+			std::istringstream it(line);
+
+			int i = 0;
+			while (it >> number) {
+
+				c[i] = atof(number.c_str());
+
+				cout << c[i] << endl;
+				i++;
+			}
+			flag_obb = false;
+
+		}
+
+	} while (flag_obb);
+
+	cout << endl;
+
+	do {
+
+		getline(myfile, line);
+		//if aren't a comment or empty line
+		if ((line[0] != '/' && line[1] != '/') && line.length() != 0) {
+
+			std::istringstream is(line);
+			int count = 0;
+			while (is >> number) {
+				count++;
+			}
+
+			num_constraint = count;
+
+			b = new double[num_constraint];
+
+			std::istringstream it(line);
+
+			int i = 0;
+			while (it >> number) {
+
+				b[i] = atof(number.c_str());
+
+				cout << b[i] << endl;
+				i++;
+			}
+
+			flag_known = false;
+		}
+	} while (flag_known);
+
+	cout << endl;
+	cout << "var e vincoli " << N << " " << num_constraint;
+
+	A = new double*[num_constraint];
+	for (int i = 0; i < num_constraint; ++i)
+		A[i] = new double[N];
+
+	std::string line1;
+	std::string number1;
+
+	int i = 0;
+	int j = 0;
+	while (getline(myfile, line1)) {
+		cout << line1 << endl;
+		//if aren't a comment or empty line
+		if ((line1[0] != '/' && line1[1] != '/') && line1.length() != 0) {
+			std::istringstream it(line1);
+			j = 0;
+			if (i >= num_constraint) {
+				cerr << "Matrix don't respect standard line";
+				exit(1);
+			}
+			while (it >> number1) {
+				if (j >= N) {
+					cerr << "Matrix don't respect standard columns";
+					exit(1);
+				}
+				A[i][j] = atof(number1.c_str());
+				j++;
+
+			}
+			i++;
+
+		}
+	}
+
+	cout << endl;
+	for (int i = 0; i < num_constraint; i++) {
+		for (int j = 0; j < N; j++) {
+
+			cout << A[i][j];
+		}
+		cout << endl;
+	}
 
 }
-
-
 
 void setupLP(CEnv env, Prob lp) {
 
@@ -119,7 +209,6 @@ void setupLP(CEnv env, Prob lp) {
 			int matbeg = 0;
 			double rhs = b[i];
 
-
 			for (int iter = 0; iter < N; iter++) {
 
 				if (A[i][iter] != 0) {
@@ -141,10 +230,11 @@ void setupLP(CEnv env, Prob lp) {
 
 int main(int argc, char const *argv[]) {
 
-    if (argc < 2) { // per la ricerca locale servono 2 parametri
-            throw std::runtime_error("usage: ./main filename.dat");}
+	if (argc < 2) { // per la ricerca locale servono 2 parametri
+		throw std::runtime_error("usage: ./main filename.txt");
+	}
 
-	ifstream myfile (argv[1], std::ios::in);
+	ifstream myfile(argv[1], std::ios::in);
 
 	load_problem(myfile);
 
@@ -232,5 +322,5 @@ int main(int argc, char const *argv[]) {
 //        std::cout << ">>>EXCEPTION: " << e.what() << std::endl;
 //    }
 
-    return 0;
+	return 0;
 }
