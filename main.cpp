@@ -7,7 +7,10 @@
 /* --*- C++ -*------x-----------------------------------------------------------
  *
  *
- * Description:
+ * Description: This main resolve a linear relaxation of the problem in the form
+ * 				min cT x
+ * 				s.t Ax=b
+ * 				x€R+
  *
  * -----------------x-----------------------------------------------------------
  */
@@ -54,6 +57,11 @@ double** A;
 //known terms
 double* b;
 
+/**
+ Method that load from file the problem (for example of format file see folder data)
+ @param  (ifstream &) , object ifstream
+ @return void
+ */
 void load_problem(ifstream &myfile) {
 
 	bool flag_obb = true;
@@ -158,46 +166,63 @@ void load_problem(ifstream &myfile) {
 
 }
 
-
+/**
+ Method that print matrix
+ @param  none
+ @return void
+ */
 void print_matrix() {
 
 	cout << "Matrix A" << endl;
 	for (int i = 0; i < num_constraint; i++) {
 		for (int j = 0; j < N; j++) {
 
-			cout << A[i][j];
+			cout << A[i][j] << " ";
 		}
 		cout << endl;
 	}
 	cout << endl;
 }
 
+/**
+ Method that print vector_c
+ @param  none
+ @return void
+ */
 void print_vect_c() {
 	cout << "Vector c" << endl;
 
 	for (int i = 0; i < N; i++)
-		cout << c[i];
+		cout << c[i] << " ";
 
 	cout << endl;
 }
 
-
+/**
+ Method that print vector_b
+ @param  none
+ @return void
+ */
 void print_vect_b() {
 
 	cout << "Vector b" << endl;
 	for (int i = 0; i < num_constraint; i++)
-		cout << b[i];
+		cout << b[i] << " ";
 
 	cout << endl;
 }
 
 
-
+/**
+ Method that set the problem in this case only one constraint
+ @param  (CEnv env, Prob lp)
+ @return void
+ */
 void setupLP(CEnv env, Prob lp) {
 
 	{
 
-		char varType = 'I';
+		char varType = 'C';
 		double obj = 0.0;
 		double lb = 0.0;
 		double ub = CPX_INFBOUND;
@@ -212,7 +237,7 @@ void setupLP(CEnv env, Prob lp) {
 
 	}
 
-	// vincolo
+	// constraint
 
 	{
 		std::vector<int> idx;
@@ -254,7 +279,6 @@ int main(int argc, char const *argv[]) {
 
 	myfile.close();
 
-
   try {
         // init
 
@@ -270,18 +294,8 @@ int main(int argc, char const *argv[]) {
         // print problem description to a file
         CHECKED_CPX_CALL(CPXwriteprob, env, lp, "problem.lp", 0);
 
-
-//        struct timeval tv1, tv2;
-//		gettimeofday(&tv1, NULL);
-//		gettimeofday(&tv1, NULL);
-//		clock_t start = clock();
-//
         // optimize
         CHECKED_CPX_CALL(CPXmipopt, env, lp);
-//        clock_t end = clock();
-//        gettimeofday(&tv2, NULL);
-
-
 
         // print objective function
         double objval;
@@ -293,12 +307,6 @@ int main(int argc, char const *argv[]) {
         std::vector<double> varVals;
         varVals.resize(cur_numcols);
         CHECKED_CPX_CALL(CPXgetx, env, lp, &varVals[0], 0, cur_numcols - 1);
-
-
-
-        for(unsigned int i=0; i<varVals.size(); ++i)
-          std::cout << varVals[i] << ' ';
-
 
         int surplus; // will contain the space missing to save the column names
 
@@ -316,10 +324,10 @@ int main(int argc, char const *argv[]) {
         // get the names
         CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace, &surplus, 0, cur_numcols - 1);
 
-        // print index, name and value of each column
-        //  for (int i = 0; i < cur_numcols; i++) {
-        //    std::cout << "Column " << i << ", " << cur_colname[i] << " = " << varVals[i] << std::endl;
-        //}
+       //  print index, name and value of each column
+          for (int i = 0; i < cur_numcols; i++) {
+            std::cout << "Column " << i << ", " << cur_colname[i] << " = " << varVals[i] << std::endl;
+        }
 
         // stampa la soluzione in formato standard
         CHECKED_CPX_CALL(CPXsolwrite, env, lp, "problem.sol");
@@ -333,16 +341,13 @@ int main(int argc, char const *argv[]) {
         CPXfreeprob(env, &lp);
         CPXcloseCPLEX(&env);
 
-        gettimeofday(&stop, NULL);
+//        gettimeofday(&stop, NULL);
 
 		for (int i = 0; i < num_constraint; ++i) {
 			delete[] A[i];
 		}
-
 		delete[] A;
-
 		delete[] b;
-
 		delete[] c;
 
     } catch (std::exception& e) {
