@@ -65,8 +65,6 @@ void load_problem(ifstream &myfile) {
 	if (!myfile.is_open())
 		cerr << "Unable to open file!!!!!";
 
-	cout << endl;
-
 	do {
 		getline(myfile, line);
 		//if aren't a comment or empty line
@@ -87,19 +85,15 @@ void load_problem(ifstream &myfile) {
 
 			int i = 0;
 			while (it >> number) {
-
 				c[i] = atof(number.c_str());
-
-				cout << c[i] << endl;
 				i++;
 			}
 			flag_obb = false;
-
 		}
 
 	} while (flag_obb);
 
-	cout << endl;
+
 
 	do {
 
@@ -123,8 +117,6 @@ void load_problem(ifstream &myfile) {
 			while (it >> number) {
 
 				b[i] = atof(number.c_str());
-
-				cout << b[i] << endl;
 				i++;
 			}
 
@@ -133,33 +125,29 @@ void load_problem(ifstream &myfile) {
 	} while (flag_known);
 
 	cout << endl;
-	cout << "var e vincoli " << N << " " << num_constraint;
+	//cout << "var e vincoli " << N << " " << num_constraint;
 
 	A = new double*[num_constraint];
 	for (int i = 0; i < num_constraint; ++i)
 		A[i] = new double[N];
 
-	std::string line1;
-	std::string number1;
-
 	int i = 0;
 	int j = 0;
-	while (getline(myfile, line1)) {
-		cout << line1 << endl;
+	while (getline(myfile, line)) {
 		//if aren't a comment or empty line
-		if ((line1[0] != '/' && line1[1] != '/') && line1.length() != 0) {
-			std::istringstream it(line1);
+		if ((line[0] != '/' && line[1] != '/') && line.length() != 0) {
+			std::istringstream it(line);
 			j = 0;
 			if (i >= num_constraint) {
 				cerr << "Matrix don't respect standard line";
 				exit(1);
 			}
-			while (it >> number1) {
+			while (it >> number) {
 				if (j >= N) {
 					cerr << "Matrix don't respect standard columns";
 					exit(1);
 				}
-				A[i][j] = atof(number1.c_str());
+				A[i][j] = atof(number.c_str());
 				j++;
 
 			}
@@ -168,7 +156,12 @@ void load_problem(ifstream &myfile) {
 		}
 	}
 
-	cout << endl;
+}
+
+
+void print_matrix() {
+
+	cout << "Matrix A" << endl;
 	for (int i = 0; i < num_constraint; i++) {
 		for (int j = 0; j < N; j++) {
 
@@ -176,8 +169,29 @@ void load_problem(ifstream &myfile) {
 		}
 		cout << endl;
 	}
-
+	cout << endl;
 }
+
+void print_vect_c() {
+	cout << "Vector c" << endl;
+
+	for (int i = 0; i < N; i++)
+		cout << c[i];
+
+	cout << endl;
+}
+
+
+void print_vect_b() {
+
+	cout << "Vector b" << endl;
+	for (int i = 0; i < num_constraint; i++)
+		cout << b[i];
+
+	cout << endl;
+}
+
+
 
 void setupLP(CEnv env, Prob lp) {
 
@@ -239,6 +253,7 @@ int main(int argc, char const *argv[]) {
 	load_problem(myfile);
 
 	myfile.close();
+
 
 //  try {
 //        // init
