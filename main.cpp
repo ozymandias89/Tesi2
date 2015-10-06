@@ -12,6 +12,8 @@
  * 				s.t Ax=b
  * 				x€R+
  *
+ * 				then print the higher fractional variable
+ *
  * -----------------x-----------------------------------------------------------
  */
 
@@ -220,7 +222,6 @@ void print_vect_b() {
 void setupLP(CEnv env, Prob lp) {
 
 	{
-
 		char varType = 'C';
 		double obj = 0.0;
 		double lb = 0.0;
@@ -351,21 +352,62 @@ int main(int argc, char const *argv[]) {
         // get the names
         CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace, &surplus, 0, cur_numcols - 1);
 
+
+        // print solution in standard format
+           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "problem.sol");
+
        //  print index, name and value of each column
           for (int i = 0; i < cur_numcols; i++) {
             std::cout << cur_colname[i] << " = " << varVals[i] << std::endl;
         }
 
+
         //chose the best fractional variable
           int index = fractionar_variable (varVals);
 
-          cout << endl;
 
-          cout << "Highter fractional varible choise " << varVals[index] << endl;
+          //if x solution aren't integer
+		if (index != -1) {
 
+			cout << endl;
+			cout << "Higher fractional variable choose " << varVals[index]
+					<< endl;
 
-        // print solution in standard format
-        CHECKED_CPX_CALL(CPXsolwrite, env, lp, "problem.sol");
+			cout << "Index " << index << endl;
+			double rhs = floor(varVals[index]);
+
+			char sense = 'L';
+			int matbeg = 0;
+			const int idx = index;
+			const double coef = 1;
+
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense,
+					&matbeg, &idx, &coef, 0, 0);
+
+			// print P1 problem to a file
+			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "problem.lp1", 0);
+
+			int cur_numrows = CPXgetnumrows(env, lp);
+
+			CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1,
+					cur_numrows - 1);
+
+//			// print solution in standard format
+//			           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "problem1.sol");
+			/////////////////////////////////////////////////////
+
+			rhs = ceil(varVals[index]);
+			sense = 'G';
+
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense,
+					&matbeg, &idx, &coef, 0, 0);
+
+			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "problem.lp2", 0);
+
+//			// print solution in standard format
+//						           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "problem2.sol");
+		}
+
 
 
         // free
