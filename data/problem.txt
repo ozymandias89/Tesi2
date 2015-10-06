@@ -1,5 +1,5 @@
 //cost coefficients
-2 5 7 45 3 1 9 8 7 5
+2 5 7 4 3 1 9 8 7 5
 
 //known terms
 5 4 2 1 8

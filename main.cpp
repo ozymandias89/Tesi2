@@ -124,7 +124,7 @@ void load_problem(ifstream &myfile) {
 		}
 	} while (flag_known);
 
-	cout << endl;
+	//cout << endl;
 	//cout << "var e vincoli " << N << " " << num_constraint;
 
 	A = new double*[num_constraint];
@@ -255,87 +255,99 @@ int main(int argc, char const *argv[]) {
 	myfile.close();
 
 
-//  try {
-//        // init
-//
-//	  	//declaration of environment
-//        DECL_ENV(env);
-//        //call to name the problem
-//        DECL_PROB(env, lp, "resolve problem RL");
-//
-//        setupLP(env, lp); // setup LP
-//
-//        CPXsetdblparam(env, CPX_PARAM_TILIM, 1800.0); //upper bound of time for Cplex resolution in seconds, return the best solution it has so far
-//
-//        // print problem description to a file
-//        CHECKED_CPX_CALL(CPXwriteprob, env, lp, "quadro_elettrico.lp", 0);
-//
-//
-//        struct timeval  tv1, tv2;
+  try {
+        // init
+
+	  	//declaration of environment
+        DECL_ENV(env);
+        //call to name the problem
+        DECL_PROB(env, lp, "resolve problem RL");
+        // setup LP
+        setupLP(env, lp);
+        //upper bound of time for Cplex resolution in seconds, return the best solution it has so far
+        CPXsetdblparam(env, CPX_PARAM_TILIM, 1800.0);
+
+        // print problem description to a file
+        CHECKED_CPX_CALL(CPXwriteprob, env, lp, "problem.lp", 0);
+
+
+//        struct timeval tv1, tv2;
 //		gettimeofday(&tv1, NULL);
-//        gettimeofday(&tv1, NULL);
-//        clock_t start = clock();
-//        CHECKED_CPX_CALL(CPXmipopt, env, lp); // optimize
+//		gettimeofday(&tv1, NULL);
+//		clock_t start = clock();
+//
+        // optimize
+        CHECKED_CPX_CALL(CPXmipopt, env, lp);
 //        clock_t end = clock();
 //        gettimeofday(&tv2, NULL);
-//
-//
-//
-//        // stampa il valore della funzione obiettivo
-//        double objval;
-//        CHECKED_CPX_CALL(CPXgetobjval, env, lp, &objval);
-//        std::cout << "Obj val: " << objval << std::endl;
-//
-//        // get the number and value of all variables
-//        int cur_numcols = CPXgetnumcols(env, lp);
-//        std::vector<double> varVals;
-//        varVals.resize(cur_numcols);
-//        CHECKED_CPX_CALL(CPXgetx, env, lp, &varVals[0], 0, cur_numcols - 1);
-//
-//        int surplus; // will contain the space missing to save the column names
-//
-//        // se a CPXgetcolname passiamo una array troppo piccolo per salvarci
-//        // tutti i nomi delle variabili, lui ritorna un codice d'errore e scrive
-//        // in surplus quanto spazio manca (un valore negativo)
-//        // NULL arguments to obtain the total memory required
-//        status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0, cur_numcols - 1);
-//        int cur_colnamespace = -surplus; // the space needed to save the names
-//
-//        // allocate memory
-//        char** cur_colname = (char **) malloc(sizeof (char *)*cur_numcols);
-//        char* cur_colnamestore = (char *) malloc(cur_colnamespace);
-//
-//        // get the names
-//        CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace, &surplus, 0, cur_numcols - 1);
-//
-//        // print index, name and value of each column
-//        //  for (int i = 0; i < cur_numcols; i++) {
-//        //    std::cout << "Column " << i << ", " << cur_colname[i] << " = " << varVals[i] << std::endl;
-//        //}
-//
-//        // stampa la soluzione in formato standard
-//        CHECKED_CPX_CALL(CPXsolwrite, env, lp, "quadro_elettrico.sol");
-//
+
+
+
+        // print objective function
+        double objval;
+        CHECKED_CPX_CALL(CPXgetobjval, env, lp, &objval);
+        std::cout << "Obj val: " << objval << std::endl;
+
+        // get the number and value of all variables
+        int cur_numcols = CPXgetnumcols(env, lp);
+        std::vector<double> varVals;
+        varVals.resize(cur_numcols);
+        CHECKED_CPX_CALL(CPXgetx, env, lp, &varVals[0], 0, cur_numcols - 1);
+
+
+
+        for(unsigned int i=0; i<varVals.size(); ++i)
+          std::cout << varVals[i] << ' ';
+
+
+        int surplus; // will contain the space missing to save the column names
+
+        // se a CPXgetcolname passiamo una array troppo piccolo per salvarci
+        // tutti i nomi delle variabili, lui ritorna un codice d'errore e scrive
+        // in surplus quanto spazio manca (un valore negativo)
+        // NULL arguments to obtain the total memory required
+        status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0, cur_numcols - 1);
+        int cur_colnamespace = -surplus; // the space needed to save the names
+
+        // allocate memory
+        char** cur_colname = (char **) malloc(sizeof (char *)*cur_numcols);
+        char* cur_colnamestore = (char *) malloc(cur_colnamespace);
+
+        // get the names
+        CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace, &surplus, 0, cur_numcols - 1);
+
+        // print index, name and value of each column
+        //  for (int i = 0; i < cur_numcols; i++) {
+        //    std::cout << "Column " << i << ", " << cur_colname[i] << " = " << varVals[i] << std::endl;
+        //}
+
+        // stampa la soluzione in formato standard
+        CHECKED_CPX_CALL(CPXsolwrite, env, lp, "problem.sol");
+
 //        std::cout << "TEMPO: " << (double)(tv2.tv_sec+tv2.tv_usec*1e-6 - (tv1.tv_sec+tv1.tv_usec*1e-6)) << " seconds (user time)\n";
 //        cout << " TEMPO: " << ((float)(end - start))/ CLOCKS_PER_SEC << " seconds (CPU time)\n";
-//
-//        // free
-//        free(cur_colname);
-//        free(cur_colnamestore);
-//        CPXfreeprob(env, &lp);
-//        CPXcloseCPLEX(&env);
-//
-//        gettimeofday(&stop, NULL);
-//
-//        for(int i = 0; i < N; ++i) {
-//                delete [] A[i];
-//            }
-//            delete [] A;
-//
-//
-//    } catch (std::exception& e) {
-//        std::cout << ">>>EXCEPTION: " << e.what() << std::endl;
-//    }
+
+        // free
+        free(cur_colname);
+        free(cur_colnamestore);
+        CPXfreeprob(env, &lp);
+        CPXcloseCPLEX(&env);
+
+        gettimeofday(&stop, NULL);
+
+		for (int i = 0; i < num_constraint; ++i) {
+			delete[] A[i];
+		}
+
+		delete[] A;
+
+		delete[] b;
+
+		delete[] c;
+
+    } catch (std::exception& e) {
+        std::cout << ">>>EXCEPTION: " << e.what() << std::endl;
+    }
 
 	return 0;
 }
