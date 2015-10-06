@@ -19,10 +19,9 @@
 #include <cstdio>
 #include <iostream>
 #include <sstream>
-#include <ctime>
-#include <sys/time.h>
 #include <vector>
 #include <fstream>
+#include <cmath>
 #include "cpxmacro.h"
 
 using std::ifstream;
@@ -267,6 +266,33 @@ void setupLP(CEnv env, Prob lp) {
 
 }
 
+/**
+ Method that choise the best fractional variable
+ @param  (vector<double>)
+ @return int, return index of highter variable functional (-1 if no variable is fractional)
+ */
+int fractionar_variable(std::vector<double> varVals) {
+
+	double threesold = 0.5;
+	double temp;
+	double temp2;
+	int index=-1;
+
+	for (unsigned int i =0; i< varVals.size(); ++i) {
+
+		temp = (varVals[i] - (int) varVals[i]);
+		temp2 = fabs((temp - 0.5));
+
+		if (temp2 < threesold) {
+			threesold = temp2;
+			index=i;
+		}
+
+	}
+	return index;
+}
+
+
 int main(int argc, char const *argv[]) {
 
 	if (argc < 2) { // per la ricerca locale servono 2 parametri
@@ -301,6 +327,7 @@ int main(int argc, char const *argv[]) {
         double objval;
         CHECKED_CPX_CALL(CPXgetobjval, env, lp, &objval);
         std::cout << "Obj val: " << objval << std::endl;
+        cout << endl;
 
         // get the number and value of all variables
         int cur_numcols = CPXgetnumcols(env, lp);
@@ -326,14 +353,20 @@ int main(int argc, char const *argv[]) {
 
        //  print index, name and value of each column
           for (int i = 0; i < cur_numcols; i++) {
-            std::cout << "Column " << i << ", " << cur_colname[i] << " = " << varVals[i] << std::endl;
+            std::cout << cur_colname[i] << " = " << varVals[i] << std::endl;
         }
 
-        // stampa la soluzione in formato standard
+        //chose the best fractional variable
+          int index = fractionar_variable (varVals);
+
+          cout << endl;
+
+          cout << "Highter fractional varible choise " << varVals[index] << endl;
+
+
+        // print solution in standard format
         CHECKED_CPX_CALL(CPXsolwrite, env, lp, "problem.sol");
 
-//        std::cout << "TEMPO: " << (double)(tv2.tv_sec+tv2.tv_usec*1e-6 - (tv1.tv_sec+tv1.tv_usec*1e-6)) << " seconds (user time)\n";
-//        cout << " TEMPO: " << ((float)(end - start))/ CLOCKS_PER_SEC << " seconds (CPU time)\n";
 
         // free
         free(cur_colname);
@@ -341,7 +374,6 @@ int main(int argc, char const *argv[]) {
         CPXfreeprob(env, &lp);
         CPXcloseCPLEX(&env);
 
-//        gettimeofday(&stop, NULL);
 
 		for (int i = 0; i < num_constraint; ++i) {
 			delete[] A[i];
