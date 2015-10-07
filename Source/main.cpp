@@ -24,6 +24,7 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
+
 #include "cpxmacro.h"
 
 using std::ifstream;
