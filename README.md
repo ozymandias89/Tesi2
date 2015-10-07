@@ -23,9 +23,10 @@ In my case it solves this generic linear problem:
 
 0 0 1 0 0 7 2 4 7 9
 
-0 0 0 1 0 9 1 4 5 0
+0 0 0 1 0 9 1 4 5 5
 
 0 0 0 0 1 2 4 7 9 8
+
 
 The program prints the objective function, the value of variables and the higher fractional variable.
 If the solution is fractional then creates two problem, P_1 and P_2 with new constraints.
