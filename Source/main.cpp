@@ -59,42 +59,22 @@ int main(int argc, char const *argv[]) {
 		// --------------------------------------------------
 		print_objval(env, lp);
 
-		// get the number and value of all variables
-		int cur_numcols = CPXgetnumcols(env, lp);
-		std::vector<double> varVals;
-		varVals.resize(cur_numcols);
-		CHECKED_CPX_CALL(CPXgetx, env, lp, &varVals[0], 0, cur_numcols - 1);
 
-		int surplus; // will contain the space missing to save the column names
+		// --------------------------------------------------
+		// 5. set number and value of variable
+		//    (cur_numcols,varVals) and print these
+		// --------------------------------------------------
+		print_variable(env, lp);
 
-		// se a CPXgetcolname passiamo una array troppo piccolo per salvarci
-		// tutti i nomi delle variabili, lui ritorna un codice d'errore e scrive
-		// in surplus quanto spazio manca (un valore negativo)
-		// NULL arguments to obtain the total memory required
-		status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0,
-				cur_numcols - 1);
-		int cur_colnamespace = -surplus; // the space needed to save the names
 
-		// allocate memory
-		char** cur_colname = (char **) malloc(sizeof(char *) * cur_numcols);
-		char* cur_colnamestore = (char *) malloc(cur_colnamespace);
-
-		// get the names
-		CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
-				&surplus, 0, cur_numcols - 1);
-
-		// print solution in standard format
-		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
-
-		//  print index, name and value of each column
-		for (int i = 0; i < cur_numcols; i++) {
-			std::cout << cur_colname[i] << " = " << varVals[i] << std::endl;
-		}
-
-		//chose the best fractional variable
+		// --------------------------------------------------
+		// 6. chose the best fractional variable
+		// --------------------------------------------------
 		int index = fractionar_variable(varVals);
 
-		//if x solution aren't integer
+		// --------------------------------------------------------
+		// 7. if x solution aren't integer create P1 and P2 problem
+		// --------------------------------------------------------
 		if (index != -1) {
 
 			cout << endl;
@@ -102,43 +82,17 @@ int main(int argc, char const *argv[]) {
 					<< endl;
 
 			cout << "Index " << index << endl;
-			double rhs = floor(varVals[index]);
 
-			char sense = 'L';
-			int matbeg = 0;
-			const int idx = index;
-			const double coef = 1;
-
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense,
-					&matbeg, &idx, &coef, 0, 0);
-
-			// print P1 problem to a file
-			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp1", 0);
-
-			int cur_numrows = CPXgetnumrows(env, lp);
-
-			CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1,
-					cur_numrows - 1);
-
-//			// print solution in standard format
-//			           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "problem1.sol");
+			create_P1_Problem(env, lp, index);
 			/////////////////////////////////////////////////////
+			create_P2_Problem(env, lp, index);
 
-			rhs = ceil(varVals[index]);
-			sense = 'G';
-
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense,
-					&matbeg, &idx, &coef, 0, 0);
-
-			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp2", 0);
-
-//			// print solution in standard format
-//						           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "problem2.sol");
 		}
 
-		// free
-		free(cur_colname);
-		free(cur_colnamestore);
+
+		// ---------------------------------------------------------
+		// 8. free allocate memory
+		// ---------------------------------------------------------
 		CPXfreeprob(env, &lp);
 		CPXcloseCPLEX(&env);
 

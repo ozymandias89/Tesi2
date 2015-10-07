@@ -47,6 +47,8 @@ double** A;
 //known terms
 double* b;
 
+std::vector<double> varVals;
+int cur_numcols;
 /**
  Method that load from file the problem (for example of format file see folder data)
  @param  (ifstream &) , object ifstream
@@ -290,5 +292,93 @@ void print_objval(CEnv env, Prob lp) {
 	cout << endl;
 
 }
+
+/**
+ Method that print variable
+ @param  (CEnv env, Prob lp), environmant of the problem and problem
+ @return void
+ */
+void print_variable(CEnv env, Prob lp) {
+	cur_numcols = CPXgetnumcols(env, lp);
+
+			varVals.resize(cur_numcols);
+			CHECKED_CPX_CALL(CPXgetx, env, lp, &varVals[0], 0, cur_numcols - 1);
+
+
+			int surplus;
+			status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0,	cur_numcols - 1);
+			int cur_colnamespace = -surplus; // the space needed to save the names
+
+			// allocate memory
+			char** cur_colname = (char **) malloc(sizeof(char *) * cur_numcols);
+			char* cur_colnamestore = (char *) malloc(cur_colnamespace);
+
+			// get the names
+			CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
+					&surplus, 0, cur_numcols - 1);
+
+			// print solution in standard format
+			CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
+
+			//  print index, name and value of each column
+			for (int i = 0; i < cur_numcols; i++) {
+				std::cout << cur_colname[i] << " = " << varVals[i] << std::endl;
+			}
+			// free
+					free(cur_colname);
+					free(cur_colnamestore);
+}
+/**
+ Method that create P1 problem (make a branch of admissible region)
+ @param  (CEnv env, Prob lp, index),
+ Environment of the problem, problem and index of fractional variable selected
+ @return void
+ */
+void create_P1_Problem(CEnv env, Prob lp, int index) {
+
+	double rhs = floor(varVals[index]);
+
+	char sense = 'L';
+	int matbeg = 0;
+	const int idx = index;
+	const double coef = 1;
+
+	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
+			&coef, 0, 0);
+
+	// print P1 problem to a file
+	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp1", 0);
+
+	int cur_numrows = CPXgetnumrows(env, lp);
+
+	CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
+
+//			// print solution in standard format
+//			           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem1.sol");
+
+}
+
+/**
+ Method that create P1 problem (make a branch of admissible region)
+ @param  (CEnv env, Prob lp, index),
+ Environment of the problem, problem and index of fractional variable selected
+ @return void
+ */
+void create_P2_Problem(CEnv env, Prob lp, int index) {
+	double rhs = ceil(varVals[index]);
+	char sense = 'G';
+	int matbeg = 0;
+	const int idx = index;
+	const double coef = 1;
+
+	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
+			&coef, 0, 0);
+
+	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp2", 0);
+
+//			// print solution in standard format
+//						           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
+}
+
 
 #endif /* SOURCE_LOAD_H_ */
