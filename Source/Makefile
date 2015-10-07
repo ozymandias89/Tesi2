@@ -15,9 +15,10 @@ EXECS = main
 
 main: $(OBJ)
 	$(CXX) $(CXXFLAGS) $(OBJ) -o $(EXECS) -L$(CPX_LDPATH) $(CPX_LDADD)
+	mv $(OBJ) $(UPDIR_BIN)
 	mv $(EXECS) $(UPDIR_BIN)
 
 clean:
-	rm -rf $(OBJ) $(UPDIR_BIN)$(EXECS)
+	rm -rf $(UPDIR_BIN)$(OBJ) $(UPDIR_BIN)$(EXECS)
 
 .PHONY: clean
