@@ -12,7 +12,8 @@
  * 				s.t Ax=b
  * 				x€R+
  *
- * 				then print the higher fractional variable
+ * 				then print the higher fractional variable and create a branch
+ * 				with P1 and P2 new problem to resolve
  *
  * -----------------x-----------------------------------------------------------
  */
