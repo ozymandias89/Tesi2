@@ -380,7 +380,7 @@ void create_P1_Problem(CEnv env, Prob lp, int index) {
 }
 
 /**
- Method that create P1 problem (make a branch of admissible region)
+ Method that create P2 problem (make a branch of admissible region)
  @param  (CEnv env, Prob lp, index),
  Environment of the problem, problem and index of fractional variable selected
  @return void
@@ -405,6 +405,7 @@ void create_P2_Problem(CEnv env, Prob lp, int index) {
 
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 	//CHECKED_CPX_CALL(CPXclpwrite, env, lp, "../data/conflict.lp2" );
+	//CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
 
 	int stat = CPXgetstat(env, lp);
 	cout << "Status of the problem: " << stat << endl;
@@ -415,6 +416,59 @@ void create_P2_Problem(CEnv env, Prob lp, int index) {
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
 	} else
 			cout << "No solution for P2 problem exists " << endl;
+
+}
+/**
+ Method solve
+ @param  (CEnv env, Prob lp, index),
+ Environment of the problem, problem and index of fractional variable selected
+ @return void
+ */
+void solve(CEnv env, Prob lp) {
+
+	// --------------------------------------------------
+	// 2. write problem
+	// --------------------------------------------------
+	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
+
+	// --------------------------------------------------
+	// 3. Optimization
+	// --------------------------------------------------
+	CHECKED_CPX_CALL(CPXmipopt, env, lp);
+
+	int stat = CPXgetstat(env, lp);
+	cout << "Status of the problem: " << stat << endl;
+	// --------------------------------------------------
+	// 4. print solution
+	// --------------------------------------------------
+	print_objval(env, lp);
+
+	// --------------------------------------------------
+	// 5. set number and value of variable
+	//    (cur_numcols,varVals) and print these
+	// --------------------------------------------------
+	print_variable(env, lp);
+
+	// --------------------------------------------------
+	// 6. chose the best fractional variable
+	// --------------------------------------------------
+	int index = fractionar_variable(varVals);
+
+	// --------------------------------------------------------
+	// 7. if x solution aren't integer create P1 and P2 problem
+	// --------------------------------------------------------
+	if (index != -1) {
+
+		cout << endl;
+		cout << "Higher fractional variable choose " << varVals[index] << endl;
+
+		cout << "Index " << index << endl;
+
+		create_P1_Problem(env, lp, index);
+		/////////////////////////////////////////////////////
+		create_P2_Problem(env, lp, index);
+
+	}
 
 }
 
