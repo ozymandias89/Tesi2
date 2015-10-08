@@ -336,6 +336,8 @@ void print_variable(CEnv env, Prob lp) {
  */
 void create_P1_Problem(CEnv env, Prob lp, int index) {
 
+	cout << "PROBLEM P1" << endl;
+
 	double rhs = floor(varVals[index]);
 
 	char sense = 'L';
@@ -353,8 +355,13 @@ void create_P1_Problem(CEnv env, Prob lp, int index) {
 
 	CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 
-//			// print solution in standard format
-//			           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem1.sol");
+	CHECKED_CPX_CALL(CPXmipopt, env, lp);
+
+	print_objval(env, lp);
+	print_variable(env, lp);
+
+			// print solution in standard format
+		           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem1.sol");
 
 }
 
@@ -365,6 +372,9 @@ void create_P1_Problem(CEnv env, Prob lp, int index) {
  @return void
  */
 void create_P2_Problem(CEnv env, Prob lp, int index) {
+
+	cout << "PROBLEM P2" << endl;
+
 	double rhs = ceil(varVals[index]);
 	char sense = 'G';
 	int matbeg = 0;
@@ -374,10 +384,16 @@ void create_P2_Problem(CEnv env, Prob lp, int index) {
 	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
 			&coef, 0, 0);
 
+
 	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp2", 0);
 
-//			// print solution in standard format
-//						           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
+	CHECKED_CPX_CALL(CPXmipopt, env, lp);
+
+	print_objval(env, lp);
+	print_variable(env, lp);
+
+			// print solution in standard format
+						           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
 }
 
 
