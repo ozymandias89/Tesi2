@@ -56,6 +56,8 @@ int main(int argc, char const *argv[]) {
 		CHECKED_CPX_CALL(CPXmipopt, env, lp);
 
 
+		int stat = CPXgetstat (env, lp);
+						cout << "Status of the problem: " << stat << endl;
 		// --------------------------------------------------
 		// 4. print solution
 		// --------------------------------------------------
@@ -68,9 +70,6 @@ int main(int argc, char const *argv[]) {
 		// --------------------------------------------------
 		print_variable(env, lp);
 
-
-		int stat = CPXgetstat (env, lp);
-				cout << "Status of the problem: " << stat << endl;
 		// --------------------------------------------------
 		// 6. chose the best fractional variable
 		// --------------------------------------------------

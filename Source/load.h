@@ -286,7 +286,7 @@ void print_vect_b() {
  @return void
  */
 void print_objval(CEnv env, Prob lp) {
-
+	cout << endl;
 	double objval;
 	CHECKED_CPX_CALL(CPXgetobjval, env, lp, &objval);
 	std::cout << "Obj val: " << objval << std::endl;
@@ -300,35 +300,39 @@ void print_objval(CEnv env, Prob lp) {
  @return void
  */
 void print_variable(CEnv env, Prob lp) {
+
+	cout << "VARIABLES: " << endl;
 	cur_numcols = CPXgetnumcols(env, lp);
 
-			varVals.resize(cur_numcols);
-			CHECKED_CPX_CALL(CPXgetx, env, lp, &varVals[0], 0, cur_numcols - 1);
+	varVals.resize(cur_numcols);
+	CHECKED_CPX_CALL(CPXgetx, env, lp, &varVals[0], 0, cur_numcols - 1);
 
+	int surplus;
+	status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0,
+			cur_numcols - 1);
+	int cur_colnamespace = -surplus; // the space needed to save the names
 
-			int surplus;
-			status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0,	cur_numcols - 1);
-			int cur_colnamespace = -surplus; // the space needed to save the names
+	// allocate memory
+	char** cur_colname = (char **) malloc(sizeof(char *) * cur_numcols);
+	char* cur_colnamestore = (char *) malloc(cur_colnamespace);
 
-			// allocate memory
-			char** cur_colname = (char **) malloc(sizeof(char *) * cur_numcols);
-			char* cur_colnamestore = (char *) malloc(cur_colnamespace);
+	// get the names
+	CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
+			&surplus, 0, cur_numcols - 1);
 
-			// get the names
-			CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
-					&surplus, 0, cur_numcols - 1);
+	// print solution in standard format
+	CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 
-			// print solution in standard format
-			CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
-
-			//  print index, name and value of each column
-			for (int i = 0; i < cur_numcols; i++) {
-				std::cout << cur_colname[i] << " = " << varVals[i] << std::endl;
-			}
-			// free
-					free(cur_colname);
-					free(cur_colnamestore);
+	//  print index, name and value of each column
+	for (int i = 0; i < cur_numcols; i++) {
+		std::cout << cur_colname[i] << " = " << varVals[i] << std::endl;
+	}
+	// free
+	free(cur_colname);
+	free(cur_colnamestore);
 }
+
+
 /**
  Method that create P1 problem (make a branch of admissible region)
  @param  (CEnv env, Prob lp, index),
@@ -337,6 +341,7 @@ void print_variable(CEnv env, Prob lp) {
  */
 void create_P1_Problem(CEnv env, Prob lp, int index) {
 
+	cout << endl;
 	cout << "PROBLEM P1" << endl;
 
 	double rhs = floor(varVals[index]);
@@ -382,10 +387,10 @@ void create_P1_Problem(CEnv env, Prob lp, int index) {
  */
 void create_P2_Problem(CEnv env, Prob lp, int index) {
 
+	cout << endl;
 	cout << "PROBLEM P2" << endl;
 
 	double rhs = floor(varVals[index])+1;
-	cout << "############" << rhs;
 	char sense = 'G';
 	int matbeg = 0;
 	const int idx = index;
@@ -409,7 +414,7 @@ void create_P2_Problem(CEnv env, Prob lp, int index) {
 		print_variable(env, lp);
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
 	} else
-		throw std::runtime_error("No solution for P2 problem exists ");
+			cout << "No solution for P2 problem exists " << endl;
 
 }
 
