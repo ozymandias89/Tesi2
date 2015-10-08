@@ -24,6 +24,7 @@ int main(int argc, char const *argv[]) {
 
 	if (argc < 2) { // per la ricerca locale servono 2 parametri
 		throw std::runtime_error("usage: ./main filename.txt");
+
 	}
 
 	ifstream myfile(argv[1], std::ios::in);

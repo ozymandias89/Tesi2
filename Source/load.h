@@ -62,9 +62,10 @@ void load_problem(ifstream &myfile) {
 	std::string line;
 	std::string number;
 
-	if (!myfile.is_open())
-		cerr << "Unable to open file!!!!!";
-
+	if (!myfile.is_open()){
+		cerr << "Unable to open file!!!!!" << endl;
+		exit(1);
+	}
 	do {
 		getline(myfile, line);
 		//if aren't a comment or empty line
