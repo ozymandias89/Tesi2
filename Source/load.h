@@ -351,17 +351,25 @@ void create_P1_Problem(CEnv env, Prob lp, int index) {
 	// print P1 problem to a file
 	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp1", 0);
 
+	CHECKED_CPX_CALL(CPXmipopt, env, lp);
+
+	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
+
+	int stat = CPXgetstat(env, lp);
+	cout << "Status of the problem: " << stat << endl;
+	//CHECKED_CPX_CALL(CPXclpwrite, env, lp, "../data/conflict.lp1" );
+
+	// print solution in standard format
+	if (stat == 30) {
+		print_objval(env, lp);
+		print_variable(env, lp);
+		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem1.sol");
+	} else
+		cout << "No solution for P1 problem exists " << endl;
+
 	int cur_numrows = CPXgetnumrows(env, lp);
 
 	CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
-
-	CHECKED_CPX_CALL(CPXmipopt, env, lp);
-
-	print_objval(env, lp);
-	print_variable(env, lp);
-
-			// print solution in standard format
-		           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem1.sol");
 
 }
 
@@ -375,7 +383,8 @@ void create_P2_Problem(CEnv env, Prob lp, int index) {
 
 	cout << "PROBLEM P2" << endl;
 
-	double rhs = ceil(varVals[index]);
+	double rhs = floor(varVals[index])+1;
+	cout << "############" << rhs;
 	char sense = 'G';
 	int matbeg = 0;
 	const int idx = index;
@@ -384,16 +393,23 @@ void create_P2_Problem(CEnv env, Prob lp, int index) {
 	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
 			&coef, 0, 0);
 
-
 	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp2", 0);
 
 	CHECKED_CPX_CALL(CPXmipopt, env, lp);
 
-	print_objval(env, lp);
-	print_variable(env, lp);
+	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
+	//CHECKED_CPX_CALL(CPXclpwrite, env, lp, "../data/conflict.lp2" );
 
-			// print solution in standard format
-						           CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
+	int stat = CPXgetstat(env, lp);
+	cout << "Status of the problem: " << stat << endl;
+
+	if (stat == 30) {
+		print_objval(env, lp);
+		print_variable(env, lp);
+		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
+	} else
+		throw std::runtime_error("No solution for P2 problem exists ");
+
 }
 
 
