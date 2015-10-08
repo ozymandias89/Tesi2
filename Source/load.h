@@ -62,7 +62,7 @@ void load_problem(ifstream &myfile) {
 	std::string line;
 	std::string number;
 
-	if (!myfile.is_open()){
+	if (!myfile.is_open()) {
 		cerr << "Unable to open file!!!!!" << endl;
 		exit(1);
 	}
@@ -332,15 +332,16 @@ void print_variable(CEnv env, Prob lp) {
 	free(cur_colnamestore);
 }
 
-
 /**
- Method that create P1 problem (make a branch of admissible region)
+ Method that create P1 problem (make a branch of admissible region),
+ return solution if exist, otherwise return INFINITE value
  @param  (CEnv env, Prob lp, index),
  Environment of the problem, problem and index of fractional variable selected
- @return void
+ @return double
  */
-void create_P1_Problem(CEnv env, Prob lp, int index) {
+double create_P1_Problem(CEnv env, Prob lp, int index) {
 
+	double z = CPX_INFBOUND;
 	cout << endl;
 	cout << "PROBLEM P1" << endl;
 
@@ -365,11 +366,11 @@ void create_P1_Problem(CEnv env, Prob lp, int index) {
 	cout << "Status of the problem: " << stat << endl;
 	//CHECKED_CPX_CALL(CPXclpwrite, env, lp, "../data/conflict.lp1" );
 
-	// print solution in standard format
+	// print and set solution
 	if (stat == 30) {
 		print_objval(env, lp);
 		print_variable(env, lp);
-		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem1.sol");
+		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
 	} else
 		cout << "No solution for P1 problem exists " << endl;
 
@@ -377,20 +378,24 @@ void create_P1_Problem(CEnv env, Prob lp, int index) {
 
 	CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 
+	return z;
+
 }
 
 /**
- Method that create P2 problem (make a branch of admissible region)
+ Method that create P2 problem (make a branch of admissible region),
+ return solution if exist, otherwise return INFINITE value
  @param  (CEnv env, Prob lp, index),
  Environment of the problem, problem and index of fractional variable selected
  @return void
  */
-void create_P2_Problem(CEnv env, Prob lp, int index) {
+double create_P2_Problem(CEnv env, Prob lp, int index) {
 
+	double z = CPX_INFBOUND;
 	cout << endl;
 	cout << "PROBLEM P2" << endl;
 
-	double rhs = floor(varVals[index])+1;
+	double rhs = floor(varVals[index]) + 1;
 	char sense = 'G';
 	int matbeg = 0;
 	const int idx = index;
@@ -413,10 +418,11 @@ void create_P2_Problem(CEnv env, Prob lp, int index) {
 	if (stat == 30) {
 		print_objval(env, lp);
 		print_variable(env, lp);
-		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
+		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
 	} else
-			cout << "No solution for P2 problem exists " << endl;
+		cout << "No solution for P2 problem exists " << endl;
 
+	return z;
 }
 /**
  Method solve
@@ -464,13 +470,12 @@ void solve(CEnv env, Prob lp) {
 
 		cout << "Index " << index << endl;
 
-		create_P1_Problem(env, lp, index);
+		double z1 = create_P1_Problem(env, lp, index);
 		/////////////////////////////////////////////////////
-		create_P2_Problem(env, lp, index);
+		double z2 = create_P2_Problem(env, lp, index);
 
 	}
 
 }
-
 
 #endif /* SOURCE_LOAD_H_ */
