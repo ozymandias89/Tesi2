@@ -48,7 +48,11 @@ double** A;
 double* b;
 
 std::vector<double> varVals;
+std::vector<double> dual_varVals;
 int cur_numcols;
+int num_rows;
+
+
 /**
  Method that load from file the problem (for example of format file see folder data)
  @param  (ifstream &) , object ifstream
@@ -299,9 +303,9 @@ void print_objval(CEnv env, Prob lp) {
  @param  (CEnv env, Prob lp), environmant of the problem and problem
  @return void
  */
-void print_variable(CEnv env, Prob lp) {
+void print_var_P(CEnv env, Prob lp) {
 
-	cout << "VARIABLES: " << endl;
+	cout << "PRIMAL VARIABLES: " << endl;
 	cur_numcols = CPXgetnumcols(env, lp);
 
 	varVals.resize(cur_numcols);
@@ -325,12 +329,29 @@ void print_variable(CEnv env, Prob lp) {
 
 	//  print index, name and value of each column
 	for (int i = 0; i < cur_numcols; i++) {
-		std::cout << cur_colname[i] << " = " << varVals[i] << std::endl;
+		cout << cur_colname[i] << " = " << varVals[i] << endl;
 	}
 	// free
 	free(cur_colname);
 	free(cur_colnamestore);
 }
+
+void print_var_D(CEnv env, Prob lp) {
+
+	cout << "DUAL VARIABLES: " << endl;
+	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_FIXEDMILP);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
+	num_rows =  CPXgetnumrows(env,lp);
+	dual_varVals.resize(num_rows);
+	CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals[0], 0, num_rows - 1);
+
+	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_MILP);
+
+	for (int i = 0; i < num_rows; i++) {
+			cout << dual_varVals[i] << endl;
+		}
+}
+
 
 /**
  Method that create P1 problem (make a branch of admissible region),
@@ -369,14 +390,18 @@ double create_P1_Problem(CEnv env, Prob lp, int index) {
 	// print and set solution
 	if (stat == 30) {
 		print_objval(env, lp);
-		print_variable(env, lp);
+		print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
+		print_var_D(env, lp);
 	} else
 		cout << "No solution for P1 problem exists " << endl;
 
+
 	int cur_numrows = CPXgetnumrows(env, lp);
 
+
 	CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
+
 
 	return z;
 
@@ -417,8 +442,9 @@ double create_P2_Problem(CEnv env, Prob lp, int index) {
 
 	if (stat == 30) {
 		print_objval(env, lp);
-		print_variable(env, lp);
+		print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
+		print_var_D(env, lp);
 	} else
 		cout << "No solution for P2 problem exists " << endl;
 
@@ -442,8 +468,6 @@ void solve(CEnv env, Prob lp) {
 	// --------------------------------------------------
 	CHECKED_CPX_CALL(CPXmipopt, env, lp);
 
-	int stat = CPXgetstat(env, lp);
-	cout << "Status of the problem: " << stat << endl;
 	// --------------------------------------------------
 	// 4. print solution
 	// --------------------------------------------------
@@ -453,7 +477,8 @@ void solve(CEnv env, Prob lp) {
 	// 5. set number and value of variable
 	//    (cur_numcols,varVals) and print these
 	// --------------------------------------------------
-	print_variable(env, lp);
+	print_var_P(env, lp);
+
 
 	// --------------------------------------------------
 	// 6. chose the best fractional variable
