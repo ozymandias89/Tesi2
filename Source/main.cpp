@@ -19,7 +19,7 @@
  */
 
 
-#include "solve.h"
+#include "solve.cpp"
 
 int main(int argc, char const *argv[]) {
 

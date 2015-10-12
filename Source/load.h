@@ -323,8 +323,6 @@ void print_var_P(CEnv env, Prob lp) {
 	CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
 			&surplus, 0, cur_numcols - 1);
 
-	// print solution in standard format
-	CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 
 	//  print index, name and value of each column
 	for (int i = 0; i < cur_numcols; i++) {
@@ -345,14 +343,14 @@ void print_var_D(CEnv env, Prob lp, bool prob) {
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P1[0], 0,
 				num_rows - 1);
 		for (int i = 0; i < num_rows; i++) {
-			cout << dual_varVals_P1[i] << endl;
+	//		cout << dual_varVals_P1[i] << endl;
 		}
 	} else {
 		dual_varVals_P2.resize(num_rows);
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P2[0], 0,
 				num_rows - 1);
 		for (int i = 0; i < num_rows; i++) {
-			cout << dual_varVals_P2[i] << endl;
+		//	cout << dual_varVals_P2[i] << endl;
 		}
 
 	}
