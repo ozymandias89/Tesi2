@@ -18,7 +18,8 @@
  * -----------------x-----------------------------------------------------------
  */
 
-#include "load.h"
+
+#include "solve.h"
 
 int main(int argc, char const *argv[]) {
 
