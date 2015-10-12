@@ -16,6 +16,7 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
+#include <algorithm>
 
 #include "cpxmacro.h"
 
@@ -48,7 +49,8 @@ double** A;
 double* b;
 
 std::vector<double> varVals;
-std::vector<double> dual_varVals;
+std::vector<double> dual_varVals_P1;
+std::vector<double> dual_varVals_P2;
 int cur_numcols;
 int num_rows;
 
@@ -127,9 +129,6 @@ void load_problem(ifstream &myfile) {
 		}
 	} while (flag_known);
 
-	//cout << endl;
-	//cout << "var e vincoli " << N << " " << num_constraint;
-
 	A = new double*[num_constraint];
 	for (int i = 0; i < num_constraint; ++i)
 		A[i] = new double[N];
@@ -169,7 +168,7 @@ void load_problem(ifstream &myfile) {
 void setupLP(CEnv env, Prob lp) {
 
 	{
-		char varType = 'C';
+		static const char* varType = NULL;
 		double obj = 0.0;
 		double lb = 0.0;
 		double ub = CPX_INFBOUND;
@@ -177,7 +176,7 @@ void setupLP(CEnv env, Prob lp) {
 			obj = c[i];
 			snprintf(name, NAME_SIZE, "x_%i", i);
 			char* varName = (char*) (&name[0]);
-			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, &varType,
+			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
 					&varName);
 
 		}
@@ -218,7 +217,7 @@ void setupLP(CEnv env, Prob lp) {
  @param  (vector<double>)
  @return int, return index of highter variable functional (-1 if no variable is fractional)
  */
-int fractionar_variable(std::vector<double> varVals) {
+int select_fractionar_var(std::vector<double> varVals) {
 
 	double threesold = 0.5;
 	double temp;
@@ -336,20 +335,28 @@ void print_var_P(CEnv env, Prob lp) {
 	free(cur_colnamestore);
 }
 
-void print_var_D(CEnv env, Prob lp) {
+void print_var_D(CEnv env, Prob lp, bool prob) {
 
 	cout << "DUAL VARIABLES: " << endl;
-	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_FIXEDMILP);
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
-	num_rows =  CPXgetnumrows(env,lp);
-	dual_varVals.resize(num_rows);
-	CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals[0], 0, num_rows - 1);
-
-	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_MILP);
-
-	for (int i = 0; i < num_rows; i++) {
-			cout << dual_varVals[i] << endl;
+	num_rows = CPXgetnumrows(env, lp);
+	if (prob) {
+		dual_varVals_P1.resize(num_rows);
+		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P1[0], 0,
+				num_rows - 1);
+		for (int i = 0; i < num_rows; i++) {
+			cout << dual_varVals_P1[i] << endl;
 		}
+	} else {
+		dual_varVals_P2.resize(num_rows);
+		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P2[0], 0,
+				num_rows - 1);
+		for (int i = 0; i < num_rows; i++) {
+			cout << dual_varVals_P2[i] << endl;
+		}
+
+	}
+
 }
 
 
@@ -360,7 +367,7 @@ void print_var_D(CEnv env, Prob lp) {
  Environment of the problem, problem and index of fractional variable selected
  @return double
  */
-double create_P1_Problem(CEnv env, Prob lp, int index) {
+double solve_P1_Problem(CEnv env, Prob lp, int index) {
 
 	double z = CPX_INFBOUND;
 	cout << endl;
@@ -379,7 +386,7 @@ double create_P1_Problem(CEnv env, Prob lp, int index) {
 	// print P1 problem to a file
 	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp1", 0);
 
-	CHECKED_CPX_CALL(CPXmipopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 
@@ -392,7 +399,7 @@ double create_P1_Problem(CEnv env, Prob lp, int index) {
 		print_objval(env, lp);
 		print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
-		print_var_D(env, lp);
+		print_var_D(env, lp, true);
 	} else
 		cout << "No solution for P1 problem exists " << endl;
 
@@ -414,7 +421,7 @@ double create_P1_Problem(CEnv env, Prob lp, int index) {
  Environment of the problem, problem and index of fractional variable selected
  @return void
  */
-double create_P2_Problem(CEnv env, Prob lp, int index) {
+double solve_P2_Problem(CEnv env, Prob lp, int index) {
 
 	double z = CPX_INFBOUND;
 	cout << endl;
@@ -431,7 +438,7 @@ double create_P2_Problem(CEnv env, Prob lp, int index) {
 
 	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp2", 0);
 
-	CHECKED_CPX_CALL(CPXmipopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 	//CHECKED_CPX_CALL(CPXclpwrite, env, lp, "../data/conflict.lp2" );
@@ -444,7 +451,7 @@ double create_P2_Problem(CEnv env, Prob lp, int index) {
 		print_objval(env, lp);
 		print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
-		print_var_D(env, lp);
+		print_var_D(env, lp, false);
 	} else
 		cout << "No solution for P2 problem exists " << endl;
 
@@ -466,7 +473,7 @@ void solve(CEnv env, Prob lp) {
 	// --------------------------------------------------
 	// 3. Optimization
 	// --------------------------------------------------
-	CHECKED_CPX_CALL(CPXmipopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	// --------------------------------------------------
 	// 4. print solution
@@ -483,7 +490,7 @@ void solve(CEnv env, Prob lp) {
 	// --------------------------------------------------
 	// 6. chose the best fractional variable
 	// --------------------------------------------------
-	int index = fractionar_variable(varVals);
+	int index = select_fractionar_var(varVals);
 
 	// --------------------------------------------------------
 	// 7. if x solution aren't integer create P1 and P2 problem
@@ -495,9 +502,14 @@ void solve(CEnv env, Prob lp) {
 
 		cout << "Index " << index << endl;
 
-		double z1 = create_P1_Problem(env, lp, index);
+		double z1 = solve_P1_Problem(env, lp, index);
 		/////////////////////////////////////////////////////
-		double z2 = create_P2_Problem(env, lp, index);
+		double z2 = solve_P2_Problem(env, lp, index);
+
+		if (z1<CPX_INFBOUND && z2<CPX_INFBOUND){
+			double z = std::min (z1,z2);
+			cout << "funzione obbiettivo minore = " << z << endl;
+		}
 
 	}
 

@@ -22,7 +22,7 @@
 
 int main(int argc, char const *argv[]) {
 
-	if (argc < 2) { // per la ricerca locale servono 2 parametri
+	if (argc < 2) { // you must insert file
 		throw std::runtime_error("usage: ./main filename.txt");
 
 	}
