@@ -330,7 +330,7 @@ void set_and_print_var_P(CEnv env, Prob lp) {
 	free(cur_colnamestore);
 }
 
-void print_var_D(CEnv env, Prob lp, bool prob) {
+void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 
 	cout << "DUAL VARIABLES: " << endl;
 	int num_rows = CPXgetnumrows(env, lp);

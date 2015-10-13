@@ -92,7 +92,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 		print_objval(env, lp);
 		set_and_print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z[0]);
-		print_var_D(env, lp, true);
+		set_and_print_var_D(env, lp, true);
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 
 		create_P2_prob(env, lp, index);
@@ -144,7 +144,7 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		print_objval(env, lp);
 		set_and_print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
-		print_var_D(env, lp, false);
+		set_and_print_var_D(env, lp, false);
 	} else {
 
 		cout << "No solution for P2 problem exists " << endl;
