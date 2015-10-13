@@ -42,7 +42,7 @@ int main(int argc, char const *argv[]) {
 		DECL_ENV(env);
 		DECL_PROB(env, lp, "resolve problem RL");
 		setupLP(env, lp);
-		CPXsetdblparam(env, CPX_PARAM_TILIM, 1800.0);
+		//CPXsetdblparam(env, CPX_PARAM_TILIM, 1800.0);
 
 
 		// --------------------------------------------------

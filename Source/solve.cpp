@@ -6,8 +6,6 @@
  * @version 1.0
  */
 
-
-
 #include "solve.h"
 #include <unistd.h>
 
@@ -17,6 +15,13 @@ using std::cout;
 using std::endl;
 using std::cerr;
 
+
+/**
+ Method that create P1 problem (make a branch of admissible region),
+ @param  (CEnv env, Prob lp, index),
+ Environment of the problem, problem and index of fractional variable selected
+ @return none
+ */
 void create_P1_prob(CEnv env, Prob lp, int index){
 
 		cout << endl;
@@ -33,10 +38,15 @@ void create_P1_prob(CEnv env, Prob lp, int index){
 				&coef, 0, 0);
 
 		// print P1 problem to a file
-		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp1", 0);
+		//CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp1", 0);
 
 }
-
+/**
+ Method that create P2 problem (make a branch of admissible region),
+ @param  (CEnv env, Prob lp, index),
+ Environment of the problem, problem and index of fractional variable selected
+ @return none
+ */
 void create_P2_prob(CEnv env, Prob lp, int index) {
 
 	cout << endl;
@@ -51,7 +61,7 @@ void create_P2_prob(CEnv env, Prob lp, int index) {
 	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
 			&coef, 0, 0);
 
-	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp2", 0);
+	//CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp2", 0);
 
 }
 
@@ -62,26 +72,31 @@ void create_P2_prob(CEnv env, Prob lp, int index) {
  Environment of the problem, problem and index of fractional variable selected
  @return double
  */
-double solve_P1_Problem(CEnv env, Prob lp, int index) {
+double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 
-	double z = CPX_INFBOUND;
+	static double z[2];
+	z[0]= CPX_INFBOUND;
+	z[1]= CPX_INFBOUND;
 
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 
 	int stat = CPXgetstat(env, lp);
-	cout << "Status of the problem: " << stat << endl;
 	int cur_numrows = CPXgetnumrows(env, lp);
 //	//CHECKED_CPX_CALL(CPXclpwrite, env, lp, "../data/conflict.lp1" );
 
-// print and set solution
-	if (stat == 30) {
+// print and set solution and create and resolve P_2 problem"
+	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
+		cout << "FEASIBLE "<< endl;
 		print_objval(env, lp);
-		print_var_P(env, lp);
-		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
+		set_and_print_var_P(env, lp);
+		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z[0]);
 		print_var_D(env, lp, true);
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
+
+		create_P2_prob(env, lp, index);
+		z[1] = solve_P2_Problem(env, lp, index);
 
 	} else {
 		cout << "No solution for P1 problem exists.. " << endl;
@@ -97,7 +112,6 @@ double solve_P1_Problem(CEnv env, Prob lp, int index) {
 				&idx, &coef, 0, 0);
 
 		cout << "Resolve a new problem P1.. " << endl;
-		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp3", 0);
 		solve(env, lp);
 
 	}
@@ -122,34 +136,32 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 	//CHECKED_CPX_CALL(CPXclpwrite, env, lp, "../data/conflict.lp2" );
 	//CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
-
 	int stat = CPXgetstat(env, lp);
 
 	int cur_numrows = CPXgetnumrows(env, lp);
-	cout << "Status of the problem: " << stat << endl;
 
-	if (stat == 30) {
+	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
+		cout << "FEASIBLE "<< endl;
 		print_objval(env, lp);
-		print_var_P(env, lp);
+		set_and_print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
 		print_var_D(env, lp, false);
-	} else{
+	} else {
 
-	cout << "No solution for P2 problem exists " << endl;
-	double rhs = floor(varVals[index]);
+		cout << "No solution for P2 problem exists " << endl;
+		double rhs = floor(varVals[index]);
 
-	char sense = 'L';
-	int matbeg = 0;
-	const int idx = index;
-	const double coef = 1;
+		char sense = 'L';
+		int matbeg = 0;
+		const int idx = index;
+		const double coef = 1;
 
-	CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
-	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
-			&coef, 0, 0);
+		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
+		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg,
+				&idx, &coef, 0, 0);
 
-	cout << "Resolve a new problem P2.. " << endl;
-	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp4", 0);
-	solve(env, lp);
+		cout << "Resolve a new problem P2.. " << endl;
+		solve(env, lp);
 	}
 
 	return z;
@@ -162,13 +174,9 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
  */
 void solve(CEnv env, Prob lp) {
 
-	// --------------------------------------------------
-	// 2. write problem
-	// --------------------------------------------------
-	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 
 	// --------------------------------------------------
-	// 3. Optimization
+	// 3. solve linear problem
 	// --------------------------------------------------
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
@@ -181,10 +189,7 @@ void solve(CEnv env, Prob lp) {
 	// 5. set number and value of variable
 	//    (cur_numcols,varVals) and print these
 	// --------------------------------------------------
-	print_var_P(env, lp);
-
-	// print solution in standard format
-	CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
+	set_and_print_var_P(env, lp);
 
 	// --------------------------------------------------
 	// 6. chose the best fractional variable
@@ -204,20 +209,31 @@ void solve(CEnv env, Prob lp) {
 		cout << "Index " << index << endl;
 
 		create_P1_prob(env, lp, index);
-		double z1 = solve_P1_Problem(env, lp, index);
-		/////////////////////////////////////////////////////
-		create_P2_prob(env, lp, index);
-		double z2 = solve_P2_Problem(env, lp, index);
 
-		if (z1<CPX_INFBOUND && z2<CPX_INFBOUND){
-			double z = std::min (z1,z2);
-			cout << "funzione obbiettivo minore = " << z << endl;
+		double* z = solve_P1_Problem(env, lp, index);
+		/////////////////////////////////////////////////////
+		static bool flag_find = true;
+
+		if (*z < CPX_INFBOUND && *(z + 1) < CPX_INFBOUND && flag_find) {
+			flag_find = false;
+
+			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
+			// --------------------------------------------------
+			// print solution in standard format
+			// --------------------------------------------------
+			CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
+
+			double sol = std::min(*z, *(z + 1));
+			cout << "objective function lesser = " << sol << endl;
+
+
+
 		}
 
+	}else{
+		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
+		cout << "The last solution is the best integer solution. STOP" << endl;
+		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 	}
-
 }
-
-
-
 

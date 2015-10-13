@@ -11,10 +11,11 @@
 
 #include "load.h"
 
+
 void create_P1_prob(CEnv env, Prob lp, int index);
 void create_P2_prob(CEnv env, Prob lp, int index);
 
-double solve_P1_Problem(CEnv env, Prob lp, int index);
+double* solve_P1_Problem(CEnv env, Prob lp, int index);
 double solve_P2_Problem(CEnv env, Prob lp, int index);
 
 void solve(CEnv env, Prob lp);

@@ -302,7 +302,7 @@ void print_objval(CEnv env, Prob lp) {
  @param  (CEnv env, Prob lp), environmant of the problem and problem
  @return void
  */
-void print_var_P(CEnv env, Prob lp) {
+void set_and_print_var_P(CEnv env, Prob lp) {
 
 	cout << "PRIMAL VARIABLES: " << endl;
 	cur_numcols = CPXgetnumcols(env, lp);
@@ -343,14 +343,14 @@ void print_var_D(CEnv env, Prob lp, bool prob) {
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P1[0], 0,
 				num_rows - 1);
 		for (int i = 0; i < num_rows; i++) {
-	//		cout << dual_varVals_P1[i] << endl;
+			cout << dual_varVals_P1[i] << endl;
 		}
 	} else {
 		dual_varVals_P2.resize(num_rows);
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P2[0], 0,
 				num_rows - 1);
 		for (int i = 0; i < num_rows; i++) {
-		//	cout << dual_varVals_P2[i] << endl;
+			cout << dual_varVals_P2[i] << endl;
 		}
 
 	}
