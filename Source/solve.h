@@ -10,6 +10,7 @@
 #define SOURCE_SOLVE_H_
 
 #include "load.h"
+static bool flag_find = true;
 
 
 void create_P1_prob(CEnv env, Prob lp, int index);

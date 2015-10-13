@@ -211,7 +211,6 @@ void solve(CEnv env, Prob lp) {
 
 		double* z = solve_P1_Problem(env, lp, index);
 		/////////////////////////////////////////////////////
-		static bool flag_find = true;
 
 		if (*z < CPX_INFBOUND && *(z + 1) < CPX_INFBOUND && flag_find) {
 			flag_find = false;
@@ -224,9 +223,6 @@ void solve(CEnv env, Prob lp) {
 
 			double sol = std::min(*z, *(z + 1));
 			cout << "objective function lesser = " << sol << endl;
-
-			print_vect_c();
-
 
 		}
 

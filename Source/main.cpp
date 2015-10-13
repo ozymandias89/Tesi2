@@ -51,11 +51,30 @@ int main(int argc, char const *argv[]) {
 		// --------------------------------------------------
 		solve (env, lp);
 
+
+
+
+		if (!flag_find) {
+
+			int num_rows = CPXgetnumrows(env, lp);
+			for (int i = 0; i < num_rows; i++) {
+				cout << dual_varVals_P1[i] << endl;
+			}
+			cout << endl << endl;
+
+			for (int i = 0; i < num_rows; i++) {
+				cout << dual_varVals_P2[i] << endl;
+			}
+
+		}
+
 		// ---------------------------------------------------------
 		// 3. free allocate memory
 		// ---------------------------------------------------------
+
 		CPXfreeprob(env, &lp);
 		CPXcloseCPLEX(&env);
+
 
 		for (int i = 0; i < num_constraint; ++i) {
 			delete[] A[i];
