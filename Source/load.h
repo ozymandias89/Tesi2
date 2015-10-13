@@ -51,9 +51,6 @@ double* b;
 std::vector<double> varVals;
 std::vector<double> dual_varVals_P1;
 std::vector<double> dual_varVals_P2;
-int cur_numcols;
-int num_rows;
-
 
 /**
  Method that load from file the problem (for example of format file see folder data)
@@ -305,7 +302,7 @@ void print_objval(CEnv env, Prob lp) {
 void set_and_print_var_P(CEnv env, Prob lp) {
 
 	cout << "PRIMAL VARIABLES: " << endl;
-	cur_numcols = CPXgetnumcols(env, lp);
+	int cur_numcols = CPXgetnumcols(env, lp);
 
 	varVals.resize(cur_numcols);
 	CHECKED_CPX_CALL(CPXgetx, env, lp, &varVals[0], 0, cur_numcols - 1);
@@ -336,25 +333,38 @@ void set_and_print_var_P(CEnv env, Prob lp) {
 void print_var_D(CEnv env, Prob lp, bool prob) {
 
 	cout << "DUAL VARIABLES: " << endl;
-	CHECKED_CPX_CALL(CPXlpopt, env, lp);
-	num_rows = CPXgetnumrows(env, lp);
+	int num_rows = CPXgetnumrows(env, lp);
+	int surplus;
+	status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0, num_rows - 1);
+	int cur_colnamespace = -surplus; // the space needed to save the names
+
+	// allocate memory
+	char** cur_rowname = (char **) malloc(sizeof(char *) * num_rows);
+	char* cur_rownamestore = (char *) malloc(cur_colnamespace);
+
+	// get the names
+	CPXgetcolname(env, lp, cur_rowname, cur_rownamestore, cur_colnamespace,
+			&surplus, 0, num_rows - 1);
+
 	if (prob) {
 		dual_varVals_P1.resize(num_rows);
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P1[0], 0,
 				num_rows - 1);
 		for (int i = 0; i < num_rows; i++) {
-			cout << dual_varVals_P1[i] << endl;
+			cout << cur_rowname[i] << " = " << dual_varVals_P1[i] << endl;
 		}
 	} else {
 		dual_varVals_P2.resize(num_rows);
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P2[0], 0,
 				num_rows - 1);
 		for (int i = 0; i < num_rows; i++) {
-			cout << dual_varVals_P2[i] << endl;
+			cout << cur_rowname[i] << " = " << dual_varVals_P2[i] << endl;
 		}
 
 	}
-
+	// free
+		free(cur_rowname);
+		free(cur_rownamestore);
 }
 
 #endif /* SOURCE_LOAD_H_ */

@@ -225,6 +225,7 @@ void solve(CEnv env, Prob lp) {
 			double sol = std::min(*z, *(z + 1));
 			cout << "objective function lesser = " << sol << endl;
 
+			print_vect_c();
 
 
 		}
