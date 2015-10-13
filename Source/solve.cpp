@@ -66,11 +66,12 @@ void create_P2_prob(CEnv env, Prob lp, int index) {
 }
 
 /**
- Method that create P1 problem (make a branch of admissible region),
+ Method that create P1 sub_problem (make a branch of admissible region),
  return solution if exist, otherwise return INFINITE value
  @param  (CEnv env, Prob lp, index),
  Environment of the problem, problem and index of fractional variable selected
- @return double
+ @return double*, pointer to vector[2] where the first element is
+ the result of P1 sub_problem, the second is the result of sub_P2 problem
  */
 double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 
@@ -84,7 +85,6 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 
 	int stat = CPXgetstat(env, lp);
 	int cur_numrows = CPXgetnumrows(env, lp);
-//	//CHECKED_CPX_CALL(CPXclpwrite, env, lp, "../data/conflict.lp1" );
 
 // print and set solution and create and resolve P_2 problem"
 	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
@@ -125,7 +125,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
  return solution if exist, otherwise return INFINITE value
  @param  (CEnv env, Prob lp, index),
  Environment of the problem, problem and index of fractional variable selected
- @return void
+ @return double , result of P2 sub_problem
  */
 double solve_P2_Problem(CEnv env, Prob lp, int index) {
 
@@ -134,8 +134,7 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
-	//CHECKED_CPX_CALL(CPXclpwrite, env, lp, "../data/conflict.lp2" );
-	//CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem2.sol");
+
 	int stat = CPXgetstat(env, lp);
 
 	int cur_numrows = CPXgetnumrows(env, lp);
