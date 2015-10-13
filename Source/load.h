@@ -249,11 +249,6 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 					&varName);
 		}
 
-
-
-
-
-
 	}
 
 	// constraint

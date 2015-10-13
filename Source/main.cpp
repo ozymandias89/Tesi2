@@ -72,7 +72,6 @@ int main(int argc, char const *argv[]) {
 			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);
 		}
 
-
 		for (int i = 0; i < num_constraint; ++i) {
 			delete[] A[i];
 		}
