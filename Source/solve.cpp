@@ -169,11 +169,11 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
  Method solve
  @param  (CEnv env, Prob lp, index),
  Environment of the problem, problem and index of fractional variable selected
- @return void
+ @return double, return the solution from the sub_problems P1/P2
  */
-void solve(CEnv env, Prob lp) {
+double solve(CEnv env, Prob lp) {
 
-
+	double min_sol;
 	// --------------------------------------------------
 	// 3. solve linear problem
 	// --------------------------------------------------
@@ -221,8 +221,8 @@ void solve(CEnv env, Prob lp) {
 			// --------------------------------------------------
 			CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 
-			double sol = std::min(*z, *(z + 1));
-			cout << "objective function lesser = " << sol << endl;
+			min_sol = std::min(*z, *(z + 1));
+			cout << "objective function lesser = " << min_sol << endl;
 
 		}
 
@@ -231,5 +231,6 @@ void solve(CEnv env, Prob lp) {
 		cout << "The last solution is the best integer solution. STOP" << endl;
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 	}
+	return min_sol;
 }
 

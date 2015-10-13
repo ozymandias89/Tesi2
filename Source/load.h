@@ -209,6 +209,83 @@ void setupLP(CEnv env, Prob lp) {
 	}
 
 }
+
+/**
+ Method that set the second problem
+ @param  (CEnv env, Prob lp)
+ @return void
+ */
+void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
+
+	{
+		static const char* varType = NULL;
+		double obj = 1.0;
+		double lb = -CPX_INFBOUND;
+		double ub = 0.0;
+		snprintf(name, NAME_SIZE, "u_%i", 0);
+		char* varName = (char*) (&name[0]);
+		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,&varName);
+
+		ub = CPX_INFBOUND;
+
+		for (int i = 1; i < num_rows; i++) {
+			snprintf(name, NAME_SIZE, "u_%i", i);
+			varName = (char*) (&name[0]);
+			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType, &varName);
+		}
+
+		lb = 0.0;
+		snprintf(name, NAME_SIZE, "v_%i", 0);
+		varName = (char*) (&name[0]);
+		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
+				&varName);
+
+		lb = -CPX_INFBOUND;
+
+		for (int i = 1; i < num_rows; i++) {
+			snprintf(name, NAME_SIZE, "v_%i", i);
+			varName = (char*) (&name[0]);
+			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
+					&varName);
+		}
+
+
+
+
+
+
+	}
+
+	// constraint
+
+	{
+		std::vector<int> idx;
+		std::vector<double> coef;
+
+		for (int i = 0; i < num_constraint; i++) {
+			char sense = 'E';
+			int matbeg = 0;
+			double rhs = b[i];
+
+			for (int iter = 0; iter < N; iter++) {
+
+				if (A[i][iter] != 0) {
+					idx.push_back(iter);
+					coef.push_back(A[i][iter]);
+				}
+
+			}
+
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 6, &rhs, &sense,
+					&matbeg, &idx[0], &coef[0], 0, 0);
+
+			idx.clear();
+			coef.clear();
+		}
+	}
+
+}
+
 /**
  Method that chooses the best fractional variable
  @param  (vector<double>)

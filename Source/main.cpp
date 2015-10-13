@@ -47,26 +47,12 @@ int main(int argc, char const *argv[]) {
 
 
 		// --------------------------------------------------
-		// 2. program
+		// 2. program (first part)
 		// --------------------------------------------------
-		solve (env, lp);
+		double min_sol= solve (env, lp);
 
-
-
-
-		if (!flag_find) {
-
-			int num_rows = CPXgetnumrows(env, lp);
-			for (int i = 0; i < num_rows; i++) {
-				cout << dual_varVals_P1[i] << endl;
-			}
-			cout << endl << endl;
-
-			for (int i = 0; i < num_rows; i++) {
-				cout << dual_varVals_P2[i] << endl;
-			}
-
-		}
+		int num_rows = CPXgetnumrows(env, lp);
+		int num_cols = CPXgetnumcols(env, lp);
 
 		// ---------------------------------------------------------
 		// 3. free allocate memory
@@ -74,6 +60,17 @@ int main(int argc, char const *argv[]) {
 
 		CPXfreeprob(env, &lp);
 		CPXcloseCPLEX(&env);
+
+
+		if (!flag_find) {
+			// --------------------------------------------------
+			// 4. Initialization of the second problem
+			// --------------------------------------------------
+			DECL_ENV(env);
+			DECL_PROB(env, lp, "resolve second problem");
+			setupSP(env, lp, num_rows, num_cols);
+			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);
+		}
 
 
 		for (int i = 0; i < num_constraint; ++i) {
