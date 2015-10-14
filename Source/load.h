@@ -36,6 +36,9 @@ char name[NAME_SIZE];
 //number of variable
 int N;
 
+//index for e_k
+int k;
+
 //number of constraint
 int num_constraint;
 
@@ -51,6 +54,11 @@ double* b;
 std::vector<double> varVals;
 std::vector<double> dual_varVals_P1;
 std::vector<double> dual_varVals_P2;
+
+std::vector<double*> cut_A;
+std::vector<double> cut_b;
+int gam;
+double min_sol;
 
 /**
  Method that load from file the problem (for example of format file see folder data)
@@ -257,21 +265,38 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 		std::vector<int> idx;
 		std::vector<double> coef;
 
-		for (int i = 0; i < num_constraint; i++) {
-			char sense = 'E';
+		for (int i = 0; i < N; i++) {
+			char sense = 'L';
 			int matbeg = 0;
-			double rhs = b[i];
+			double rhs = c[i];
+			int nzcnt=0;
 
-			for (int iter = 0; iter < N; iter++) {
+			int iter = 0;
+			while ( iter < num_constraint) {
 
-				if (A[i][iter] != 0) {
+				cout << A[iter][i];
+				if (A[iter][i] != 0) {
 					idx.push_back(iter);
-					coef.push_back(A[i][iter]);
+					coef.push_back(A[iter][i]);
+					nzcnt++;
 				}
+				 iter++;
+			}cout << endl;
 
-			}
+			for (std::vector<double*>::const_iterator j = cut_A.begin();
+					j != cut_A.end(); ++j) {
+				double*ptr = *j;
+				cout <<ptr[i];
+				if (ptr[i] != 0) {
+					idx.push_back(iter);
+					coef.push_back(ptr[i]);
+					nzcnt++;
+				}
+				iter++;
+			}cout << endl;
 
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 6, &rhs, &sense,
+
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
 
 			idx.clear();

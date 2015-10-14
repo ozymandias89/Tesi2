@@ -51,7 +51,7 @@ int main(int argc, char const *argv[]) {
 		// --------------------------------------------------
 		solve (env, lp);
 
-		int num_rows = CPXgetnumrows(env, lp);
+		int num_rows = (CPXgetnumrows(env, lp)-1);
 		int num_cols = CPXgetnumcols(env, lp);
 
 		// ---------------------------------------------------------
@@ -78,6 +78,7 @@ int main(int argc, char const *argv[]) {
 			print_v_variables();
 			cout << "gamma= " << gam << endl;
 			cout << "z= " << min_sol << endl;
+			cout << "k= " << k << endl;
 
 
 			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);

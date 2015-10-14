@@ -161,6 +161,7 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		set_and_print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
 		set_and_print_var_D(env, lp, false);
+
 	} else {
 
 		cout << "No solution for P2 problem exists " << endl;
@@ -251,6 +252,8 @@ void solve(CEnv env, Prob lp) {
 			CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 
 			min_sol = std::min(*z, *(z + 1));
+			k=index;
+			cout << "k = " << k << endl;
 			cout << "objective function lesser = " << min_sol << endl;
 
 

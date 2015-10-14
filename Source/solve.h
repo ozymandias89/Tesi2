@@ -11,10 +11,7 @@
 
 #include "load.h"
 static bool flag_find = true;
-std::vector<double*> cut_A;
-std::vector<double> cut_b;
-int gam;
-double min_sol;
+
 
 
 void create_P1_prob(CEnv env, Prob lp, int index);
