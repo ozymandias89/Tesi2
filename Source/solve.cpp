@@ -76,8 +76,8 @@ void create_P2_prob(CEnv env, Prob lp, int index) {
 double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 
 	static double z[2];
-	z[0]= CPX_INFBOUND;
-	z[1]= CPX_INFBOUND;
+	z[0] = CPX_INFBOUND;
+	z[1] = CPX_INFBOUND;
 
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
@@ -88,7 +88,8 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 
 // print and set solution and create and resolve P_2 problem"
 	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
-		cout << "FEASIBLE "<< endl;
+		cout << "FEASIBLE " << endl;
+		gam = floor(varVals[index]);
 		print_objval(env, lp);
 		set_and_print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z[0]);
@@ -107,9 +108,24 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 		const int idx = index;
 		const double coef = 1;
 
+
+		double* cut = new double[N];
+
+		for (int i = 0; i < N; i++) {
+			if (i == index) {
+				cut[i] = 1;
+			} else
+				cut[i] = 0;
+		}
+
+
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg,
 				&idx, &coef, 0, 0);
+
+		cut_A.push_back(cut);
+		cut_b.push_back(rhs);
+
 
 		cout << "Resolve a new problem P1.. " << endl;
 		solve(env, lp);
@@ -140,7 +156,7 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 	int cur_numrows = CPXgetnumrows(env, lp);
 
 	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
-		cout << "FEASIBLE "<< endl;
+		cout << "FEASIBLE " << endl;
 		print_objval(env, lp);
 		set_and_print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
@@ -155,9 +171,23 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		const int idx = index;
 		const double coef = 1;
 
+		double* cut;
+		cut = new double[N];
+
+		for (int i = 0; i < N; i++) {
+			if (i == index) {
+				cut[i] = 1;
+			} else
+				cut[i] = 0;
+		}
+
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg,
 				&idx, &coef, 0, 0);
+
+		cut_A.push_back(cut);
+		cut_b.push_back(rhs);
+
 
 		cout << "Resolve a new problem P2.. " << endl;
 		solve(env, lp);
@@ -174,6 +204,7 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 double solve(CEnv env, Prob lp) {
 
 	double min_sol;
+
 	// --------------------------------------------------
 	// 3. solve linear problem
 	// --------------------------------------------------
@@ -196,7 +227,7 @@ double solve(CEnv env, Prob lp) {
 	int index = select_fractionar_var(varVals);
 
 
-	usleep(1000000);
+	//usleep(1000000);
 	// --------------------------------------------------------
 	// 7. if x solution aren't integer create P1 and P2 problem
 	// --------------------------------------------------------
@@ -232,5 +263,25 @@ double solve(CEnv env, Prob lp) {
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 	}
 	return min_sol;
+}
+
+void print_cut_A() {
+	cout << "cut: " << endl;
+	for (std::vector<double*>::const_iterator i = cut_A.begin();
+			i != cut_A.end(); ++i) {
+		double*ptr = *i;
+		for (int j = 0; j < N; ++j) {
+			std::cout << ptr[j] << ' ';
+		}
+		cout << endl;
+	}
+}
+void print_cut_b() {
+	cout << "vector_b: " << endl;
+	for (std::vector<double>::const_iterator i = cut_b.begin();
+			i != cut_b.end(); ++i) {
+		std::cout << *i << ' ';
+		cout << endl;
+	}
 }
 

@@ -69,6 +69,14 @@ int main(int argc, char const *argv[]) {
 			DECL_ENV(env);
 			DECL_PROB(env, lp, "resolve second problem");
 			setupSP(env, lp, num_rows, num_cols);
+
+			print_matrix();
+			print_cut_A();
+			print_cut_b();
+			cout << "gamma: " << gam << endl;
+
+
+
 			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);
 		}
 

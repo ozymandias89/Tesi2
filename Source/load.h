@@ -308,7 +308,7 @@ int select_fractionar_var(std::vector<double> varVals) {
 }
 
 /**
- Method that print matrix
+ Method that print matrix A
  @param  none
  @return void
  */
