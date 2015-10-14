@@ -49,7 +49,7 @@ int main(int argc, char const *argv[]) {
 		// --------------------------------------------------
 		// 2. program (first part)
 		// --------------------------------------------------
-		double min_sol= solve (env, lp);
+		solve (env, lp);
 
 		int num_rows = CPXgetnumrows(env, lp);
 		int num_cols = CPXgetnumcols(env, lp);
@@ -73,8 +73,11 @@ int main(int argc, char const *argv[]) {
 			print_matrix();
 			print_cut_A();
 			print_cut_b();
-			cout << "gamma: " << gam << endl;
 
+			print_u_variables();
+			print_v_variables();
+			cout << "gamma= " << gam << endl;
+			cout << "z= " << min_sol << endl;
 
 
 			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);

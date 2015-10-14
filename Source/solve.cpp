@@ -199,11 +199,9 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
  Method solve
  @param  (CEnv env, Prob lp, index),
  Environment of the problem, problem and index of fractional variable selected
- @return double, return the solution from the sub_problems P1/P2
+ @return void
  */
-double solve(CEnv env, Prob lp) {
-
-	double min_sol;
+void solve(CEnv env, Prob lp) {
 
 	// --------------------------------------------------
 	// 3. solve linear problem
@@ -255,6 +253,7 @@ double solve(CEnv env, Prob lp) {
 			min_sol = std::min(*z, *(z + 1));
 			cout << "objective function lesser = " << min_sol << endl;
 
+
 		}
 
 	}else{
@@ -262,7 +261,7 @@ double solve(CEnv env, Prob lp) {
 		cout << "The last solution is the best integer solution. STOP" << endl;
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 	}
-	return min_sol;
+
 }
 
 void print_cut_A() {
@@ -284,4 +283,24 @@ void print_cut_b() {
 		cout << endl;
 	}
 }
+
+void print_u_variables() {
+	cout << "u variable: " << endl;
+	for (std::vector<double>::const_iterator i = dual_varVals_P1.begin();
+			i != dual_varVals_P1.end(); ++i)
+		std::cout << *i << ' ';
+
+	cout << endl;
+}
+
+void print_v_variables() {
+
+	cout << "v variable: " << endl;
+	for (std::vector<double>::const_iterator i =
+			dual_varVals_P2.begin(); i != dual_varVals_P2.end(); ++i)
+		std::cout << *i << ' ';
+
+	cout << endl;
+}
+
 
