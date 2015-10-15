@@ -177,6 +177,7 @@ void setupLP(CEnv env, Prob lp) {
 		double obj = 0.0;
 		double lb = 0.0;
 		double ub = CPX_INFBOUND;
+
 		for (int i = 0; i < N; i++) {
 			obj = c[i];
 			snprintf(name, NAME_SIZE, "x_%i", i);
@@ -272,15 +273,18 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 			int nzcnt=0;
 
 			int iter = 0;
+			int u=1;
+
 			while ( iter < num_constraint) {
 
 				cout << A[iter][i];
 				if (A[iter][i] != 0) {
-					idx.push_back(iter);
+					idx.push_back(u);
 					coef.push_back(A[iter][i]);
 					nzcnt++;
 				}
 				 iter++;
+				 u++;
 			}cout << endl;
 
 			for (std::vector<double*>::const_iterator j = cut_A.begin();
@@ -288,12 +292,22 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 				double*ptr = *j;
 				cout <<ptr[i];
 				if (ptr[i] != 0) {
-					idx.push_back(iter);
+					idx.push_back(u);
 					coef.push_back(ptr[i]);
 					nzcnt++;
 				}
 				iter++;
+				u++;
 			}cout << endl;
+
+			// --------------------------------------------------
+			//  e_k * u
+			// --------------------------------------------------
+			if (i == k) {
+				idx.push_back(0);
+				coef.push_back(1);
+				nzcnt++;
+			}
 
 
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,

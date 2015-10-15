@@ -51,7 +51,7 @@ int main(int argc, char const *argv[]) {
 		// --------------------------------------------------
 		solve (env, lp);
 
-		int num_rows = (CPXgetnumrows(env, lp)-1);
+		int num_rows = (CPXgetnumrows(env, lp));
 		int num_cols = CPXgetnumcols(env, lp);
 
 		// ---------------------------------------------------------
