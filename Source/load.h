@@ -199,17 +199,19 @@ void setupLP(CEnv env, Prob lp) {
 			char sense = 'E';
 			int matbeg = 0;
 			double rhs = b[i];
+			int nzcnt=0;
 
 			for (int iter = 0; iter < N; iter++) {
 
 				if (A[i][iter] != 0) {
 					idx.push_back(iter);
 					coef.push_back(A[i][iter]);
+					nzcnt++;
 				}
 
 			}
 
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 6, &rhs, &sense,
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
 
 			idx.clear();
@@ -260,12 +262,15 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 	}
 
-	// constraint
+	// constraints A_T * u + e_k * u_0
 
 	{
 		std::vector<int> idx;
 		std::vector<double> coef;
 
+		// --------------------------------------------------
+		//  A_T * u
+		// --------------------------------------------------
 		for (int i = 0; i < N; i++) {
 			char sense = 'L';
 			int matbeg = 0;
@@ -316,6 +321,58 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 			idx.clear();
 			coef.clear();
 		}
+	}
+
+
+
+
+	//constraint b_T * u + u_0 * gamma
+
+	{
+		std::vector<int> idx;
+		std::vector<double> coef;
+
+		char sense = 'G';
+		int matbeg = 0;
+		double rhs = min_sol;
+		int nzcnt = 0;
+		int u = 1;
+
+		for (int i = 0; i < num_constraint; i++) {
+
+			if (b[i] != 0) {
+				idx.push_back(u);
+				coef.push_back(b[i]);
+				nzcnt++;
+			}
+			u++;
+
+		}
+
+		for (std::vector<double>::const_iterator j = cut_b.begin();
+				j != cut_b.end(); ++j) {
+			cout << *j;
+			if (*j != 0) {
+				idx.push_back(u);
+				coef.push_back(*j);
+				nzcnt++;
+			}
+			u++;
+		}
+		cout << endl;
+
+		if (gam != 0) {
+			idx.push_back(0);
+			coef.push_back(gam);
+			nzcnt++;
+		}
+
+		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+				&matbeg, &idx[0], &coef[0], 0, 0);
+
+		idx.clear();
+		coef.clear();
+
 	}
 
 }
