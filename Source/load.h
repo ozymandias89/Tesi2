@@ -378,9 +378,6 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 	}
 
-	//////////////////////////////////
-	/////////////////////////////////
-
 	// constraints A_T * v + e_k * v_0
 
 		{
@@ -443,6 +440,58 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 				idx.clear();
 				coef.clear();
 			}
+		}
+
+
+		//constraint b_T * v + v_0 * (gamma+1)
+
+		{
+			std::vector<int> idx;
+			std::vector<double> coef;
+
+			char sense = 'G';
+			int matbeg = 0;
+			double rhs = min_sol;
+			int nzcnt = 0;
+			int v = v_0;
+			v++;
+
+
+			for (int i = 0; i < num_constraint; i++) {
+
+				if (b[i] != 0) {
+					idx.push_back(v);
+					coef.push_back(b[i]);
+					nzcnt++;
+				}
+				v++;
+
+			}
+
+			for (std::vector<double>::const_iterator j = cut_b.begin();
+					j != cut_b.end(); ++j) {
+				cout << *j;
+				if (*j != 0) {
+					idx.push_back(v);
+					coef.push_back(*j);
+					nzcnt++;
+				}
+				v++;
+			}
+			cout << endl;
+
+			if (gam != 0) {
+				idx.push_back(0);
+				coef.push_back(gam+1);
+				nzcnt++;
+			}
+
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+					&matbeg, &idx[0], &coef[0], 0, 0);
+
+			idx.clear();
+			coef.clear();
+
 		}
 
 
