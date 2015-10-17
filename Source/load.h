@@ -326,6 +326,8 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 
 
+	int v_0;
+
 	//constraint b_T * u + u_0 * gamma
 
 	{
@@ -372,8 +374,77 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 		idx.clear();
 		coef.clear();
+		v_0=u;
 
 	}
+
+	//////////////////////////////////
+	/////////////////////////////////
+
+	// constraints A_T * v + e_k * v_0
+
+		{
+			std::vector<int> idx;
+			std::vector<double> coef;
+
+			// --------------------------------------------------
+			//  A_T * v
+			// --------------------------------------------------
+			for (int i = 0; i < N; i++) {
+				char sense = 'L';
+				int matbeg = 0;
+				double rhs = c[i];
+				int nzcnt = 0;
+
+				int iter = 0;
+				int v = v_0;
+				v++;
+
+				while ( iter < num_constraint) {
+
+					cout << A[iter][i];
+					if (A[iter][i] != 0) {
+						idx.push_back(v);
+						coef.push_back(A[iter][i]);
+						nzcnt++;
+					}
+					 iter++;
+					 v++;
+				}cout << endl;
+
+
+				for (std::vector<double*>::const_iterator j = cut_A.begin();
+						j != cut_A.end(); ++j) {
+					double*ptr = *j;
+					cout <<ptr[i];
+					if (ptr[i] != 0) {
+						idx.push_back(v);
+						coef.push_back(ptr[i]);
+						nzcnt++;
+					}
+					iter++;
+					v++;
+				}cout << endl;
+
+
+				// --------------------------------------------------
+				//  e_k * u
+				// --------------------------------------------------
+				if (i == k) {
+					idx.push_back(v_0);
+					coef.push_back(1);
+					nzcnt++;
+				}
+
+
+				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+						&matbeg, &idx[0], &coef[0], 0, 0);
+
+				idx.clear();
+				coef.clear();
+			}
+		}
+
 
 }
 
