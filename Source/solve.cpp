@@ -197,9 +197,10 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 	return z;
 }
 /**
- Method solve
+ Method solve, solve the original problem, then branch in P_1 and P_2 problem
+ and resolve recursively the two sub_problems.
  @param  (CEnv env, Prob lp, index),
- Environment of the problem, problem and index of fractional variable selected
+ Environment of the problem, problem and index of fractional variables selected
  @return void
  */
 void solve(CEnv env, Prob lp) {
@@ -225,8 +226,9 @@ void solve(CEnv env, Prob lp) {
 	// --------------------------------------------------
 	int index = select_fractionar_var(varVals);
 
-
+	//if you want to slow the iteration
 	//usleep(1000000);
+
 	// --------------------------------------------------------
 	// 7. if x solution aren't integer create P1 and P2 problem
 	// --------------------------------------------------------
@@ -237,11 +239,21 @@ void solve(CEnv env, Prob lp) {
 
 		cout << "Index " << index << endl;
 
+		//create problem P_1
 		create_P1_prob(env, lp, index);
 
+		// --------------------------------------------------------
+		// 8. solve sub_problems (P_1 and P_2) return min solution
+		// --------------------------------------------------------
 		double* z = solve_P1_Problem(env, lp, index);
+
 		/////////////////////////////////////////////////////
 
+
+		// ------------------------------------------------
+		// 9. only if both problems have solution else take
+		//		the best solution and stop
+		// ------------------------------------------------
 		if (*z < CPX_INFBOUND && *(z + 1) < CPX_INFBOUND && flag_find) {
 			flag_find = false;
 
@@ -253,10 +265,6 @@ void solve(CEnv env, Prob lp) {
 
 			min_sol = std::min(*z, *(z + 1));
 			k=index;
-			cout << "k = " << k << endl;
-			cout << "objective function lesser = " << min_sol << endl;
-
-
 		}
 
 	}else{

@@ -51,13 +51,23 @@ double** A;
 //known terms
 double* b;
 
+//primary variables
 std::vector<double> varVals;
+
+//dual variables P_1 problem
 std::vector<double> dual_varVals_P1;
+
+//dual variables P_2 problem
 std::vector<double> dual_varVals_P2;
 
+//inequality insert in cut_A
 std::vector<double*> cut_A;
+//inequality insert in cut_b
 std::vector<double> cut_b;
+
+//gamma
 int gam;
+//min_sol from P_1/P_2
 double min_sol;
 
 /**
@@ -166,13 +176,13 @@ void load_problem(ifstream &myfile) {
 }
 
 /**
- Method that set the problem in this case only one constraint
+ Method that set the primary problem
  @param  (CEnv env, Prob lp)
  @return void
  */
 void setupLP(CEnv env, Prob lp) {
 
-	{
+	{	// variables
 		static const char* varType = NULL;
 		double obj = 0.0;
 		double lb = 0.0;
@@ -189,7 +199,7 @@ void setupLP(CEnv env, Prob lp) {
 
 	}
 
-	// constraint
+	// constraints
 
 	{
 		std::vector<int> idx;
@@ -229,6 +239,7 @@ void setupLP(CEnv env, Prob lp) {
 void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 	{
+		// variables
 		static const char* varType = NULL;
 		double obj = 1.0;
 		double lb = -CPX_INFBOUND;
@@ -282,7 +293,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 			while ( iter < num_constraint) {
 
-				cout << A[iter][i];
+				//cout << A[iter][i];
 				if (A[iter][i] != 0) {
 					idx.push_back(u);
 					coef.push_back(A[iter][i]);
@@ -290,12 +301,12 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 				}
 				 iter++;
 				 u++;
-			}cout << endl;
+			}//cout << endl;
 
 			for (std::vector<double*>::const_iterator j = cut_A.begin();
 					j != cut_A.end(); ++j) {
 				double*ptr = *j;
-				cout <<ptr[i];
+				//cout <<ptr[i];
 				if (ptr[i] != 0) {
 					idx.push_back(u);
 					coef.push_back(ptr[i]);
@@ -303,7 +314,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 				}
 				iter++;
 				u++;
-			}cout << endl;
+			}//cout << endl;
 
 			// --------------------------------------------------
 			//  e_k * u
@@ -353,7 +364,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 		for (std::vector<double>::const_iterator j = cut_b.begin();
 				j != cut_b.end(); ++j) {
-			cout << *j;
+			//cout << *j;
 			if (*j != 0) {
 				idx.push_back(u);
 				coef.push_back(*j);
@@ -361,7 +372,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 			}
 			u++;
 		}
-		cout << endl;
+		//cout << endl;
 
 		if (gam != 0) {
 			idx.push_back(0);
@@ -399,7 +410,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 				while ( iter < num_constraint) {
 
-					cout << A[iter][i];
+					//cout << A[iter][i];
 					if (A[iter][i] != 0) {
 						idx.push_back(v);
 						coef.push_back(A[iter][i]);
@@ -407,13 +418,13 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 					}
 					 iter++;
 					 v++;
-				}cout << endl;
+				}//cout << endl;
 
 
 				for (std::vector<double*>::const_iterator j = cut_A.begin();
 						j != cut_A.end(); ++j) {
 					double*ptr = *j;
-					cout <<ptr[i];
+					//cout <<ptr[i];
 					if (ptr[i] != 0) {
 						idx.push_back(v);
 						coef.push_back(ptr[i]);
@@ -421,7 +432,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 					}
 					iter++;
 					v++;
-				}cout << endl;
+				}//cout << endl;
 
 
 				// --------------------------------------------------
@@ -470,7 +481,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 			for (std::vector<double>::const_iterator j = cut_b.begin();
 					j != cut_b.end(); ++j) {
-				cout << *j;
+				//cout << *j;
 				if (*j != 0) {
 					idx.push_back(v);
 					coef.push_back(*j);
@@ -478,7 +489,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 				}
 				v++;
 			}
-			cout << endl;
+			//cout << endl;
 
 			if (gam != 0) {
 				idx.push_back(0);
@@ -500,7 +511,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 /**
  Method that chooses the best fractional variable
  @param  (vector<double>)
- @return int, return index of highter variable functional (-1 if no variable is fractional)
+ @return int, return index of higher variable functional (-1 if no variable is fractional)
  */
 int select_fractionar_var(std::vector<double> varVals) {
 
@@ -570,7 +581,7 @@ void print_vect_b() {
 }
 /**
  Method that print object function
- @param  (CEnv env, Prob lp), environmant of the problem and problem
+ @param  (CEnv env, Prob lp), environment of the problem and problem
  @return void
  */
 void print_objval(CEnv env, Prob lp) {
@@ -620,7 +631,7 @@ void set_and_print_var_P(CEnv env, Prob lp) {
 
 /**
  Method that set and print dual variables
- @param  (CEnv env, Prob lp, bool prob), environmant of the problem,
+ @param  (CEnv env, Prob lp, bool prob), environment of the problem,
   problem and flag(true P1 problem, false P2 problem)
  @return void
  */
@@ -635,8 +646,9 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 				num_rows - 1);
 
 		for (int i = 0; i < num_rows; i++) {
-			cout << dual_varVals_P1[i] << endl;
+			cout << dual_varVals_P1[i]<< " ";
 		}
+		cout << endl;
 
 	} else {
 		dual_varVals_P2.resize(num_rows);
@@ -644,9 +656,9 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 				num_rows - 1);
 
 		for (int i = 0; i < num_rows; i++) {
-			cout << dual_varVals_P2[i] << endl;
+			cout << dual_varVals_P2[i] << " ";
 		}
-
+		cout << endl;
 	}
 
 }

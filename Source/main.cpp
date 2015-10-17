@@ -61,28 +61,38 @@ int main(int argc, char const *argv[]) {
 		CPXfreeprob(env, &lp);
 		CPXcloseCPLEX(&env);
 
-
+		// ---------------------------------------------------------
+		// 4. if P_1and P_2 have solution
+		// ---------------------------------------------------------
 		if (!flag_find) {
 			// --------------------------------------------------
-			// 4. Initialization of the second problem
+			// 5. Initialization of the second problem
 			// --------------------------------------------------
 			DECL_ENV(env);
 			DECL_PROB(env, lp, "resolve second problem");
 			setupSP(env, lp, num_rows, num_cols);
 
-			print_matrix();
-			print_cut_A();
-			print_cut_b();
+			//print_matrix();
+			//print_cut_A();
+			//print_cut_b();
 
 			print_u_variables();
+			cout << endl;
 			print_v_variables();
+			cout << endl;
 			cout << "gamma= " << gam << endl;
-			cout << "z= " << min_sol << endl;
-			cout << "k= " << k << endl;
+			cout << endl;
+			cout << "min solution= " << min_sol << endl;
+			cout << endl;
+			cout << "index fractional variable = " << k << endl;
 
 
 			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);
 		}
+
+		// ---------------------------------------------------------
+		// 6. free allocate memory
+		// ---------------------------------------------------------
 
 		for (int i = 0; i < num_constraint; ++i) {
 			delete[] A[i];
