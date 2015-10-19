@@ -1,7 +1,7 @@
 //cost coefficients
 1 4 7 2 7 1 5 8 7 5
 
-//known terms
+//right side
 3 1 1 3 1
 
 //matrix

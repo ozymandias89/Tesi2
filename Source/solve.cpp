@@ -37,6 +37,7 @@ void create_P1_prob(CEnv env, Prob lp, int index){
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
 				&coef, 0, 0);
 
+		cout << "insert inequality x_" << index << " <= " << rhs << endl;
 		// print P1 problem to a file
 		//CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp1", 0);
 
@@ -61,6 +62,7 @@ void create_P2_prob(CEnv env, Prob lp, int index) {
 	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
 			&coef, 0, 0);
 
+	cout << "insert inequality x_" << index << " >= " << rhs << endl;
 	//CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp2", 0);
 
 }
@@ -95,6 +97,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z[0]);
 		set_and_print_var_D(env, lp, true);
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
+		cout << "delete last inequality " << endl;
 
 		create_P2_prob(env, lp, index);
 		z[1] = solve_P2_Problem(env, lp, index);
@@ -118,16 +121,18 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 				cut[i] = 0;
 		}
 
-
+		cout << "delete last inequality " << endl;
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg,
 				&idx, &coef, 0, 0);
+
 
 		cut_A.push_back(cut);
 		cut_b.push_back(rhs);
 
 
 		cout << "Resolve a new problem P1.. " << endl;
+		cout << "add inequality x_" << index << " >= " << rhs  << endl;
 		solve(env, lp);
 
 	}
@@ -182,9 +187,11 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 				cut[i] = 0;
 		}
 
+		cout << "delete last inequality " << endl;
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg,
 				&idx, &coef, 0, 0);
+		cout << "add inequality x_" << index << " <= " << rhs << endl;
 
 		cut_A.push_back(cut);
 		cut_b.push_back(rhs);
@@ -235,7 +242,7 @@ void solve(CEnv env, Prob lp) {
 	if (index != -1) {
 
 		cout << endl;
-		cout << "Higher fractional variable choose " << varVals[index] << endl;
+		cout << "More fractional variable choose " << varVals[index] << endl;
 
 		cout << "Index " << index << endl;
 
