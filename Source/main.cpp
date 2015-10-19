@@ -54,23 +54,17 @@ int main(int argc, char const *argv[]) {
 		int num_rows = (CPXgetnumrows(env, lp));
 		int num_cols = CPXgetnumcols(env, lp);
 
-		// ---------------------------------------------------------
-		// 3. free allocate memory
-		// ---------------------------------------------------------
-
-		CPXfreeprob(env, &lp);
-		CPXcloseCPLEX(&env);
 
 		// ---------------------------------------------------------
-		// 4. if P_1and P_2 have solution
+		// 3. if P_1 and P_2 have solution
 		// ---------------------------------------------------------
 		if (!flag_find) {
 			// --------------------------------------------------
-			// 5. Initialization of the second problem
+			// 4. Initialization of the second problem
 			// --------------------------------------------------
-			DECL_ENV(env);
-			DECL_PROB(env, lp, "resolve second problem");
-			setupSP(env, lp, num_rows, num_cols);
+			DECL_ENV(env_dual);
+			DECL_PROB(env_dual, lp_dual, "resolve second problem");
+			setupSP(env_dual, lp_dual, num_rows, num_cols);
 
 			//print_matrix();
 			//print_cut_A();
@@ -87,12 +81,20 @@ int main(int argc, char const *argv[]) {
 			cout << "index fractional variable = " << k << endl;
 
 
-			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);
+			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
+
+			CPXfreeprob(env_dual, &lp_dual);
+			CPXcloseCPLEX(&env_dual);
 		}
 
 		// ---------------------------------------------------------
-		// 6. free allocate memory
+		// 5. free allocate memory
 		// ---------------------------------------------------------
+
+
+		CPXfreeprob(env, &lp);
+		CPXcloseCPLEX(&env);
+
 
 		for (int i = 0; i < num_constraint; ++i) {
 			delete[] A[i];
