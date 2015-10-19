@@ -167,6 +167,12 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
 		set_and_print_var_D(env, lp, false);
 
+		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
+		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
+
+		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
+		cout << "delete last inequality " << endl;
+
 	} else {
 
 		cout << "No solution for P2 problem exists " << endl;
@@ -263,12 +269,6 @@ void solve(CEnv env, Prob lp) {
 		// ------------------------------------------------
 		if (*z < CPX_INFBOUND && *(z + 1) < CPX_INFBOUND && flag_find) {
 			flag_find = false;
-
-			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-			// --------------------------------------------------
-			// print solution in standard format
-			// --------------------------------------------------
-			CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 
 			min_sol = std::min(*z, *(z + 1));
 			k=index;

@@ -236,7 +236,7 @@ void setupLP(CEnv env, Prob lp) {
  @param  (CEnv env, Prob lp)
  @return void
  */
-void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
+void setupSP(CEnv env, Prob lp, int num_rows) {
 
 	{
 		// variables
@@ -250,7 +250,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 		ub = CPX_INFBOUND;
 
-		for (int i = 1; i < num_rows; i++) {
+		for (int i = 1; i <= num_rows; i++) {
 			snprintf(name, NAME_SIZE, "u_%i", i);
 			varName = (char*) (&name[0]);
 			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType, &varName);
@@ -264,7 +264,7 @@ void setupSP(CEnv env, Prob lp, int num_rows, int num_cols) {
 
 		lb = -CPX_INFBOUND;
 
-		for (int i = 1; i < num_rows; i++) {
+		for (int i = 1; i <= num_rows; i++) {
 			snprintf(name, NAME_SIZE, "v_%i", i);
 			varName = (char*) (&name[0]);
 			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,

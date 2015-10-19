@@ -52,7 +52,6 @@ int main(int argc, char const *argv[]) {
 		solve (env, lp);
 
 		int num_rows = (CPXgetnumrows(env, lp));
-		int num_cols = CPXgetnumcols(env, lp);
 
 
 		// ---------------------------------------------------------
@@ -64,7 +63,7 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			DECL_ENV(env_dual);
 			DECL_PROB(env_dual, lp_dual, "resolve second problem");
-			setupSP(env_dual, lp_dual, num_rows, num_cols);
+			setupSP(env_dual, lp_dual, num_rows);
 
 			//print_matrix();
 			//print_cut_A();
