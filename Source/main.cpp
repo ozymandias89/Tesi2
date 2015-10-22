@@ -65,9 +65,9 @@ int main(int argc, char const *argv[]) {
 			DECL_PROB(env_dual, lp_dual, "resolve second problem");
 			setupSP(env_dual, lp_dual, num_rows);
 
-			//print_matrix();
-			//print_cut_A();
-			//print_cut_b();
+			print_matrix();
+			print_cut_A();
+			print_cut_b();
 
 			print_u_variables();
 			cout << endl;
@@ -101,6 +101,13 @@ int main(int argc, char const *argv[]) {
 		delete[] A;
 		delete[] b;
 		delete[] c;
+
+
+			for (std::vector<double*>::const_iterator j = cut_A.begin();
+					j != cut_A.end(); ++j) {
+				delete *j;
+			}
+
 
 	} catch (std::exception& e) {
 		std::cout << ">>>EXCEPTION: " << e.what() << std::endl;
