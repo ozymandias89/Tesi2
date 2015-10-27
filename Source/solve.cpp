@@ -25,7 +25,7 @@ using std::cerr;
 void create_P1_prob(CEnv env, Prob lp, int index){
 
 		cout << endl;
-		cout << "PROBLEM P1" << endl;
+		cout << "SUB_PROBLEM P1" << endl;
 
 		double rhs = floor(varVals[index]);
 
@@ -38,8 +38,6 @@ void create_P1_prob(CEnv env, Prob lp, int index){
 				&coef, 0, 0);
 
 		cout << "insert inequality x_" << index << " <= " << rhs << endl;
-		// print P1 problem to a file
-		//CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp1", 0);
 
 }
 /**
@@ -51,7 +49,7 @@ void create_P1_prob(CEnv env, Prob lp, int index){
 void create_P2_prob(CEnv env, Prob lp, int index) {
 
 	cout << endl;
-	cout << "PROBLEM P2" << endl;
+	cout << "SUB_PROBLEM P2" << endl;
 
 	double rhs = floor(varVals[index]) + 1;
 	char sense = 'G';
@@ -221,6 +219,7 @@ void solve(CEnv env, Prob lp) {
 	// --------------------------------------------------
 	// 3. solve linear problem
 	// --------------------------------------------------
+	cout << "PROBLEM MASTER:" << endl;
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	// --------------------------------------------------
@@ -303,7 +302,7 @@ void print_cut_b() {
 }
 
 void print_u_variables() {
-	cout << "u variable: " << endl;
+	cout << "u variables: " << endl;
 	for (std::vector<double>::const_iterator i = dual_varVals_P1.begin();
 			i != dual_varVals_P1.end(); ++i)
 		std::cout << *i << ' ';
@@ -313,7 +312,7 @@ void print_u_variables() {
 
 void print_v_variables() {
 
-	cout << "v variable: " << endl;
+	cout << "v variables: " << endl;
 	for (std::vector<double>::const_iterator i =
 			dual_varVals_P2.begin(); i != dual_varVals_P2.end(); ++i)
 		std::cout << *i << ' ';

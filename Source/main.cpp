@@ -43,7 +43,6 @@ int main(int argc, char const *argv[]) {
 		DECL_ENV(env);
 		DECL_PROB(env, lp, "resolve problem RL");
 		setupLP(env, lp);
-		//CPXsetdblparam(env, CPX_PARAM_TILIM, 1800.0);
 
 
 		// --------------------------------------------------
@@ -66,6 +65,7 @@ int main(int argc, char const *argv[]) {
 			setupSP(env_dual, lp_dual, num_rows);
 
 			print_matrix();
+			print_vect_b();
 			print_cut_A();
 			print_cut_b();
 
