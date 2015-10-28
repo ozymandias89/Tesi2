@@ -131,6 +131,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 
 		cout << "Resolve a new problem P1.. " << endl;
 		cout << "add inequality x_" << index << " >= " << rhs  << endl;
+		cout << "Now the new problem master is: "  << endl;
 		solve(env, lp);
 
 	}
@@ -195,13 +196,13 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg,
 				&idx, &coef, 0, 0);
+		cout << "Resolve a new problem P2.. " << endl;
 		cout << "add inequality x_" << index << " <= " << rhs << endl;
+		cout << "Now the new problem master is: "  << endl;
 
 		cut_A.push_back(cut);
 		cut_b.push_back(rhs);
 
-
-		cout << "Resolve a new problem P2.. " << endl;
 		solve(env, lp);
 	}
 
@@ -249,7 +250,7 @@ void solve(CEnv env, Prob lp) {
 		cout << endl;
 		cout << "More fractional variable choose " << varVals[index] << endl;
 
-		cout << "Index " << index << endl;
+		cout << "Index of variable choose: " << index << endl;
 
 		//create problem P_1
 		create_P1_prob(env, lp, index);
@@ -282,7 +283,7 @@ void solve(CEnv env, Prob lp) {
 }
 
 void print_cut_A() {
-	cout << "cut: " << endl;
+	cout << "added cuts : " << endl;
 	for (std::vector<double*>::const_iterator i = cut_A.begin();
 			i != cut_A.end(); ++i) {
 		double*ptr = *i;
@@ -293,7 +294,7 @@ void print_cut_A() {
 	}
 }
 void print_cut_b() {
-	cout << "vector_b: " << endl;
+	cout << "vector_b of added cuts : " << endl;
 	for (std::vector<double>::const_iterator i = cut_b.begin();
 			i != cut_b.end(); ++i) {
 		std::cout << *i << ' ';
@@ -302,7 +303,7 @@ void print_cut_b() {
 }
 
 void print_u_variables() {
-	cout << "u variables: " << endl;
+	cout << "u variables (the last is u_0): " << endl;
 	for (std::vector<double>::const_iterator i = dual_varVals_P1.begin();
 			i != dual_varVals_P1.end(); ++i)
 		std::cout << *i << ' ';
@@ -312,7 +313,7 @@ void print_u_variables() {
 
 void print_v_variables() {
 
-	cout << "v variables: " << endl;
+	cout << "v variables (the last is v_0): " << endl;
 	for (std::vector<double>::const_iterator i =
 			dual_varVals_P2.begin(); i != dual_varVals_P2.end(); ++i)
 		std::cout << *i << ' ';

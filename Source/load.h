@@ -681,7 +681,7 @@ int select_fractionar_var(std::vector<double> varVals) {
 void print_matrix() {
 
 	cout << endl;
-	cout << "Matrix A" << endl;
+	cout << "Original Matrix A " << endl;
 	for (int i = 0; i < num_constraint; i++) {
 		for (int j = 0; j < N; j++) {
 
@@ -715,7 +715,7 @@ void print_vect_c() {
  */
 void print_vect_b() {
 
-	cout << "Vector b" << endl;
+	cout << "Original Vector b" << endl;
 	for (int i = 0; i < num_constraint; i++)
 		cout << b[i] << " ";
 
@@ -780,7 +780,7 @@ void set_and_print_var_P(CEnv env, Prob lp) {
 void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 
 	cout << endl;
-	cout << "DUAL VARIABLES: " << endl;
+	cout << "DUAL VARIABLES (the last is u_0 or v_0): " << endl;
 	int num_rows = CPXgetnumrows(env, lp);
 
 	if (prob) {

@@ -60,6 +60,9 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			// 4. Initialization of the second problem
 			// --------------------------------------------------
+			cout << "Now we have solved both subproblems and we have the min z. " << endl;
+			cout << "Your guide to all the data is shown here: " << endl;
+
 			DECL_ENV(env_dual);
 			DECL_PROB(env_dual, lp_dual, "resolve second problem");
 			setupSP(env_dual, lp_dual, num_rows);
@@ -77,8 +80,11 @@ int main(int argc, char const *argv[]) {
 			cout << endl;
 			cout << "min solution= " << min_sol << endl;
 			cout << endl;
-			cout << "index fractional variable = " << k << endl;
+			cout << "index fractional variable (e_k)= " << k << endl;
 
+			cout << "It was also set the second problem... check the correctness of the second model (second_problem.lp)." << endl;
+			cout << "Warning: In the first primal problem (problem.lp) you don't evaluate the last line (last constraint).  " << endl;
+			cout << " The last constraint, indeed, is trash." << endl;
 
 			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
 
