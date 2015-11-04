@@ -21,6 +21,8 @@ double solve_P2_Problem(CEnv env, Prob lp, int index);
 
 void solve(CEnv env, Prob lp);
 
+std::vector<double> evaluate_rT();
+
 void print_cut_A();
 void print_cut_b();
 void print_u_variables();

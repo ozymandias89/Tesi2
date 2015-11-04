@@ -67,24 +67,26 @@ int main(int argc, char const *argv[]) {
 			DECL_PROB(env_dual, lp_dual, "resolve second problem");
 			setupSP(env_dual, lp_dual, num_rows);
 
-			print_matrix();
-			print_vect_b();
-			print_cut_A();
-			print_cut_b();
+			std::vector<double> rT = evaluate_rT();
 
-			print_u_variables();
-			cout << endl;
-			print_v_variables();
-			cout << endl;
-			cout << "gamma= " << gam << endl;
-			cout << endl;
-			cout << "min solution= " << min_sol << endl;
-			cout << endl;
-			cout << "index fractional variable (e_k)= " << k << endl;
-
-			cout << "It was also set the second problem... check the correctness of the second model (second_problem.lp)." << endl;
-			cout << "Warning: In the first primal problem (problem.lp) you don't evaluate the last line (last constraint).  " << endl;
-			cout << " The last constraint, indeed, is trash." << endl;
+//			print_matrix();
+//			print_vect_b();
+//			print_cut_A();
+//			print_cut_b();
+//
+//			print_u_variables();
+//			cout << endl;
+//			print_v_variables();
+//			cout << endl;
+//			cout << "gamma= " << gam << endl;
+//			cout << endl;
+//			cout << "min solution= " << min_sol << endl;
+//			cout << endl;
+//			cout << "index fractional variable (e_k)= " << k << endl;
+//
+//			cout << "It was also set the second problem... check the correctness of the second model (second_problem.lp)." << endl;
+//			cout << "Warning: In the first primal problem (problem.lp) you don't evaluate the last line (last constraint).  " << endl;
+//			cout << " The last constraint, indeed, is trash." << endl;
 
 			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
 
