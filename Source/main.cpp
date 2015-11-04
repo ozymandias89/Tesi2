@@ -21,6 +21,7 @@
 
 
 #include "solve.cpp"
+#include "SecondProblem.cpp"
 
 int main(int argc, char const *argv[]) {
 
@@ -62,31 +63,37 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			cout << "Now we have solved both subproblems and we have the min z. " << endl;
 			cout << "Your guide to all the data is shown here: " << endl;
-
 			DECL_ENV(env_dual);
 			DECL_PROB(env_dual, lp_dual, "resolve second problem");
-			setupSP(env_dual, lp_dual, num_rows);
 
-			std::vector<double> rT = evaluate_rT();
+			SecondProblem* sec_prob = new SecondProblem();
 
-//			print_matrix();
-//			print_vect_b();
-//			print_cut_A();
-//			print_cut_b();
-//
-//			print_u_variables();
-//			cout << endl;
-//			print_v_variables();
-//			cout << endl;
-//			cout << "gamma= " << gam << endl;
-//			cout << endl;
-//			cout << "min solution= " << min_sol << endl;
-//			cout << endl;
-//			cout << "index fractional variable (e_k)= " << k << endl;
-//
-//			cout << "It was also set the second problem... check the correctness of the second model (second_problem.lp)." << endl;
-//			cout << "Warning: In the first primal problem (problem.lp) you don't evaluate the last line (last constraint).  " << endl;
-//			cout << " The last constraint, indeed, is trash." << endl;
+			sec_prob->setupSP(env_dual, lp_dual, num_rows);
+
+			std::vector<double> rT = sec_prob->evaluate_rT();
+
+			sec_prob->solve(env_dual, lp_dual, num_rows );
+
+
+
+			print_matrix();
+			print_vect_b();
+			print_cut_A();
+			print_cut_b();
+
+			print_u_variables();
+			cout << endl;
+			print_v_variables();
+			cout << endl;
+			cout << "gamma= " << gam << endl;
+			cout << endl;
+			cout << "min solution= " << min_sol << endl;
+			cout << endl;
+			cout << "index fractional variable (e_k)= " << k << endl;
+
+			cout << "It was also set the second problem... check the correctness of the second model (second_problem.lp)." << endl;
+			cout << "Warning: In the first primal problem (problem.lp) you don't evaluate the last line (last constraint).  " << endl;
+			cout << " The last constraint, indeed, is trash." << endl;
 
 			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
 
