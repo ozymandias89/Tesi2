@@ -1,7 +1,7 @@
 /*
  @file    main.cc
  @author  Riccardo Zanella, riccardozanella89@gmail.com
- @version 1.0
+ @version 2.0
  */
 
 /* --*- C++ -*------x-----------------------------------------------------------
@@ -78,8 +78,7 @@ int main(int argc, char const *argv[]) {
 
 			print_matrix();
 			print_vect_b();
-			print_cut_A();
-			print_cut_b();
+			print_vect_c();
 
 			print_u_variables();
 			cout << endl;
@@ -108,20 +107,6 @@ int main(int argc, char const *argv[]) {
 
 		CPXfreeprob(env, &lp);
 		CPXcloseCPLEX(&env);
-
-
-		for (int i = 0; i < num_constraint; ++i) {
-			delete[] A[i];
-		}
-		delete[] A;
-		delete[] b;
-		delete[] c;
-
-
-			for (std::vector<double*>::const_iterator j = cut_A.begin();
-					j != cut_A.end(); ++j) {
-				delete *j;
-			}
 
 
 	} catch (std::exception& e) {

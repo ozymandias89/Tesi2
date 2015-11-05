@@ -3,7 +3,7 @@
  * library for support
  *
  * @author  Riccardo Zanella, riccardozanella89@gmail.com
- * @version 1.0
+ * @version 2.0
  */
 
 #ifndef SOURCE_LOAD_H_
@@ -44,13 +44,13 @@ int k;
 int num_constraint;
 
 //Coefficient cost
-double* c;
+std::vector<double> c;
 
 //price matrix
-double** A;
+std::vector< std::vector<double> > A;
 
 //known terms
-double* b;
+std::vector<double> b;
 
 //primary variables
 std::vector<double> varVals;
@@ -60,11 +60,6 @@ std::vector<double> dual_varVals_P1;
 
 //dual variables P_2 problem
 std::vector<double> dual_varVals_P2;
-
-//inequality insert in cut_A
-std::vector<double*> cut_A;
-//inequality insert in cut_b
-std::vector<double> cut_b;
 
 //gamma
 int gam;
@@ -102,7 +97,7 @@ void load_problem(ifstream &myfile) {
 
 			N = count;
 
-			c = new double[N];
+			c.resize(N);
 
 			std::istringstream it(line);
 
@@ -130,7 +125,7 @@ void load_problem(ifstream &myfile) {
 
 			num_constraint = count;
 
-			b = new double[num_constraint];
+			b.resize(num_constraint);
 
 			std::istringstream it(line);
 
@@ -145,9 +140,12 @@ void load_problem(ifstream &myfile) {
 		}
 	} while (flag_known);
 
-	A = new double*[num_constraint];
-	for (int i = 0; i < num_constraint; ++i)
-		A[i] = new double[N];
+
+	//ALLOCATE MATRIX A
+	 A.resize(num_constraint);
+	for (int i = 0; i < num_constraint; ++i) {
+		A[i].resize(N);
+	}
 
 	int i = 0;
 	int j = 0;
@@ -267,14 +265,15 @@ void print_matrix() {
 
 	cout << endl;
 	cout << "Original Matrix A " << endl;
-	for (int i = 0; i < num_constraint; i++) {
-		for (int j = 0; j < N; j++) {
+
+	for (unsigned int i = 0; i < A.size(); i++) {
+		for (unsigned int j = 0; j < A[i].size(); j++) {
 
 			cout << A[i][j] << " ";
 		}
 		cout << endl;
 	}
-	cout << endl;
+
 }
 
 /**

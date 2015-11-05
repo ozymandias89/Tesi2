@@ -3,7 +3,7 @@
  * solve file
  *
  * @author  Riccardo Zanella, riccardozanella89@gmail.com
- * @version 1.0
+ * @version 2.0
  */
 
 #include "solve.h"
@@ -110,14 +110,17 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 		const double coef = 1;
 
 
-		double* cut = new double[N];
+		num_constraint++;
+		A.resize(num_constraint);
+		A[(num_constraint - 1)].reserve(N);
 
 		for (int i = 0; i < N; i++) {
 			if (i == index) {
-				cut[i] = 1;
+				A[(num_constraint - 1)].push_back(1);
 			} else
-				cut[i] = 0;
+				A[(num_constraint - 1)].push_back(0);
 		}
+
 
 		cout << "delete last inequality " << endl;
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
@@ -125,8 +128,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 				&idx, &coef, 0, 0);
 
 
-		cut_A.push_back(cut);
-		cut_b.push_back(rhs);
+		b.push_back(rhs);
 
 
 		cout << "Resolve a new problem P1.. " << endl;
@@ -182,15 +184,22 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		const int idx = index;
 		const double coef = 1;
 
-		double* cut;
-		cut = new double[N];
+		num_constraint++;
+		A.resize(num_constraint);
+		A[(num_constraint - 1)].reserve(N);
 
-		for (int i = 0; i < N; i++) {
-			if (i == index) {
-				cut[i] = 1;
-			} else
-				cut[i] = 0;
-		}
+			for (int i = 0; i < N; i++) {
+				if (i == index) {
+					A[(num_constraint - 1)].push_back(1);
+				} else
+					A[(num_constraint - 1)].push_back(0);
+			}
+
+
+		for (int i = 0; i < N; i++)
+			cout << A[(num_constraint - 1)][i] << " ";
+
+		cout << endl;
 
 		cout << "delete last inequality " << endl;
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
@@ -200,8 +209,9 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		cout << "add inequality x_" << index << " <= " << rhs << endl;
 		cout << "Now the new problem master is: "  << endl;
 
-		cut_A.push_back(cut);
-		cut_b.push_back(rhs);
+
+		b.push_back(rhs);
+
 
 		solve(env, lp);
 	}
@@ -280,26 +290,6 @@ void solve(CEnv env, Prob lp) {
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 	}
 
-}
-
-void print_cut_A() {
-	cout << "added cuts : " << endl;
-	for (std::vector<double*>::const_iterator i = cut_A.begin();
-			i != cut_A.end(); ++i) {
-		double*ptr = *i;
-		for (int j = 0; j < N; ++j) {
-			std::cout << ptr[j] << ' ';
-		}
-		cout << endl;
-	}
-}
-void print_cut_b() {
-	cout << "vector_b of added cuts : " << endl;
-	for (std::vector<double>::const_iterator i = cut_b.begin();
-			i != cut_b.end(); ++i) {
-		std::cout << *i << ' ';
-		cout << endl;
-	}
 }
 
 void print_u_variables() {
