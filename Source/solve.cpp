@@ -103,31 +103,56 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 	} else {
 		cout << "No solution for P1 problem exists.. " << endl;
 
-		double rhs = floor(varVals[index]) + 1;
-		char sense = 'G';
-		int matbeg = 0;
-		const int idx = index;
-		const double coef = 1;
+		// add Slack variables
+		static const char* varType = NULL;
+		double obj = 0.0;
+		double lb = 0.0;
+		double ub = CPX_INFBOUND;
+		snprintf(name, NAME_SIZE, "S_%i", num_constraint);
+		char* varName = (char*) (&name[0]);
+		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
+				&varName);
 
+
+		//add cut
+		std::vector<int> idx;
+		std::vector<double> coef;
+
+		double rhs = floor(varVals[index]) + 1;
+		char sense = 'E';
+		int matbeg = 0;
+
+		// x_k
+		idx.push_back(index);
+		coef.push_back(1);
+
+		// S
+		idx.push_back(N);
+		coef.push_back(-1);
 
 		num_constraint++;
+		N++;
+
 		A.resize(num_constraint);
-		A[(num_constraint - 1)].reserve(N);
+		for (int i = 0; i < num_constraint; i++)
+			A[i].resize(N);
 
 		for (int i = 0; i < N; i++) {
 			if (i == index) {
-				A[(num_constraint - 1)].push_back(1);
+				A[(num_constraint - 1)][i] = 1;
+			} else if (i == N - 1) {
+				A[(num_constraint - 1)][i] = -1;
 			} else
-				A[(num_constraint - 1)].push_back(0);
+				A[(num_constraint - 1)][i] = 0;
 		}
 
 
 		cout << "delete last inequality " << endl;
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
-		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg,
-				&idx, &coef, 0, 0);
+		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 2, &rhs, &sense, &matbeg,
+				&idx[0], &coef[0], 0, 0);
 
-
+		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		b.push_back(rhs);
 
 
@@ -177,23 +202,50 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 	} else {
 
 		cout << "No solution for P2 problem exists " << endl;
-		double rhs = floor(varVals[index]);
 
-		char sense = 'L';
-		int matbeg = 0;
-		const int idx = index;
-		const double coef = 1;
+		// add Slack variables
+				static const char* varType = NULL;
+				double obj = 0.0;
+				double lb = 0.0;
+				double ub = CPX_INFBOUND;
+				snprintf(name, NAME_SIZE, "S_%i", num_constraint);
+				char* varName = (char*) (&name[0]);
+				CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
+						&varName);
 
-		num_constraint++;
-		A.resize(num_constraint);
-		A[(num_constraint - 1)].reserve(N);
 
-			for (int i = 0; i < N; i++) {
-				if (i == index) {
-					A[(num_constraint - 1)].push_back(1);
-				} else
-					A[(num_constraint - 1)].push_back(0);
-			}
+				//add cut
+				std::vector<int> idx;
+				std::vector<double> coef;
+
+				double rhs = floor(varVals[index]);
+				char sense = 'E';
+				int matbeg = 0;
+
+				//x_k
+				idx.push_back(index);
+				coef.push_back(1);
+
+				//S
+				idx.push_back(N);
+				coef.push_back(1);
+
+				num_constraint++;
+				N++;
+
+				A.resize(num_constraint);
+				for (int i = 0; i < num_constraint; i++)
+					A[i].resize(N);
+
+				for (int i = 0; i < N; i++) {
+					if (i == index) {
+						A[(num_constraint - 1)][i] = 1;
+					} else if (i == N - 1) {
+						A[(num_constraint - 1)][i] = 1;
+					} else
+						A[(num_constraint - 1)][i] = 0;
+				}
+
 
 
 		for (int i = 0; i < N; i++)
@@ -203,8 +255,9 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 
 		cout << "delete last inequality " << endl;
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
-		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg,
-				&idx, &coef, 0, 0);
+		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 2, &rhs, &sense, &matbeg,
+				&idx[0], &coef[0], 0, 0);
+
 		cout << "Resolve a new problem P2.. " << endl;
 		cout << "add inequality x_" << index << " <= " << rhs << endl;
 		cout << "Now the new problem master is: "  << endl;
@@ -250,7 +303,7 @@ void solve(CEnv env, Prob lp) {
 	int index = select_fractionar_var(varVals);
 
 	//if you want to slow the iteration
-	//usleep(1000000);
+	usleep(1000000);
 
 	// --------------------------------------------------------
 	// 7. if x solution aren't integer create P1 and P2 problem

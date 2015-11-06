@@ -37,6 +37,12 @@ char name[NAME_SIZE];
 //number of variable
 int N;
 
+//number of variable original
+int Num_original_variables;
+
+//number of variable original
+int Num_original_constraints;
+
 //index for e_k
 int k;
 
@@ -96,6 +102,7 @@ void load_problem(ifstream &myfile) {
 			}
 
 			N = count;
+			Num_original_variables=N;
 
 			c.resize(N);
 
@@ -124,6 +131,7 @@ void load_problem(ifstream &myfile) {
 			}
 
 			num_constraint = count;
+			Num_original_constraints=num_constraint;
 
 			b.resize(num_constraint);
 
@@ -230,6 +238,7 @@ void setupLP(CEnv env, Prob lp) {
 
 }
 
+
  /**
  Method that chooses the best fractional variable
  @param  (vector<double>)
@@ -242,7 +251,7 @@ int select_fractionar_var(std::vector<double> varVals) {
 	double temp2;
 	int index = -1;
 
-	for (unsigned int i = 0; i < varVals.size(); ++i) {
+	for (int i = 0; i < Num_original_variables; ++i) {
 
 		temp = (varVals[i] - (int) varVals[i]);
 		temp2 = fabs((temp - 0.5));
@@ -286,7 +295,7 @@ void print_vect_c() {
 	cout << endl;
 	cout << "Vector c" << endl;
 
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < Num_original_variables; i++)
 		cout << c[i] << " ";
 
 	cout << endl;

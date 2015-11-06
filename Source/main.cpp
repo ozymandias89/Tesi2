@@ -61,19 +61,19 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			// 4. Initialization of the second problem
 			// --------------------------------------------------
-			cout << "Now we have solved both subproblems and we have the min z. " << endl;
-			cout << "Your guide to all the data is shown here: " << endl;
-			DECL_ENV(env_dual);
-			DECL_PROB(env_dual, lp_dual, "resolve second problem");
-
-			SecondProblem* sec_prob = new SecondProblem();
-
-			sec_prob->setupSP(env_dual, lp_dual, num_rows);
-
-			std::vector<double> rT = sec_prob->evaluate_rT();
-
-			sec_prob->solve(env_dual, lp_dual, num_rows );
-
+//			cout << "Now we have solved both subproblems and we have the min z. " << endl;
+//			cout << "Your guide to all the data is shown here: " << endl;
+//			DECL_ENV(env_dual);
+//			DECL_PROB(env_dual, lp_dual, "resolve second problem");
+//
+//			SecondProblem* sec_prob = new SecondProblem();
+//
+//			sec_prob->setupSP(env_dual, lp_dual, num_rows);
+//
+//			std::vector<double> rT = sec_prob->evaluate_rT();
+//
+//			sec_prob->solve(env_dual, lp_dual, num_rows );
+//
 
 
 			print_matrix();
@@ -94,10 +94,10 @@ int main(int argc, char const *argv[]) {
 			cout << "Warning: In the first primal problem (problem.lp) you don't evaluate the last line (last constraint).  " << endl;
 			cout << " The last constraint, indeed, is trash." << endl;
 
-			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
-
-			CPXfreeprob(env_dual, &lp_dual);
-			CPXcloseCPLEX(&env_dual);
+//			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
+//
+//			CPXfreeprob(env_dual, &lp_dual);
+//			CPXcloseCPLEX(&env_dual);
 		}
 
 		// ---------------------------------------------------------
