@@ -47,6 +47,13 @@ public:
 	void solve(CEnv env, Prob lp);
 
 	/**
+	 Method that creates tight C'y >= d subsystem and adds to dual problem
+	 @param  CEnv env, Prob lp
+	 @return void
+	 */
+	void step8_1(CEnv env, Prob lp);
+
+	/**
 	 Method print u
 	 @param  none
 	 @return none
