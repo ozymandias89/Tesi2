@@ -16,10 +16,50 @@ SecondProblem::~SecondProblem() {
 	// TODO Auto-generated destructor stub
 }
 
+void SecondProblem::print_u() {
+
+	cout << endl;
+	for (unsigned int i = 0; i < u.size(); ++i)
+		cout << "u_" << i << " " << " = " << u[i] << endl;
+
+}
+
+void SecondProblem::print_v() {
+
+	cout << endl;
+	for (unsigned  int i = 0; i < v.size(); ++i)
+		cout << "v_" << i << " = " << v[i] << endl;
+
+}
+
+void SecondProblem::print_a() {
+	cout << endl;
+	for (unsigned  int i = 0; i < a.size(); ++i)
+		cout << "a_" << i << " " << " = " << a[i] << endl;
+
+}
+
+void SecondProblem::print_u0() {
+
+	cout << "u_0" << " = " << u0 << endl;
+}
+
+void SecondProblem::print_v0() {
+	cout << endl;
+	cout << "v0 " << " = " << v0 << endl;
+}
+
+void SecondProblem::print_beta() {
+	cout << endl;
+	cout << "beta " << " = " << beta << endl;
+
+}
 
 void SecondProblem::setupSP(CEnv env, Prob lp) {
 
 	{
+		cout << endl;
+		cout << "DUAL PROBLEM: " << endl;
 		// variables
 		static const char* varType = NULL;
 		double obj = 1.0;
@@ -76,21 +116,19 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 	}
 
 	// constraints A_T * u + e_k * u_0
-	std::vector< std::vector<double> > temp = A;
-
+	std::vector<std::vector<double> > temp = A;
 
 	//change sign matrix A
 	for (unsigned int i = 0; i < A.size(); i++) {
 		for (unsigned int j = 0; j < A[i].size(); j++) {
 			if (A[i][j] != 0)
-			A[i][j] = -A[i][j];
+				A[i][j] = -A[i][j];
 		}
 	}
 
 	{
 		std::vector<int> idx;
 		std::vector<double> coef;
-
 
 		// --------------------------------------------------
 		//  -A_T * u
@@ -114,7 +152,6 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 				iter++;
 				u++;
 			}
-
 
 			// --------------------------------------------------
 			//  -e_k * u0
@@ -164,7 +201,6 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 			u++;
 
 		}
-
 
 		if (gam != 0) {
 			idx.push_back(0);
@@ -218,7 +254,6 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 				v++;
 			}
 
-
 			// --------------------------------------------------
 			//  -e_k * v0
 			// --------------------------------------------------
@@ -256,7 +291,6 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 		int v = v_0;
 		v++;
 
-
 		// --------------------------------------------------
 		//  b_T * v
 		// --------------------------------------------------
@@ -270,7 +304,6 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 			v++;
 
 		}
-
 
 		// --------------------------------------------------
 		//  (gamma+1) * v0
@@ -352,7 +385,6 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 
 }
 
-
 std::vector<double> SecondProblem::evaluate_rT() {
 
 	std::vector<double> rt;
@@ -366,8 +398,6 @@ std::vector<double> SecondProblem::evaluate_rT() {
 		sum = 0;
 		for (int j = 0; j < num_constraint; j++)
 			sum += A[j][i];
-
-
 
 		// --------------------------------------------------
 		//  -e_k
@@ -390,7 +420,6 @@ std::vector<double> SecondProblem::evaluate_rT() {
 	sum = 0;
 	for (int i = 0; i < num_constraint; i++)
 		sum += b[i];
-
 
 	// --------------------------------------------------
 	//  gamma
@@ -422,8 +451,8 @@ std::vector<double> SecondProblem::evaluate_rT() {
 	// --------------------------------------------------
 	rt.push_back(1);
 
-
-	cout << "vettore r " << endl;
+	cout << endl;
+	cout << "vector r " << endl;
 	for (std::vector<double>::const_iterator j = rt.begin(); j != rt.end(); ++j)
 		cout << *j << " ";
 	cout << endl;
@@ -431,74 +460,64 @@ std::vector<double> SecondProblem::evaluate_rT() {
 	return rt;
 }
 
-void SecondProblem::set_solution(CEnv env, Prob lp){
+void SecondProblem::set_solution(CEnv env, Prob lp) {
 
-		vector<double> varibles;
+	vector<double> varibles;
 
-		cout << "!!!!!!!  VARIABILI DEL PROBLEMA DUALE: " << endl;
-		int cur_numcols = CPXgetnumcols(env, lp);
+	cout << "VARIABLES SECOND PROBLEM: " << endl;
+	int cur_numcols = CPXgetnumcols(env, lp);
 
-		varibles.resize(cur_numcols);
-		CHECKED_CPX_CALL(CPXgetx, env, lp, &varibles[0], 0, cur_numcols - 1);
+	varibles.resize(cur_numcols);
+	CHECKED_CPX_CALL(CPXgetx, env, lp, &varibles[0], 0, cur_numcols - 1);
 
-		int surplus;
-		status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0,
-				cur_numcols - 1);
-		int cur_colnamespace = -surplus; // the space needed to save the names
+	int surplus;
+	status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0,
+			cur_numcols - 1);
+	int cur_colnamespace = -surplus; // the space needed to save the names
 
-		// allocate memory
-		char** cur_colname = (char **) malloc(sizeof(char *) * cur_numcols);
-		char* cur_colnamestore = (char *) malloc(cur_colnamespace);
+	// allocate memory
+	char** cur_colname = (char **) malloc(sizeof(char *) * cur_numcols);
+	char* cur_colnamestore = (char *) malloc(cur_colnamespace);
 
-		// get the names
-		CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
-				&surplus, 0, cur_numcols - 1);
+	// get the names
+	CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
+			&surplus, 0, cur_numcols - 1);
 
-		//  set variables
-		u0 = varibles[0];
-		cout << cur_colname[0] << " = " << u0 << endl;
+	//  set variables
+	u0 = varibles[0];
 
-		cout << endl;
-		for (int i = 1; i <= num_constraint; i++) {
-			cout << cur_colname[i] << " = " << varibles[i] << endl;
-			u.push_back(varibles[i]);
-		}
+	for (int i = 1; i <= num_constraint; i++)
+		u.push_back(varibles[i]);
 
-		cout << endl;
-		for (int i = num_constraint + 1; i < num_constraint + 1+N; i++) {
-			cout << cur_colname[i] << " = " << varibles[i] << endl;
-			a.push_back(varibles[i]);
-		}
+	for (int i = num_constraint + 1; i < num_constraint + 1 + N; i++)
+		a.push_back(varibles[i]);
 
-		cout << endl;
-		beta = varibles[num_constraint + N + 1];
-		cout << cur_colname[num_constraint + N + 1] << " = " << beta << endl;
+	beta = varibles[num_constraint + N + 1];
 
+	v0 = varibles[num_constraint + N + 2];
 
-		cout << endl;
-		v0 = varibles[num_constraint + N + 2];
-		cout << cur_colname[num_constraint + N + 2] << " = " << v0 << endl;
+	for (int i = num_constraint + N + 3; i < 2 * num_constraint + N + 3; i++)
+		v.push_back(varibles[i]);
 
-		cout << endl;
-		for (int i = num_constraint + N + 3; i < 2*num_constraint + N + 3; i++) {
-					cout << cur_colname[i] << " = " << varibles[i] << endl;
-					v.push_back(varibles[i]);
-		}
-
-
-		// free
-		free(cur_colname);
-		free(cur_colnamestore);
-
+	// free
+	free(cur_colname);
+	free(cur_colnamestore);
 
 }
 
-void SecondProblem::solve(CEnv env, Prob lp){
+void SecondProblem::solve(CEnv env, Prob lp) {
 
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 	print_objval(env, lp);
 
 	set_solution(env, lp);
+
+	print_u0();
+	print_u();
+	print_a();
+	print_beta();
+	print_v0();
+	print_v();
 
 
 }

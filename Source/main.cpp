@@ -55,7 +55,7 @@ int main(int argc, char const *argv[]) {
 		// 3. if P_1 and P_2 have solution
 		// ---------------------------------------------------------
 		if (!flag_find) {
-			print_matrix();
+
 			// --------------------------------------------------
 			// 4. Initialization of the second problem
 			// --------------------------------------------------
@@ -64,20 +64,28 @@ int main(int argc, char const *argv[]) {
 			DECL_ENV(env_dual);
 			DECL_PROB(env_dual, lp_dual, "resolve second problem");
 
+			print_matrix();
+
 			SecondProblem* sec_prob = new SecondProblem();
 
 			sec_prob->setupSP(env_dual, lp_dual);
 
-			std::vector<double> rT = sec_prob->evaluate_rT();
-
 			sec_prob->solve(env_dual, lp_dual);
 
+			// --------------------------------------------------
+			// 5. Evaluate vector r
+			// --------------------------------------------------
+			std::vector<double> rT = sec_prob->evaluate_rT();
 
 
-			print_matrix();
+			// --------------------------------------------------
+			// 6. Show dates
+			// --------------------------------------------------
+			cout << endl;
 			print_vect_b();
+			cout << endl;
 			print_vect_c();
-
+			cout << endl;
 			print_u_variables();
 			cout << endl;
 			print_v_variables();

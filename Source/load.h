@@ -292,7 +292,6 @@ void print_matrix() {
  */
 void print_vect_c() {
 
-	cout << endl;
 	cout << "Vector c" << endl;
 
 	for (int i = 0; i < Num_original_variables; i++)

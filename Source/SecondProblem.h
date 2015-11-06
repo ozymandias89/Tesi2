@@ -46,6 +46,44 @@ public:
 	 */
 	void solve(CEnv env, Prob lp);
 
+	/**
+	 Method print u
+	 @param  none
+	 @return none
+	 */
+	void print_u();
+
+	/**
+	 Method print v
+	 @param  none
+	 @return none
+	 */
+	void print_v();
+	/**
+	 Method print a
+	 @param  none
+	 @return none
+	 */
+	void print_a();
+	/**
+	 Method print u0
+	 @param  none
+	 @return none
+	 */
+	void print_u0();
+	/**
+	 Method print v0
+	 @param  none
+	 @return none
+	 */
+	void print_v0();
+	/**
+	 Method print beta
+	 @param  none
+	 @return none
+	 */
+	void print_beta();
+
 	// ATTRIBUTES:
 	std::set <double> R;
 	vector<double> u;
