@@ -61,7 +61,6 @@ void create_P2_prob(CEnv env, Prob lp, int index) {
 			&coef, 0, 0);
 
 	cout << "insert inequality x_" << index << " >= " << rhs << endl;
-	//CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp2", 0);
 
 }
 
@@ -152,7 +151,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 2, &rhs, &sense, &matbeg,
 				&idx[0], &coef[0], 0, 0);
 
-		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
+
 		b.push_back(rhs);
 
 
@@ -303,7 +302,7 @@ void solve(CEnv env, Prob lp) {
 	int index = select_fractionar_var(varVals);
 
 	//if you want to slow the iteration
-	usleep(1000000);
+	//usleep(1000000);
 
 	// --------------------------------------------------------
 	// 7. if x solution aren't integer create P1 and P2 problem

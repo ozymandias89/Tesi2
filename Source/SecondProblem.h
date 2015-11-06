@@ -26,7 +26,7 @@ public:
 	 @param  (CEnv env, Prob lp)
 	 @return void
 	 */
-	void setupSP(CEnv env, Prob lp, int num_rows);
+	void setupSP(CEnv env, Prob lp);
 
 
 	/** Method that evaluate the vector r as sum of rows of C (matrix of dual problem (13-19) + 21)
@@ -36,7 +36,7 @@ public:
 	std::vector<double> evaluate_rT();
 
 
-	void set_solution(CEnv env, Prob lp, int num_rows);
+	void set_solution(CEnv env, Prob lp);
 
 
 	/**
@@ -44,7 +44,7 @@ public:
 	 @param  none
 	 @return vector<double>
 	 */
-	void solve(CEnv env, Prob lp, int num_rows);
+	void solve(CEnv env, Prob lp);
 
 	// ATTRIBUTES:
 	std::set <double> R;

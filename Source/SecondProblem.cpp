@@ -9,6 +9,7 @@
 
 SecondProblem::SecondProblem() {
 	// TODO Auto-generated constructor stub
+
 }
 
 SecondProblem::~SecondProblem() {
@@ -16,7 +17,7 @@ SecondProblem::~SecondProblem() {
 }
 
 
-void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
+void SecondProblem::setupSP(CEnv env, Prob lp) {
 
 	{
 		// variables
@@ -34,7 +35,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 		ub = CPX_INFBOUND;
 
 		// variable u
-		for (int i = 1; i <= num_rows; i++) {
+		for (int i = 1; i <= num_constraint; i++) {
 			snprintf(name, NAME_SIZE, "u_%i", i);
 			varName = (char*) (&name[0]);
 			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
@@ -65,7 +66,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 		lb = -CPX_INFBOUND;
 
 		// variables v
-		for (int i = 1; i <= num_rows; i++) {
+		for (int i = 1; i <= num_constraint; i++) {
 			snprintf(name, NAME_SIZE, "v_%i", i);
 			varName = (char*) (&name[0]);
 			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
@@ -75,16 +76,17 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 	}
 
 	// constraints A_T * u + e_k * u_0
-
+	std::vector< std::vector<double> > temp = A;
 	{
 		std::vector<int> idx;
 		std::vector<double> coef;
 
+
 		// --------------------------------------------------
-		//  A_T * u
+		//  -A_T * u
 		// --------------------------------------------------
 		for (int i = 0; i < N; i++) {
-			char sense = 'L';
+			char sense = 'G';
 			int matbeg = 0;
 			double rhs = 0;
 			int nzcnt = 0;
@@ -95,6 +97,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 			while (iter < num_constraint) {
 
 				if (A[iter][i] != 0) {
+					A[iter][i] = (-A[iter][i]);
 					idx.push_back(u);
 					coef.push_back(A[iter][i]);
 					nzcnt++;
@@ -105,19 +108,19 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 
 
 			// --------------------------------------------------
-			//  e_k * u0
+			//  -e_k * u0
 			// --------------------------------------------------
 			if (i == k) {
 				idx.push_back(0);
-				coef.push_back(1);
+				coef.push_back(-1);
 				nzcnt++;
 			}
 
 			// --------------------------------------------------
-			//  -a_i
+			//  +a_i
 			// --------------------------------------------------
-			idx.push_back(num_rows + 1 + i);
-			coef.push_back(-1);
+			idx.push_back(num_constraint + 1 + i);
+			coef.push_back(1);
 			nzcnt++;
 
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
@@ -163,7 +166,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 		// --------------------------------------------------
 		//  -b
 		// --------------------------------------------------
-		idx.push_back(num_rows + 1 + N);
+		idx.push_back(num_constraint + 1 + N);
 		coef.push_back(-1);
 		nzcnt++;
 
@@ -172,7 +175,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 
 		idx.clear();
 		coef.clear();
-		v_0 = num_rows + N + 2;
+		v_0 = num_constraint + N + 2;
 
 	}
 
@@ -183,10 +186,10 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 		std::vector<double> coef;
 
 		// --------------------------------------------------
-		//  A_T * v
+		//  -A_T * v
 		// --------------------------------------------------
 		for (int i = 0; i < N; i++) {
-			char sense = 'L';
+			char sense = 'G';
 			int matbeg = 0;
 			double rhs = 0;
 			int nzcnt = 0;
@@ -198,6 +201,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 			while (iter < num_constraint) {
 
 				if (A[iter][i] != 0) {
+					A[iter][i] = (-A[iter][i]);
 					idx.push_back(v);
 					coef.push_back(A[iter][i]);
 					nzcnt++;
@@ -208,19 +212,19 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 
 
 			// --------------------------------------------------
-			//  e_k * v0
+			//  -e_k * v0
 			// --------------------------------------------------
 			if (i == k) {
 				idx.push_back(v_0);
-				coef.push_back(1);
+				coef.push_back(-1);
 				nzcnt++;
 			}
 
 			// --------------------------------------------------
-			//  -a_i
+			//  +a_i
 			// --------------------------------------------------
-			idx.push_back(num_rows + 1 + i);
-			coef.push_back(-1);
+			idx.push_back(num_constraint + 1 + i);
+			coef.push_back(1);
 			nzcnt++;
 
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
@@ -272,7 +276,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 		// --------------------------------------------------
 		//  -b
 		// --------------------------------------------------
-		idx.push_back(num_rows + N + 1);
+		idx.push_back(num_constraint + N + 1);
 		coef.push_back(-1);
 		nzcnt++;
 
@@ -298,10 +302,10 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 			int nzcnt = 0;
 
 			for (int iter = 0; iter < N; iter++) {
-				r += A[i][iter] * c[iter];
-				if (A[i][iter] != 0) {
-					idx.push_back(num_rows + 1 + iter);
-					coef.push_back(A[i][iter]);
+				r += temp[i][iter] * c[iter];
+				if (temp[i][iter] != 0) {
+					idx.push_back(num_constraint + 1 + iter);
+					coef.push_back(temp[i][iter]);
 					nzcnt++;
 				}
 
@@ -310,7 +314,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 
 			//b[i]*beta
 			if (b[i] != 0) {
-				idx.push_back(num_rows + 1 + N);
+				idx.push_back(num_constraint + 1 + N);
 				coef.push_back(b[i]);
 				nzcnt++;
 			}
@@ -321,7 +325,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp, int num_rows) {
 			nzcnt++;
 
 			//v_i
-			idx.push_back(num_rows + 3 + N + i);
+			idx.push_back(num_constraint + 3 + N + i);
 			coef.push_back(1);
 			nzcnt++;
 
@@ -437,7 +441,7 @@ std::vector<double> SecondProblem::evaluate_rT() {
 	return rt;
 }
 
-void SecondProblem::set_solution(CEnv env, Prob lp, int num_rows){
+void SecondProblem::set_solution(CEnv env, Prob lp){
 
 		vector<double> varibles;
 
@@ -472,24 +476,24 @@ void SecondProblem::set_solution(CEnv env, Prob lp, int num_rows){
 		u0 = varibles[0];
 		cout << cur_colname[0] << " = " << u0 << endl;
 
-		for (int i = 1; i <= num_rows; i++) {
+		for (int i = 1; i <= num_constraint; i++) {
 			cout << cur_colname[i] << " = " << varibles[i] << endl;
 			u.push_back(varibles[i]);
 		}
 
-		for (int i = num_rows + 1; i < num_rows + 1+N; i++) {
+		for (int i = num_constraint + 1; i < num_constraint + 1+N; i++) {
 			cout << cur_colname[i] << " = " << varibles[i] << endl;
 			a.push_back(varibles[i]);
 		}
 
-		beta = varibles[num_rows + N + 1];
-		cout << cur_colname[num_rows + N + 1] << " = " << beta << endl;
+		beta = varibles[num_constraint + N + 1];
+		cout << cur_colname[num_constraint + N + 1] << " = " << beta << endl;
 
 
-		v0 = varibles[num_rows + N + 2];
-		cout << cur_colname[num_rows + N + 2] << " = " << v0 << endl;
+		v0 = varibles[num_constraint + N + 2];
+		cout << cur_colname[num_constraint + N + 2] << " = " << v0 << endl;
 
-		for (int i = num_rows + N + 3; i < 2*num_rows + N + 3; i++) {
+		for (int i = num_constraint + N + 3; i < 2*num_constraint + N + 3; i++) {
 					cout << cur_colname[i] << " = " << varibles[i] << endl;
 					v.push_back(varibles[i]);
 		}
@@ -502,12 +506,12 @@ void SecondProblem::set_solution(CEnv env, Prob lp, int num_rows){
 
 }
 
-void SecondProblem::solve(CEnv env, Prob lp, int num_rows){
+void SecondProblem::solve(CEnv env, Prob lp){
 
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 	print_objval(env, lp);
 
-	set_solution(env, lp, num_rows);
+	set_solution(env, lp);
 
 
 }

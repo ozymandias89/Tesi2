@@ -240,7 +240,7 @@ void setupLP(CEnv env, Prob lp) {
 
 
  /**
- Method that chooses the best fractional variable
+ Method that chooses the best x fractional variable
  @param  (vector<double>)
  @return int, return index of higher variable functional (-1 if no variable is fractional)
  */
