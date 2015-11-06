@@ -67,7 +67,7 @@ int main(int argc, char const *argv[]) {
 
 			sec_prob->setupSP(env_dual, lp_dual);
 //
-//			std::vector<double> rT = sec_prob->evaluate_rT();
+			std::vector<double> rT = sec_prob->evaluate_rT();
 //
 //			sec_prob->solve(env_dual, lp_dual, num_rows );
 //

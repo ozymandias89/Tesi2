@@ -353,7 +353,7 @@ std::vector<double> SecondProblem::evaluate_rT() {
 	double sum = 0;
 
 	// --------------------------------------------------
-	//evaluate A_T + e_k -1;
+	//evaluate -A_T - e_k +1;
 	// --------------------------------------------------
 	for (int i = 0; i < N; i++) {
 
@@ -364,15 +364,15 @@ std::vector<double> SecondProblem::evaluate_rT() {
 
 
 		// --------------------------------------------------
-		//  e_k
+		//  -e_k
 		// --------------------------------------------------
 		if (i == k)
-			sum++;
+			sum--;
 
 		// --------------------------------------------------
-		//  -1 (coeff a)
+		//  +1 (coeff a)
 		// --------------------------------------------------
-		sum--;
+		sum++;
 
 		rt.push_back(sum);
 
@@ -406,31 +406,15 @@ std::vector<double> SecondProblem::evaluate_rT() {
 
 	rt.insert(rt.end(), temp.begin(), temp.end());
 
-	cout << "vettore r duplicato" << endl;
-	for (std::vector<double>::const_iterator j = rt.begin(); j != rt.end(); ++j)
-		cout << *j << " ";
-	cout << endl;
-
 	// --------------------------------------------------
-	// A + b + 1 + 1 (the last constraints)
+	// -u_0>=0
 	// --------------------------------------------------
-	for (int i = 0; i < num_constraint; i++) {
-		sum = 0;
 
-		for (int j = 0; j < N; j++)
-			sum += A[i][j];
-
-		sum += b[i];
-
-		// u
-		sum++;
-
-		// v
-		sum++;
-
-		rt.push_back(sum);
-
-	}
+	rt.push_back(-1);
+	// --------------------------------------------------
+	// v_0>=0
+	// --------------------------------------------------
+	rt.push_back(1);
 
 
 	cout << "vettore r " << endl;
