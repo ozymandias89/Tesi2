@@ -20,7 +20,7 @@ void SecondProblem::print_u() {
 
 	cout << endl;
 	for (unsigned int i = 0; i < u.size(); ++i)
-		cout << "u_" << i << " " << " = " << u[i] << endl;
+		cout << "u_" << i+1 << " " << " = " << u[i] << endl;
 
 }
 
@@ -28,7 +28,7 @@ void SecondProblem::print_v() {
 
 	cout << endl;
 	for (unsigned  int i = 0; i < v.size(); ++i)
-		cout << "v_" << i << " = " << v[i] << endl;
+		cout << "v_" << i+1 << " = " << v[i] << endl;
 
 }
 

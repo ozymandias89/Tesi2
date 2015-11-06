@@ -77,6 +77,8 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			std::vector<double> rT = sec_prob->evaluate_rT();
 
+			print_matrix();
+
 
 			// --------------------------------------------------
 			// 6. Show dates
