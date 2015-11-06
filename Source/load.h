@@ -273,7 +273,7 @@ int select_fractionar_var(std::vector<double> varVals) {
 void print_matrix() {
 
 	cout << endl;
-	cout << "Original Matrix A " << endl;
+	cout << "Matrix A " << endl;
 
 	for (unsigned int i = 0; i < A.size(); i++) {
 		for (unsigned int j = 0; j < A[i].size(); j++) {
@@ -308,7 +308,7 @@ void print_vect_c() {
  */
 void print_vect_b() {
 
-	cout << "Original Vector b" << endl;
+	cout << "Vector b" << endl;
 	for (int i = 0; i < num_constraint; i++)
 		cout << b[i] << " ";
 

@@ -77,6 +77,16 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 
 	// constraints A_T * u + e_k * u_0
 	std::vector< std::vector<double> > temp = A;
+
+
+	//change sign matrix A
+	for (unsigned int i = 0; i < A.size(); i++) {
+		for (unsigned int j = 0; j < A[i].size(); j++) {
+			if (A[i][j] != 0)
+			A[i][j] = -A[i][j];
+		}
+	}
+
 	{
 		std::vector<int> idx;
 		std::vector<double> coef;
@@ -97,7 +107,6 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 			while (iter < num_constraint) {
 
 				if (A[iter][i] != 0) {
-					A[iter][i] = (-A[iter][i]);
 					idx.push_back(u);
 					coef.push_back(A[iter][i]);
 					nzcnt++;
@@ -201,7 +210,6 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 			while (iter < num_constraint) {
 
 				if (A[iter][i] != 0) {
-					A[iter][i] = (-A[iter][i]);
 					idx.push_back(v);
 					coef.push_back(A[iter][i]);
 					nzcnt++;
@@ -340,8 +348,6 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 			coef.clear();
 		}
 
-
-
 	}
 
 }
@@ -448,35 +454,32 @@ void SecondProblem::set_solution(CEnv env, Prob lp){
 		CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
 				&surplus, 0, cur_numcols - 1);
 
-
-		//  print index, name and value of each column
-		for (int i = 0; i < cur_numcols; i++) {
-			cout << cur_colname[i] << " = " << varibles[i] << endl;
-		}
-
-		cout << endl;
-		cout << endl;
 		//  set variables
 		u0 = varibles[0];
 		cout << cur_colname[0] << " = " << u0 << endl;
 
+		cout << endl;
 		for (int i = 1; i <= num_constraint; i++) {
 			cout << cur_colname[i] << " = " << varibles[i] << endl;
 			u.push_back(varibles[i]);
 		}
 
+		cout << endl;
 		for (int i = num_constraint + 1; i < num_constraint + 1+N; i++) {
 			cout << cur_colname[i] << " = " << varibles[i] << endl;
 			a.push_back(varibles[i]);
 		}
 
+		cout << endl;
 		beta = varibles[num_constraint + N + 1];
 		cout << cur_colname[num_constraint + N + 1] << " = " << beta << endl;
 
 
+		cout << endl;
 		v0 = varibles[num_constraint + N + 2];
 		cout << cur_colname[num_constraint + N + 2] << " = " << v0 << endl;
 
+		cout << endl;
 		for (int i = num_constraint + N + 3; i < 2*num_constraint + N + 3; i++) {
 					cout << cur_colname[i] << " = " << varibles[i] << endl;
 					v.push_back(varibles[i]);
