@@ -294,7 +294,7 @@ void print_vect_c() {
 
 	cout << "Vector c" << endl;
 
-	for (int i = 0; i < Num_original_variables; i++)
+	for (int i = 0; i < N; i++)
 		cout << c[i] << " ";
 
 	cout << endl;

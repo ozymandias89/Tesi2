@@ -132,6 +132,10 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 		num_constraint++;
 		N++;
 
+		//add 0 to c
+		c.push_back(0);
+
+		//extend A matrix
 		A.resize(num_constraint);
 		for (int i = 0; i < num_constraint; i++)
 			A[i].resize(N);
@@ -144,6 +148,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 			} else
 				A[(num_constraint - 1)][i] = 0;
 		}
+
 
 
 		cout << "delete last inequality " << endl;
@@ -232,6 +237,10 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 				num_constraint++;
 				N++;
 
+				//add 0 to c
+				c.push_back(0);
+
+				//extend A matrix
 				A.resize(num_constraint);
 				for (int i = 0; i < num_constraint; i++)
 					A[i].resize(N);
