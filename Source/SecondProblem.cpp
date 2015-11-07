@@ -391,65 +391,52 @@ std::vector<double> SecondProblem::evaluate_rT() {
 	double sum = 0;
 
 	// --------------------------------------------------
-	//evaluate -A_T - e_k +1;
+	//evaluate coefficients for u (A matrix + b vector)
 	// --------------------------------------------------
-	for (int i = 0; i < N; i++) {
+	for (int i = 0; i < num_constraint; i++) {
 
 		sum = 0;
-		for (int j = 0; j < num_constraint; j++)
-			sum += A[j][i];
+		for (int j = 0; j < N; j++)
+			sum += A[i][j];
 
-		// --------------------------------------------------
-		//  -e_k
-		// --------------------------------------------------
-		if (i == k)
-			sum--;
-
-		// --------------------------------------------------
-		//  +1 (coeff a)
-		// --------------------------------------------------
-		sum++;
+		sum +=b[i];
 
 		rt.push_back(sum);
 
 	}
 
 	// --------------------------------------------------
-	//evaluate b_T + gamma -1;
+	//evaluate u_0
 	// --------------------------------------------------
 	sum = 0;
-	for (int i = 0; i < num_constraint; i++)
-		sum += b[i];
-
-	// --------------------------------------------------
-	//  gamma
-	// --------------------------------------------------
-	sum += gam;
-
-	// --------------------------------------------------
-	//  - 1 (coeff b)
-	// --------------------------------------------------
-	sum--;
-
+	sum = gam -2;
 	rt.push_back(sum);
 
 	// --------------------------------------------------
 	//duplicate vector for other constraints with gamma+1
 	// --------------------------------------------------
 	std::vector<double> temp = rt;
-	temp[temp.size() - 1]++;
+	temp[temp.size() - 1] = temp[temp.size() - 1] + 3;
 
 	rt.insert(rt.end(), temp.begin(), temp.end());
 
-	// --------------------------------------------------
-	// -u_0>=0
-	// --------------------------------------------------
 
-	rt.push_back(-1);
 	// --------------------------------------------------
-	// v_0>=0
+	//evaluate coefficients for b
 	// --------------------------------------------------
-	rt.push_back(1);
+	sum = 0;
+	sum = -2;
+	rt.insert(rt.begin(), sum);
+
+	// --------------------------------------------------
+	//evaluate coefficients for a
+	// --------------------------------------------------
+	sum = 0;
+	temp.clear();
+	for (int i=0;i<N;i++)
+		temp.push_back(2.0);
+
+	rt.insert(rt.begin(), temp.begin(), temp.end());
 
 	cout << endl;
 	cout << "vector r " << endl;
