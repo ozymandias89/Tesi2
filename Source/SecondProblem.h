@@ -11,6 +11,7 @@
 
 // Includes:
 #include "load.h"
+#include <limits>
 
 using namespace std;
 

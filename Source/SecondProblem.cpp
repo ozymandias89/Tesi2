@@ -541,11 +541,15 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		//  FAMMI VEDERE QUALI DI QUESTI VINCOLI SODDISFANO L'EQUAZIONE
 		// --------------------------------------------------
-		cout << endl;
-		cout << "STAMPA DI SUM " << sum << " vincolo numero " << j << endl;
-		if (sum >= 0)
-			cout << "Il vincolo numero " << j << " soddisfa l'equazione"
-					<< endl;
+		if (sum <  std::numeric_limits<double>::epsilon() &&
+			    sum > -std::numeric_limits<double>::epsilon()) {
+			  sum = 0.0;
+			}
+//		cout << endl;
+//		cout << "STAMPA DI SUM " << sum << " vincolo numero " << j << endl;
+//		if (sum >= 0)
+//			cout << "Il vincolo numero " << j << " soddisfa l'equazione"
+//					<< endl;
 
 	}
 
@@ -576,11 +580,14 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	// --------------------------------------------------
 	//  FAMMI VEDERE QUALI DI QUESTI VINCOLI SODDISFANO L'EQUAZIONE
 	// --------------------------------------------------
-
-	cout << endl;
-	cout << "STAMPA DI SUM " << sum << endl;
-	if (sum >= 0)
-		cout << "Il vincolo con beta soddisfa l'equazione " << endl;
+	if (sum <  std::numeric_limits<double>::epsilon() &&
+		    sum > -std::numeric_limits<double>::epsilon()) {
+		  sum = 0.0;
+		}
+//	cout << endl;
+//	cout << "STAMPA DI SUM " << sum << endl;
+//	if (sum >= 0)
+//		cout << "Il vincolo con beta soddisfa l'equazione " << endl;
 
 	// --------------------------------------------------
 	//  A_T * v
@@ -592,26 +599,31 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 			if (A[i][j] != 0) {
 				sum += A[i][j] * v[i];
-				//cout << " A[i][j] " << A[i][j] << " v[i] " << v[i] << endl;
+				cout << " A[i][j] " << A[i][j] << " v[i] " << v[i] << endl;
 			}
 
 		}
 		// --------------------------------------------------
-		//  -e_k * u0
+		//  -e_k * v0
 		// --------------------------------------------------
 		if (j == k) {
 			sum -= v0;
-			//cout << " v0 " << v0 << endl;
+			cout << " v0 " << v0 << endl;
 		}
 		// --------------------------------------------------
 		//  +a_i
 		// --------------------------------------------------
 		sum += a[j];
-		//cout << "a[j] " << a[j] << endl;
+		cout << "a[j] " << a[j] << endl;
 
 		// --------------------------------------------------
 		//  FAMMI VEDERE QUALI DI QUESTI VINCOLI SODDISFANO L'EQUAZIONE
 		// --------------------------------------------------
+		if (sum <  std::numeric_limits<double>::epsilon() &&
+		    sum > -std::numeric_limits<double>::epsilon()) {
+		  sum = 0.0;
+		}
+
 		cout << endl;
 		cout << "STAMPA DI SUM " << sum << " vincolo numero " << j << endl;
 		if (sum >= 0)
@@ -649,7 +661,10 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	// --------------------------------------------------
 	//  FAMMI VEDERE QUALI DI QUESTI VINCOLI SODDISFANO L'EQUAZIONE
 	// --------------------------------------------------
-
+	if (sum <  std::numeric_limits<double>::epsilon() &&
+			    sum > -std::numeric_limits<double>::epsilon()) {
+			  sum = 0.0;
+			}
 	cout << endl;
 	cout << "STAMPA DI SUM " << sum << endl;
 	if (sum >= 0)
