@@ -79,7 +79,7 @@ int main(int argc, char const *argv[]) {
 
 			print_matrix();
 
-			//sec_prob->step8_1(env_dual, lp_dual);
+			sec_prob->step8_1(env_dual, lp_dual);
 
 			// --------------------------------------------------
 			// 6. Show dates
