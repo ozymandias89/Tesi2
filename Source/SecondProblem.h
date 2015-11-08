@@ -30,11 +30,11 @@ public:
 	void setupSP(CEnv env, Prob lp);
 
 
-	/** Method that evaluate the vector r as sum of rows of C (matrix of dual problem (13-19) + 21)
+	/** Method that evaluate the vector r as sum of rows of C (matrix of dual problem (13-19) + 21) and set r vector
 	 @param  none
-	 @return vector<double>
+	 @return none
 	 */
-	std::vector<double> evaluate_rT();
+	void evaluate_rT();
 
 
 	void set_solution(CEnv env, Prob lp);
@@ -53,6 +53,13 @@ public:
 	 @return void
 	 */
 	void step8_1(CEnv env, Prob lp);
+
+	/**
+	 Method that add constraint r_T * y = r_T * y
+	 @param  CEnv env, Prob lp
+	 @return void
+	 */
+	void step8_2(CEnv env, Prob lp);
 
 	/**
 	 Method print u
@@ -100,6 +107,7 @@ public:
 	double u0;
 	double v0;
 	double beta;
+	vector<double> rt;
 
 };
 

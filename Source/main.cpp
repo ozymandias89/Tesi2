@@ -75,11 +75,13 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			// 5. Evaluate vector r
 			// --------------------------------------------------
-			std::vector<double> rT = sec_prob->evaluate_rT();
+			sec_prob->evaluate_rT();
 
 			print_matrix();
 
-			sec_prob->step8_1(env_dual, lp_dual);
+			//sec_prob->step8_1(env_dual, lp_dual);
+
+			sec_prob->step8_2(env_dual, lp_dual);
 
 			// --------------------------------------------------
 			// 6. Show dates

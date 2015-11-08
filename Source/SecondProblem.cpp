@@ -385,9 +385,8 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 
 }
 
-std::vector<double> SecondProblem::evaluate_rT() {
+void  SecondProblem::evaluate_rT() {
 
-	std::vector<double> rt;
 	double sum = 0;
 
 	// --------------------------------------------------
@@ -444,7 +443,7 @@ std::vector<double> SecondProblem::evaluate_rT() {
 		cout << *j << " ";
 	cout << endl;
 
-	return rt;
+
 }
 
 void SecondProblem::set_solution(CEnv env, Prob lp) {
@@ -515,8 +514,10 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	std::vector<double> coef;
 
 	// --------------------------------------------------
-	//  A_T * u
+	// Estimation A_T * u - e_k * u_0 + a = 0
 	// --------------------------------------------------
+
+	//  A_T * u
 	char sense = 'E';
 	int matbeg = 0;
 	double rhs = 0;
@@ -533,16 +534,14 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			}
 
 		}
-		// --------------------------------------------------
+
 		//  -e_k * u0
-		// --------------------------------------------------
 		if (j == k) {
 			sum -= u0;
 			//cout << " u0 " << u0 << endl;
 		}
-		// --------------------------------------------------
+
 		//  +a_i
-		// --------------------------------------------------
 		sum += a[j];
 		//cout << "a[j] " << a[j] << endl;
 
@@ -554,20 +553,19 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			sum = 0.0;
 		}
 
-		// --------------------------------------------------
-		// add new constraint A_T * u - e_k * u_0 + a = 0
-		// --------------------------------------------------
+
 		cout << endl;
 		cout << "STAMPA DI SUM " << sum << " vincolo numero " << j << endl;
 		if (sum >= 0) {
 			cout << "Il vincolo numero " << j << " soddisfa l'equazione"
 					<< endl;
 
-			//add new constraint
+			// --------------------------------------------------
+			// add new constraint A_T * u - e_k * u_0 + a = 0
+			// --------------------------------------------------
 			nzcnt = 0;
-			// --------------------------------------------------
+
 			//  -A_T * u
-			// --------------------------------------------------
 			int iter = 0;
 			int u = 1;
 
@@ -582,18 +580,14 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 				u++;
 			}
 
-			// --------------------------------------------------
 			//  -e_k * u0
-			// --------------------------------------------------
 			if (j == k) {
 				idx.push_back(0);
 				coef.push_back(-1);
 				nzcnt++;
 			}
 
-			// --------------------------------------------------
 			//  +a_i
-			// --------------------------------------------------
 			idx.push_back(num_constraint + 1 + j);
 			coef.push_back(1);
 			nzcnt++;
@@ -609,8 +603,10 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	}
 
 	// --------------------------------------------------
-	//  b_T * u
+	// Estimation b_T * u + u_0 * gamma - b
 	// --------------------------------------------------
+
+	//  b_T * u
 	sum = 0;
 	for (int i = 0; i < num_constraint; i++) {
 
@@ -620,9 +616,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		}
 	}
 
-	// --------------------------------------------------
 	//  u_0 * gamma
-	// --------------------------------------------------
 	sum += u0 * gam;
 	//cout << u0 << " " << gam << endl;
 
@@ -640,13 +634,15 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		sum = 0.0;
 	}
 
-	// --------------------------------------------------
-	// add new constraint b_T * u + u_0 * gamma - b = 0
-	// --------------------------------------------------
 	cout << endl;
 	cout << "STAMPA DI SUM " << sum << endl;
 
 	if (sum >= 0) {
+
+		// --------------------------------------------------
+		// add new constraint b_T * u + u_0 * gamma - b = 0
+		// --------------------------------------------------
+
 		cout << "Il vincolo con beta soddisfa l'equazione " << endl;
 		nzcnt = 0;
 		char sense = 'E';
@@ -672,9 +668,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			nzcnt++;
 		}
 
-		// --------------------------------------------------
 		//  -b
-		// --------------------------------------------------
 		idx.push_back(num_constraint + 1 + N);
 		coef.push_back(-1);
 		nzcnt++;
@@ -688,8 +682,10 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	}
 
 	// --------------------------------------------------
-	//  A_T * v
+	// Estimation A_T * u - e_k * u_0 + a = 0
 	// --------------------------------------------------
+
+	//  A_T * v
 	int v_0 = num_constraint + N + 2;
 	sum = 0;
 	for (int j = 0; j < N; j++) {
@@ -702,16 +698,16 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			}
 
 		}
-		// --------------------------------------------------
+
 		//  -e_k * v0
-		// --------------------------------------------------
+
 		if (j == k) {
 			sum -= v0;
 			cout << " v0 " << v0 << endl;
 		}
-		// --------------------------------------------------
+
 		//  +a_i
-		// --------------------------------------------------
+
 		sum += a[j];
 		cout << "a[j] " << a[j] << endl;
 
@@ -730,8 +726,9 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 					<< endl;
 
 			// --------------------------------------------------
-			//  A_T * v
+			// add new constraints A_T * v - e_k * v_0 + a = 0
 			// --------------------------------------------------
+
 			nzcnt = 0;
 			int iter = 0;
 			int v = v_0;
@@ -748,18 +745,18 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 				v++;
 			}
 
-			// --------------------------------------------------
+
 			//  -e_k * v0
-			// --------------------------------------------------
+
 			if (j == k) {
 				idx.push_back(v_0);
 				coef.push_back(-1);
 				nzcnt++;
 			}
 
-			// --------------------------------------------------
+
 			//  +a_i
-			// --------------------------------------------------
+
 			idx.push_back(num_constraint + 1 + j);
 			coef.push_back(1);
 			nzcnt++;
@@ -774,10 +771,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		}
 	}
 
+
+
 	// --------------------------------------------------
-	//  b_T * v
+	// Estimation b_T * v + v_0 * (gamma+1) - b = 0
 	// --------------------------------------------------
 
+	//  b_T * v
 	sum = 0;
 	for (int i = 0; i < num_constraint; i++) {
 
@@ -787,16 +787,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		}
 	}
 
-	// --------------------------------------------------
 	//  v_0 * (gamma + 1)
-	// --------------------------------------------------
 
 	sum += v0 * (gam + 1);
 	//cout << v0 << " " << gam << endl;
 
-	// --------------------------------------------------
+
 	//  -b
-	// --------------------------------------------------
 	sum -= beta;
 	//cout << beta << endl;
 
@@ -811,13 +808,16 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	cout << "STAMPA DI SUM " << sum << endl;
 	if (sum >= 0) {
 		cout << "Il vincolo con beta soddisfa l'equazione " << endl;
+
+		// --------------------------------------------------
+		// add new constraint b_T * v + v_0 * (gamma+1) - b = 0
+		// --------------------------------------------------
+
 		nzcnt = 0;
 		int v = v_0;
 		v++;
 
-		// --------------------------------------------------
 		//  b_T * v
-		// --------------------------------------------------
 		for (int i = 0; i < num_constraint; i++) {
 
 			if (b[i] != 0) {
@@ -829,18 +829,14 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 		}
 
-		// --------------------------------------------------
 		//  (gamma+1) * v0
-		// --------------------------------------------------
-		if (gam != 0) {
+			if (gam != 0) {
 			idx.push_back(v_0);
 			coef.push_back(gam + 1);
 			nzcnt++;
 		}
 
-		// --------------------------------------------------
 		//  -b
-		// --------------------------------------------------
 		idx.push_back(num_constraint + N + 1);
 		coef.push_back(-1);
 		nzcnt++;
@@ -852,4 +848,65 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		idx.clear();
 		coef.clear();
 	}
+
+
+}
+
+void SecondProblem::step8_2(CEnv env, Prob lp){
+
+
+	std::vector<int> idx;
+	std::vector<double> coef;
+
+
+	//calcolo right side r * y
+
+	double r = 0 ;
+	int i = 0;
+
+	while (i<N){
+		r += rt[i] * c[i];
+		cout << " rt   " << rt[i]  << " c   " <<  c[i] << endl;
+		i++;
+	}
+
+	r += rt[i] * min_sol;
+	cout << "rt   " << rt[i]  << "z    " <<  min_sol << endl;
+	i++;
+
+	int j=0;
+	while (i<N+1+num_constraint){
+		r += rt[i] * u[j];
+		cout << " rt  " << rt[i]  << " u  " <<  u[j] << endl;
+		i++;
+		j++;
+	}
+
+	r += rt[i] * u0;
+	cout << " rt  " << rt[i]  << " u0  " <<  u0 << endl;
+	i++;
+
+    j=0;
+	while (i<N+2+num_constraint+num_constraint){
+			r += rt[i] * v[j];
+			cout << " rt  " << rt[i]  << " v  " <<  v[j] << endl;
+			i++;
+			j++;
+		}
+
+	r += rt[i] * v0;
+	cout << " rt  " << rt[i]  << " v0  " <<  v0 << endl;
+
+
+	cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   " << r << endl;
+
+
+	char sense = 'E';
+	int matbeg = 0;
+	double rhs = r;
+	int nzcnt = 0;
+
+
+
+
 }
