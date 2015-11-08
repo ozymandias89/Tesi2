@@ -511,7 +511,6 @@ void SecondProblem::solve(CEnv env, Prob lp) {
 
 void SecondProblem::step8_1(CEnv env, Prob lp) {
 
-
 	std::vector<int> idx;
 	std::vector<double> coef;
 
@@ -550,22 +549,22 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		//  FAMMI VEDERE QUALI DI QUESTI VINCOLI SODDISFANO L'EQUAZIONE
 		// --------------------------------------------------
-		if (sum <  std::numeric_limits<double>::epsilon() &&
-			    sum > -std::numeric_limits<double>::epsilon()) {
-			  sum = 0.0;
-			}
+		if (sum < std::numeric_limits<double>::epsilon()
+				&& sum > -std::numeric_limits<double>::epsilon()) {
+			sum = 0.0;
+		}
 
 		// --------------------------------------------------
 		// add new constraint A_T * u - e_k * u_0 + a = 0
 		// --------------------------------------------------
 		cout << endl;
 		cout << "STAMPA DI SUM " << sum << " vincolo numero " << j << endl;
-		if (sum >= 0){
+		if (sum >= 0) {
 			cout << "Il vincolo numero " << j << " soddisfa l'equazione"
 					<< endl;
 
 			//add new constraint
-			nzcnt=0;
+			nzcnt = 0;
 			// --------------------------------------------------
 			//  -A_T * u
 			// --------------------------------------------------
@@ -607,10 +606,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			coef.clear();
 		}
 
-
-
 	}
-
 
 	// --------------------------------------------------
 	//  b_T * u
@@ -644,14 +640,12 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		sum = 0.0;
 	}
 
-
 	// --------------------------------------------------
 	// add new constraint b_T * u + u_0 * gamma - b = 0
 	// --------------------------------------------------
 	cout << endl;
 	cout << "STAMPA DI SUM " << sum << endl;
 
-	int v_0;
 	if (sum >= 0) {
 		cout << "Il vincolo con beta soddisfa l'equazione " << endl;
 		nzcnt = 0;
@@ -690,90 +684,172 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 		idx.clear();
 		coef.clear();
-		v_0 = num_constraint + N + 2;
 
 	}
 
+	// --------------------------------------------------
+	//  A_T * v
+	// --------------------------------------------------
+	int v_0 = num_constraint + N + 2;
+	sum = 0;
+	for (int j = 0; j < N; j++) {
+		sum = 0;
+		for (int i = 0; i < num_constraint; i++) {
 
-//	// --------------------------------------------------
-//	//  A_T * v
-//	// --------------------------------------------------
-//	sum = 0;
-//	for (int j = 0; j < N; j++) {
-//		sum = 0;
-//		for (int i = 0; i < num_constraint; i++) {
-//
-//			if (A[i][j] != 0) {
-//				sum += A[i][j] * v[i];
-//				cout << " A[i][j] " << A[i][j] << " v[i] " << v[i] << endl;
-//			}
-//
-//		}
-//		// --------------------------------------------------
-//		//  -e_k * v0
-//		// --------------------------------------------------
-//		if (j == k) {
-//			sum -= v0;
-//			cout << " v0 " << v0 << endl;
-//		}
-//		// --------------------------------------------------
-//		//  +a_i
-//		// --------------------------------------------------
-//		sum += a[j];
-//		cout << "a[j] " << a[j] << endl;
-//
-//		// --------------------------------------------------
-//		//  FAMMI VEDERE QUALI DI QUESTI VINCOLI SODDISFANO L'EQUAZIONE
-//		// --------------------------------------------------
-//		if (sum < std::numeric_limits<double>::epsilon()
-//				&& sum > -std::numeric_limits<double>::epsilon()) {
-//			sum = 0.0;
-//		}
-//
-//		cout << endl;
-//		cout << "STAMPA DI SUM " << sum << " vincolo numero " << j << endl;
-//		if (sum >= 0)
-//			cout << "Il vincolo numero " << j << " soddisfa l'equazione"
-//					<< endl;
-//
-//	}
-//
-//	// --------------------------------------------------
-//	//  b_T * v
-//	// --------------------------------------------------
-//
-//	sum = 0;
-//	for (int i = 0; i < num_constraint; i++) {
-//
-//		if (b[i] != 0) {
-//			sum += b[i] * v[i];
-//			//cout << b[i] << " " << v[i] << endl;
-//		}
-//	}
-//
-//	// --------------------------------------------------
-//	//  v_0 * (gamma + 1)
-//	// --------------------------------------------------
-//
-//	sum += v0 * (gam + 1);
-//	//cout << v0 << " " << gam << endl;
-//
-//	// --------------------------------------------------
-//	//  -b
-//	// --------------------------------------------------
-//	sum -= beta;
-//	//cout << beta << endl;
-//
-//	// --------------------------------------------------
-//	//  FAMMI VEDERE QUALI DI QUESTI VINCOLI SODDISFANO L'EQUAZIONE
-//	// --------------------------------------------------
-//	if (sum < std::numeric_limits<double>::epsilon()
-//			&& sum > -std::numeric_limits<double>::epsilon()) {
-//		sum = 0.0;
-//	}
-//	cout << endl;
-//	cout << "STAMPA DI SUM " << sum << endl;
-//	if (sum >= 0)
-//		cout << "Il vincolo con beta soddisfa l'equazione " << endl;
+			if (A[i][j] != 0) {
+				sum += A[i][j] * v[i];
+				cout << " A[i][j] " << A[i][j] << " v[i] " << v[i] << endl;
+			}
 
+		}
+		// --------------------------------------------------
+		//  -e_k * v0
+		// --------------------------------------------------
+		if (j == k) {
+			sum -= v0;
+			cout << " v0 " << v0 << endl;
+		}
+		// --------------------------------------------------
+		//  +a_i
+		// --------------------------------------------------
+		sum += a[j];
+		cout << "a[j] " << a[j] << endl;
+
+		// --------------------------------------------------
+		//  FAMMI VEDERE QUALI DI QUESTI VINCOLI SODDISFANO L'EQUAZIONE
+		// --------------------------------------------------
+		if (sum < std::numeric_limits<double>::epsilon()
+				&& sum > -std::numeric_limits<double>::epsilon()) {
+			sum = 0.0;
+		}
+
+		cout << endl;
+		cout << "STAMPA DI SUM " << sum << " vincolo numero " << j << endl;
+		if (sum >= 0) {
+			cout << "Il vincolo numero " << j << " soddisfa l'equazione"
+					<< endl;
+
+			// --------------------------------------------------
+			//  A_T * v
+			// --------------------------------------------------
+			nzcnt = 0;
+			int iter = 0;
+			int v = v_0;
+			v++;
+
+			while (iter < num_constraint) {
+
+				if (A[iter][j] != 0) {
+					idx.push_back(v);
+					coef.push_back(A[iter][j]);
+					nzcnt++;
+				}
+				iter++;
+				v++;
+			}
+
+			// --------------------------------------------------
+			//  -e_k * v0
+			// --------------------------------------------------
+			if (j == k) {
+				idx.push_back(v_0);
+				coef.push_back(-1);
+				nzcnt++;
+			}
+
+			// --------------------------------------------------
+			//  +a_i
+			// --------------------------------------------------
+			idx.push_back(num_constraint + 1 + j);
+			coef.push_back(1);
+			nzcnt++;
+
+			cout << "VINCOLO AGGIUNTO " << endl;
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+					&matbeg, &idx[0], &coef[0], 0, 0);
+
+			idx.clear();
+			coef.clear();
+
+		}
+	}
+
+	// --------------------------------------------------
+	//  b_T * v
+	// --------------------------------------------------
+
+	sum = 0;
+	for (int i = 0; i < num_constraint; i++) {
+
+		if (b[i] != 0) {
+			sum += b[i] * v[i];
+			//cout << b[i] << " " << v[i] << endl;
+		}
+	}
+
+	// --------------------------------------------------
+	//  v_0 * (gamma + 1)
+	// --------------------------------------------------
+
+	sum += v0 * (gam + 1);
+	//cout << v0 << " " << gam << endl;
+
+	// --------------------------------------------------
+	//  -b
+	// --------------------------------------------------
+	sum -= beta;
+	//cout << beta << endl;
+
+	// --------------------------------------------------
+	//  FAMMI VEDERE QUALI DI QUESTI VINCOLI SODDISFANO L'EQUAZIONE
+	// --------------------------------------------------
+	if (sum < std::numeric_limits<double>::epsilon()
+			&& sum > -std::numeric_limits<double>::epsilon()) {
+		sum = 0.0;
+	}
+	cout << endl;
+	cout << "STAMPA DI SUM " << sum << endl;
+	if (sum >= 0) {
+		cout << "Il vincolo con beta soddisfa l'equazione " << endl;
+		nzcnt = 0;
+		int v = v_0;
+		v++;
+
+		// --------------------------------------------------
+		//  b_T * v
+		// --------------------------------------------------
+		for (int i = 0; i < num_constraint; i++) {
+
+			if (b[i] != 0) {
+				idx.push_back(v);
+				coef.push_back(b[i]);
+				nzcnt++;
+			}
+			v++;
+
+		}
+
+		// --------------------------------------------------
+		//  (gamma+1) * v0
+		// --------------------------------------------------
+		if (gam != 0) {
+			idx.push_back(v_0);
+			coef.push_back(gam + 1);
+			nzcnt++;
+		}
+
+		// --------------------------------------------------
+		//  -b
+		// --------------------------------------------------
+		idx.push_back(num_constraint + N + 1);
+		coef.push_back(-1);
+		nzcnt++;
+
+		cout << "VINCOLO AGGIUNTO " << endl;
+		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+				&matbeg, &idx[0], &coef[0], 0, 0);
+
+		idx.clear();
+		coef.clear();
+	}
 }
