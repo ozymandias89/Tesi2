@@ -79,7 +79,7 @@ int main(int argc, char const *argv[]) {
 
 			print_matrix();
 
-			//sec_prob->step8_1(env_dual, lp_dual);
+			sec_prob->step8_1(env_dual, lp_dual);
 
 			sec_prob->step8_2(env_dual, lp_dual);
 
@@ -90,20 +90,16 @@ int main(int argc, char const *argv[]) {
 			print_vect_b();
 			cout << endl;
 			print_vect_c();
-			cout << endl;
-			print_u_variables();
-			cout << endl;
-			print_v_variables();
-			cout << endl;
+//			cout << endl;
+//			print_u_variables();
+//			cout << endl;
+//			print_v_variables();
+//			cout << endl;
 			cout << "gamma= " << gam << endl;
 			cout << endl;
 			cout << "min solution= " << min_sol << endl;
 			cout << endl;
 			cout << "index fractional variable (e_k)= " << k << endl;
-
-			cout << "It was also set the second problem... check the correctness of the second model (second_problem.lp)." << endl;
-			cout << "Warning: In the first primal problem (problem.lp) you don't evaluate the last line (last constraint).  " << endl;
-			cout << " The last constraint, indeed, is trash." << endl;
 
 			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
 
