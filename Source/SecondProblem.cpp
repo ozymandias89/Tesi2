@@ -858,8 +858,12 @@ void SecondProblem::step8_2(CEnv env, Prob lp){
 	std::vector<int> idx;
 	std::vector<double> coef;
 
+	// --------------------------------------------------
+	//evaluate right side r * y
+	// --------------------------------------------------
 
-	//calcolo right side r * y
+	cout << endl;
+	cout << "evaluate side r_T * y = r_T * y " << endl;
 
 	double r = 0 ;
 	int i = 0;
@@ -871,7 +875,7 @@ void SecondProblem::step8_2(CEnv env, Prob lp){
 	}
 
 	r += rt[i] * min_sol;
-	cout << "rt   " << rt[i]  << "z    " <<  min_sol << endl;
+	cout << "rt   " << rt[i]  << " z    " <<  min_sol << endl;
 	i++;
 
 	int j=0;
@@ -898,15 +902,85 @@ void SecondProblem::step8_2(CEnv env, Prob lp){
 	cout << " rt  " << rt[i]  << " v0  " <<  v0 << endl;
 
 
-	cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   " << r << endl;
+	cout << "right side r_T * y = " << r << endl;
 
-
+	cout << endl;
+	// --------------------------------------------------
+	// add constraint r_T * y = r_T * y
+	// --------------------------------------------------
 	char sense = 'E';
 	int matbeg = 0;
 	double rhs = r;
 	int nzcnt = 0;
 
+	//cout << "right side r_T * y = " << r << endl;
+
+	// a
+	cout << " A " << endl;
+	int p = 0;
+	while (p < N) {
+		idx.push_back(num_constraint + 1 + p);
+		cout << " rt [p] " << rt[p] << endl;
+		coef.push_back(rt[p]);
+		nzcnt++;
+		p++;
+	}
+
+	//b
+	cout << " B " << endl;
+	idx.push_back(num_constraint + 1 + N);
+	cout << " rt [p] " << rt[p] << endl;
+	coef.push_back(rt[p]);
+	nzcnt++;
+	p++;
+
+	//u
+	cout << " U " << endl;
+	for (int iter = 1; iter <= num_constraint; iter++) {
+		idx.push_back(iter);
+		cout << " rt [p] " << rt[p] << endl;
+		coef.push_back(rt[p]);
+		nzcnt++;
+		p++;
+	}
+
+	//u_0
+	cout << " U_0 " << endl;
+	idx.push_back(0);
+	coef.push_back(rt[p]);
+	cout << " rt [p] " << rt[p] << endl;
+	nzcnt++;
+	p++;
 
 
+	//v
+		cout << " V " << endl;
+		int v_0 = num_constraint + N + 2;
+		int v = v_0;
+		v++;
+		for (int iter = 0; iter < num_constraint; iter++) {
+			idx.push_back(v);
+			cout << " rt [p] " << rt[p] << endl;
+			coef.push_back(rt[p]);
+			nzcnt++;
+			p++;
+			v++;
+		}
+
+	//v_0
+	cout << " V_0 " << endl;
+	idx.push_back(v_0);
+	coef.push_back(rt[p]);
+	cout << " rt [p] " << rt[p] << endl;
+	nzcnt++;
+
+
+
+	cout << "VINCOLO r_T * y = r_T * y AGGIUNTO " << endl;
+	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense, &matbeg,
+			&idx[0], &coef[0], 0, 0);
+
+	idx.clear();
+	coef.clear();
 
 }
