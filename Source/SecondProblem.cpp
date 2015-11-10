@@ -55,6 +55,16 @@ void SecondProblem::print_beta() {
 
 }
 
+void SecondProblem::print_y_tilde() {
+
+	cout << endl;
+	cout << "y_tilde= ";
+	for (unsigned  int i = 0; i < y_tilde.size(); ++i)
+		cout << y_tilde[i] << " ";
+
+	cout << endl;
+}
+
 void SecondProblem::setupSP(CEnv env, Prob lp) {
 
 	{
@@ -446,7 +456,7 @@ void  SecondProblem::evaluate_rT() {
 
 }
 
-void SecondProblem::set_solution(CEnv env, Prob lp) {
+void SecondProblem::set_solution(CEnv env, Prob lp, bool y_til) {
 
 	vector<double> varibles;
 
@@ -469,6 +479,9 @@ void SecondProblem::set_solution(CEnv env, Prob lp) {
 	CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
 			&surplus, 0, cur_numcols - 1);
 
+
+	if (!y_til){
+
 	//  set variables
 	u0 = varibles[0];
 
@@ -485,18 +498,7 @@ void SecondProblem::set_solution(CEnv env, Prob lp) {
 	for (int i = num_constraint + N + 3; i < 2 * num_constraint + N + 3; i++)
 		v.push_back(varibles[i]);
 
-	// free
-	free(cur_colname);
-	free(cur_colnamestore);
 
-}
-
-void SecondProblem::solve(CEnv env, Prob lp) {
-
-	CHECKED_CPX_CALL(CPXlpopt, env, lp);
-	print_objval(env, lp);
-
-	set_solution(env, lp);
 
 	print_u0();
 	print_u();
@@ -505,6 +507,27 @@ void SecondProblem::solve(CEnv env, Prob lp) {
 	print_v0();
 	print_v();
 
+	}
+	else{
+
+		//add y tilde in the R set
+		y_tilde = varibles;
+		R.insert(y_tilde);
+
+	}
+
+	// free
+	free(cur_colname);
+	free(cur_colnamestore);
+
+}
+
+void SecondProblem::solve(CEnv env, Prob lp, bool y_til) {
+
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
+	print_objval(env, lp);
+
+	set_solution(env, lp, y_til);
 
 }
 
@@ -557,7 +580,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		cout << endl;
 		cout << "sum = " << sum << " constraint number " << j << endl;
-		if (sum >= 0) {
+		if (sum == 0) {
 			cout << "The constraint number " << j << " respects equation"
 					<< endl;
 
@@ -599,7 +622,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			idx.clear();
 			coef.clear();
 		}
-		else cout << "constraint doesn't respects the equation " << endl;
+		else cout << "The constraint number " << j << " doesn't respects the equation " << endl;
 
 	}
 
@@ -638,7 +661,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	cout << endl;
 	cout << "sum = " << sum << endl;
 
-	if (sum >= 0) {
+	if (sum == 0) {
 
 		// --------------------------------------------------
 		// add new constraint b_T * u + u_0 * gamma - b = 0
@@ -680,7 +703,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		idx.clear();
 		coef.clear();
 
-	} else cout << "constraint doesn't respects the equation " << endl;
+	} else cout << "The constraint  with beta doesn't respects the equation " << endl;
 
 	// --------------------------------------------------
 	// Estimation A_T * u - e_k * u_0 + a = 0
@@ -723,7 +746,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		cout << endl;
 		cout << "sum = " << sum << " constraint number " << j << endl;
-		if (sum >= 0) {
+		if (sum == 0) {
 			cout << "The constraint number " << j << " respects equation"
 								<< endl;
 
@@ -770,7 +793,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			idx.clear();
 			coef.clear();
 
-		}else cout << "constraint doesn't respects the equation " << endl;
+		}else cout << "The constraint number " << j << " doesn't respects the equation " << endl;
 	}
 
 
@@ -808,7 +831,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	}
 	cout << endl;
 	cout << "sum = " << sum << endl;
-	if (sum >= 0) {
+	if (sum == 0) {
 		cout << "The constraint with beta respects equation " << endl;
 
 		// --------------------------------------------------
@@ -848,7 +871,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 		idx.clear();
 		coef.clear();
-	}else cout << "constraint doesn't respects the equation " << endl;
+	}else cout << "The constraint with beta doesn't respects the equation " << endl;
 
 
 }

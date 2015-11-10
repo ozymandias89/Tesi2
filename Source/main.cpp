@@ -70,7 +70,7 @@ int main(int argc, char const *argv[]) {
 
 			sec_prob->setupSP(env_dual, lp_dual);
 
-			sec_prob->solve(env_dual, lp_dual);
+			sec_prob->solve(env_dual, lp_dual, false);
 
 			// --------------------------------------------------
 			// 5. Evaluate vector r
@@ -79,9 +79,19 @@ int main(int argc, char const *argv[]) {
 
 			print_matrix();
 
+			// --------------------------------------------------
+			// 6. Cycle
+			// --------------------------------------------------
+
+			//while (Y!=Ytilde)
 			sec_prob->step8_1(env_dual, lp_dual);
 
 			sec_prob->step8_2(env_dual, lp_dual);
+
+
+			sec_prob->solve(env_dual, lp_dual, true);
+
+
 
 			// --------------------------------------------------
 			// 6. Show dates
@@ -105,6 +115,7 @@ int main(int argc, char const *argv[]) {
 
 			CPXfreeprob(env_dual, &lp_dual);
 			CPXcloseCPLEX(&env_dual);
+			free(sec_prob);
 		}
 
 		// ---------------------------------------------------------
