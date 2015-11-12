@@ -821,12 +821,12 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	//  v_0 * (gamma + 1)
 
 	sum += dual_varVals_P2[num_constraint] * (gam + 1);
-	cout << "v_0" << dual_varVals_P2[num_constraint] << " " << "gamma + 1 (da fare)" << gam << endl;
+	cout << " v_0 " << dual_varVals_P2[num_constraint] << " " << " gamma + (1 da sommare)" << gam << endl;
 
 
 	//  -b
 	sum -= min_sol;
-	cout << "b " << min_sol << endl;
+	cout << " b " << min_sol << endl;
 
 	// --------------------------------------------------
 	//  print respect constraint
