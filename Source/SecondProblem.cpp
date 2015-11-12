@@ -69,7 +69,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 
 	{
 		cout << endl;
-		cout << "DUAL PROBLEM: " << endl;
+		cout << "Initialization dual problem... " << endl;
 		// variables
 		static const char* varType = NULL;
 		double obj = 1.0;
@@ -392,7 +392,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 		}
 
 	}
-
+	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);
 }
 
 void  SecondProblem::evaluate_rT() {
@@ -524,10 +524,19 @@ void SecondProblem::set_solution(CEnv env, Prob lp, bool y_til) {
 
 void SecondProblem::solve(CEnv env, Prob lp, bool y_til) {
 
-	CHECKED_CPX_CALL(CPXlpopt, env, lp);
+	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
+	int stat = CPXgetstat(env, lp);
+
+	if (stat==CPX_STAT_CONFLICT_FEASIBLE){
+	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 	print_objval(env, lp);
 
-	set_solution(env, lp, y_til);
+	set_solution(env, lp, y_til);}
+	else {
+		cerr << "Second problem has conflict!!!!!" << endl;
+		exit(1);
+	}
 
 }
 
@@ -553,7 +562,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 			if (A[i][j] != 0) {
 				sum += A[i][j] * u[i];
-				//cout << " A[i][j] " << A[i][j] << " u[i] " << u[i] << endl;
+				cout << " A[i][j] " << A[i][j] << " u[i] " << u[i] << endl;
 			}
 
 		}
@@ -561,12 +570,12 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		//  -e_k * u0
 		if (j == k) {
 			sum -= u0;
-			//cout << " u0 " << u0 << endl;
+			cout << " u0 " << u0 << endl;
 		}
 
 		//  +a_i
 		sum += a[j];
-		//cout << "a[j] " << a[j] << endl;
+		cout << "a[j] " << a[j] << endl;
 
 
 		//machine error
@@ -636,19 +645,19 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 		if (b[i] != 0) {
 			sum += b[i] * u[i];
-			//cout << b[i] << " " << u[i] << endl;
+			cout << " b[i] " << b[i] << " " << " u[i] " << u[i] << endl;
 		}
 	}
 
 	//  u_0 * gamma
 	sum += u0 * gam;
-	//cout << u0 << " " << gam << endl;
+	cout << " u0 " << u0 << " " << "gamma " << gam << endl;
 
 	// --------------------------------------------------
 	//  -b
 	// --------------------------------------------------
 	sum -= beta;
-	//cout << beta << endl;
+	cout << " beta " << beta << endl;
 
 	// --------------------------------------------------
 	//  print respect constraint
@@ -659,7 +668,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	}
 
 	cout << endl;
-	cout << "sum = " << sum << endl;
+	cout << " sum = " << sum << endl;
 
 	if (sum == 0) {
 
@@ -718,7 +727,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 			if (A[i][j] != 0) {
 				sum += A[i][j] * v[i];
-			//	cout << " A[i][j] " << A[i][j] << " v[i] " << v[i] << endl;
+				cout << " A[i][j] " << A[i][j] << " v[i] " << v[i] << endl;
 			}
 
 		}
@@ -727,13 +736,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 		if (j == k) {
 			sum -= v0;
-		//	cout << " v0 " << v0 << endl;
+			cout << " v0 " << v0 << endl;
 		}
 
 		//  +a_i
 
 		sum += a[j];
-		//cout << "a[j] " << a[j] << endl;
+		cout << "a[j] " << a[j] << endl;
 
 		//machine error
 		if (sum < std::numeric_limits<double>::epsilon()
@@ -815,12 +824,12 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	//  v_0 * (gamma + 1)
 
 	sum += v0 * (gam + 1);
-	//cout << v0 << " " << gam << endl;
+	cout << v0 << " " << "gamma + 1 (da fare)" << gam << endl;
 
 
 	//  -b
 	sum -= beta;
-	//cout << beta << endl;
+	cout << beta << endl;
 
 	// --------------------------------------------------
 	//  print respect constraint
@@ -830,7 +839,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		sum = 0.0;
 	}
 	cout << endl;
-	cout << "sum = " << sum << endl;
+	cout << " sum = " << sum << endl;
 	if (sum == 0) {
 		cout << "The constraint with beta respects equation " << endl;
 

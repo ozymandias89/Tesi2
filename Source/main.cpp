@@ -51,6 +51,8 @@ int main(int argc, char const *argv[]) {
 		// --------------------------------------------------
 		solve (env, lp);
 
+
+
 		// ---------------------------------------------------------
 		// 3. if P_1 and P_2 have solution
 		// ---------------------------------------------------------
@@ -59,17 +61,21 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			// 4. Initialization of the second problem
 			// --------------------------------------------------
-			cout << "Now we have solved both subproblems and we have the min z. " << endl;
-			cout << "Your guide to all the data is shown here: " << endl;
+//			cout << "Now we have solved both subproblems and we have the min z. " << endl;
+//			cout << "Your guide to all the data is shown here: " << endl;
 			DECL_ENV(env_dual);
 			DECL_PROB(env_dual, lp_dual, "resolve second problem");
+//
+			print_matrix();
+//
+			SecondProblem* sec_prob = new SecondProblem();
+//
+			sec_prob->setupSP(env_dual, lp_dual);
+//
 
 			print_matrix();
-
-			SecondProblem* sec_prob = new SecondProblem();
-
-			sec_prob->setupSP(env_dual, lp_dual);
-
+//
+//
 			sec_prob->solve(env_dual, lp_dual, false);
 
 			// --------------------------------------------------
@@ -77,19 +83,18 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			sec_prob->evaluate_rT();
 
-			print_matrix();
 
 			// --------------------------------------------------
 			// 6. Cycle
 			// --------------------------------------------------
 
 			//while (Y!=Ytilde)
-			sec_prob->step8_1(env_dual, lp_dual);
+//			sec_prob->step8_1(env_dual, lp_dual);
 
-			sec_prob->step8_2(env_dual, lp_dual);
+//			sec_prob->step8_2(env_dual, lp_dual);
 
 
-			sec_prob->solve(env_dual, lp_dual, true);
+	//		sec_prob->solve(env_dual, lp_dual, true);
 
 
 
@@ -100,22 +105,22 @@ int main(int argc, char const *argv[]) {
 			print_vect_b();
 			cout << endl;
 			print_vect_c();
-//			cout << endl;
-//			print_u_variables();
-//			cout << endl;
-//			print_v_variables();
-//			cout << endl;
+			cout << endl;
+			print_u_variables();
+			cout << endl;
+			print_v_variables();
+			cout << endl;
 			cout << "gamma= " << gam << endl;
 			cout << endl;
 			cout << "min solution= " << min_sol << endl;
 			cout << endl;
 			cout << "index fractional variable (e_k)= " << k << endl;
 
-			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
 
-			CPXfreeprob(env_dual, &lp_dual);
-			CPXcloseCPLEX(&env_dual);
-			free(sec_prob);
+//
+//			CPXfreeprob(env_dual, &lp_dual);
+//			CPXcloseCPLEX(&env_dual);
+//			free(sec_prob);
 		}
 
 		// ---------------------------------------------------------
