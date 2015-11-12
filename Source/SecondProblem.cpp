@@ -561,28 +561,27 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		for (int i = 0; i < num_constraint; i++) {
 
 			if (A[i][j] != 0) {
-				sum += A[i][j] * u[i];
-				cout << " A[i][j] " << A[i][j] << " u[i] " << u[i] << endl;
+				sum += A[i][j] * dual_varVals_P1[i];
+				cout << " A[i][j] " << A[i][j] << " u[i] " << dual_varVals_P1[i] << endl;
 			}
 
 		}
 
 		//  -e_k * u0
 		if (j == k) {
-			sum -= u0;
-			cout << " u0 " << u0 << endl;
+			sum -= dual_varVals_P1[num_constraint];
+			cout << " u0 " << dual_varVals_P1[num_constraint] << endl;
 		}
 
 		//  +a_i
-		sum += a[j];
-		cout << "a[j] " << a[j] << endl;
+		sum += c[j];
+		cout << "a[j] " << c[j] << endl;
 
 
-		//machine error
-		if (sum < std::numeric_limits<double>::epsilon()
-				&& sum > -std::numeric_limits<double>::epsilon()) {
+		//tolerance error
+		if (sum < epsilon && sum > -epsilon)
 			sum = 0.0;
-		}
+
 
 		// --------------------------------------------------
 		//  print respect constraint
@@ -592,7 +591,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		if (sum == 0) {
 			cout << "The constraint number " << j << " respects equation"
 					<< endl;
-
+			cout <<endl<<endl;
 			// --------------------------------------------------
 			// add new constraint A_T * u - e_k * u_0 + a = 0
 			// --------------------------------------------------
@@ -644,28 +643,28 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	for (int i = 0; i < num_constraint; i++) {
 
 		if (b[i] != 0) {
-			sum += b[i] * u[i];
-			cout << " b[i] " << b[i] << " " << " u[i] " << u[i] << endl;
+			sum += b[i] * dual_varVals_P1[i];
+			cout << " b[i] " << b[i] << " " << " u[i] " << dual_varVals_P1[i] << endl;
 		}
 	}
 
 	//  u_0 * gamma
-	sum += u0 * gam;
-	cout << " u0 " << u0 << " " << "gamma " << gam << endl;
+	sum += dual_varVals_P1[num_constraint] * gam;
+	cout << " u0 " << dual_varVals_P1[num_constraint] << " " << "gamma " << gam << endl;
 
 	// --------------------------------------------------
 	//  -b
 	// --------------------------------------------------
-	sum -= beta;
-	cout << " beta " << beta << endl;
+	sum -= min_sol;
+	cout << " beta " << min_sol << endl;
 
 	// --------------------------------------------------
 	//  print respect constraint
 	// --------------------------------------------------
-	if (sum < std::numeric_limits<double>::epsilon()
-			&& sum > -std::numeric_limits<double>::epsilon()) {
+
+	//tolerance error
+	if (sum < epsilon && sum > -epsilon)
 		sum = 0.0;
-	}
 
 	cout << endl;
 	cout << " sum = " << sum << endl;
@@ -726,8 +725,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		for (int i = 0; i < num_constraint; i++) {
 
 			if (A[i][j] != 0) {
-				sum += A[i][j] * v[i];
-				cout << " A[i][j] " << A[i][j] << " v[i] " << v[i] << endl;
+				sum += A[i][j] * dual_varVals_P2[i];
+				cout << " A[i][j] " << A[i][j] << " v[i] " << dual_varVals_P2[i] << endl;
 			}
 
 		}
@@ -735,20 +734,18 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		//  -e_k * v0
 
 		if (j == k) {
-			sum -= v0;
-			cout << " v0 " << v0 << endl;
+			sum -= dual_varVals_P2[num_constraint];
+			cout << " v0 " << dual_varVals_P2[num_constraint] << endl;
 		}
 
 		//  +a_i
 
-		sum += a[j];
-		cout << "a[j] " << a[j] << endl;
+		sum += c[j];
+		cout << "a[j] " << c[j] << endl;
 
-		//machine error
-		if (sum < std::numeric_limits<double>::epsilon()
-				&& sum > -std::numeric_limits<double>::epsilon()) {
-			sum = 0.0;
-		}
+		//tolerance error
+				if (sum < epsilon && sum > -epsilon)
+					sum = 0.0;
 
 		// --------------------------------------------------
 		//  print respect constraint
@@ -758,7 +755,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		if (sum == 0) {
 			cout << "The constraint number " << j << " respects equation"
 								<< endl;
-
+			cout <<endl<<endl;
 
 			// --------------------------------------------------
 			// add new constraint A_T * v - e_k * v_0 + a = 0
@@ -816,28 +813,28 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	for (int i = 0; i < num_constraint; i++) {
 
 		if (b[i] != 0) {
-			sum += b[i] * v[i];
-			//cout << b[i] << " " << v[i] << endl;
+			sum += b[i] * dual_varVals_P2[i];
+			cout << " b[i] " << b[i] << " v[i] " << dual_varVals_P2[i] << endl;
 		}
 	}
 
 	//  v_0 * (gamma + 1)
 
-	sum += v0 * (gam + 1);
-	cout << v0 << " " << "gamma + 1 (da fare)" << gam << endl;
+	sum += dual_varVals_P2[num_constraint] * (gam + 1);
+	cout << "v_0" << dual_varVals_P2[num_constraint] << " " << "gamma + 1 (da fare)" << gam << endl;
 
 
 	//  -b
-	sum -= beta;
-	cout << beta << endl;
+	sum -= min_sol;
+	cout << "b " << min_sol << endl;
 
 	// --------------------------------------------------
 	//  print respect constraint
 	// --------------------------------------------------
-	if (sum < std::numeric_limits<double>::epsilon()
-			&& sum > -std::numeric_limits<double>::epsilon()) {
-		sum = 0.0;
-	}
+	//tolerance error
+			if (sum < epsilon && sum > -epsilon)
+				sum = 0.0;
+
 	cout << endl;
 	cout << " sum = " << sum << endl;
 	if (sum == 0) {

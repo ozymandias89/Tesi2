@@ -34,6 +34,7 @@ char errmsg[BUF_SIZE];
 const int NAME_SIZE = 512;
 char name[NAME_SIZE];
 
+const double epsilon = 1.e-6L;
 //number of variable
 int N;
 

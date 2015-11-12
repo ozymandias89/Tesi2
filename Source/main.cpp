@@ -89,7 +89,7 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 
 			//while (Y!=Ytilde)
-//			sec_prob->step8_1(env_dual, lp_dual);
+			sec_prob->step8_1(env_dual, lp_dual);
 
 //			sec_prob->step8_2(env_dual, lp_dual);
 
@@ -116,11 +116,11 @@ int main(int argc, char const *argv[]) {
 			cout << endl;
 			cout << "index fractional variable (e_k)= " << k << endl;
 
+			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
 
-//
-//			CPXfreeprob(env_dual, &lp_dual);
-//			CPXcloseCPLEX(&env_dual);
-//			free(sec_prob);
+			CPXfreeprob(env_dual, &lp_dual);
+			CPXcloseCPLEX(&env_dual);
+			free(sec_prob);
 		}
 
 		// ---------------------------------------------------------
