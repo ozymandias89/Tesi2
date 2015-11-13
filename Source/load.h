@@ -54,7 +54,7 @@ int num_constraint;
 std::vector<double> c;
 
 //price matrix
-std::vector< std::vector<double> > A;
+std::vector<std::vector<double> > A;
 
 //known terms
 std::vector<double> b;
@@ -103,7 +103,7 @@ void load_problem(ifstream &myfile) {
 			}
 
 			N = count;
-			Num_original_variables=N;
+			Num_original_variables = N;
 
 			c.resize(N);
 
@@ -132,7 +132,7 @@ void load_problem(ifstream &myfile) {
 			}
 
 			num_constraint = count;
-			Num_original_constraints=num_constraint;
+			Num_original_constraints = num_constraint;
 
 			b.resize(num_constraint);
 
@@ -149,9 +149,8 @@ void load_problem(ifstream &myfile) {
 		}
 	} while (flag_known);
 
-
 	//ALLOCATE MATRIX A
-	 A.resize(num_constraint);
+	A.resize(num_constraint);
 	for (int i = 0; i < num_constraint; ++i) {
 		A[i].resize(N);
 	}
@@ -217,7 +216,7 @@ void setupLP(CEnv env, Prob lp) {
 			char sense = 'E';
 			int matbeg = 0;
 			double rhs = b[i];
-			int nzcnt=0;
+			int nzcnt = 0;
 
 			for (int iter = 0; iter < N; iter++) {
 
@@ -239,8 +238,7 @@ void setupLP(CEnv env, Prob lp) {
 
 }
 
-
- /**
+/**
  Method that chooses the best x fractional variable
  @param  (vector<double>)
  @return int, return index of higher variable functional (-1 if no variable is fractional)
@@ -354,7 +352,6 @@ void set_and_print_var_P(CEnv env, Prob lp) {
 	CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
 			&surplus, 0, cur_numcols - 1);
 
-
 	//  print index, name and value of each column
 	for (int i = 0; i < cur_numcols; i++) {
 		cout << cur_colname[i] << " = " << varVals[i] << endl;
@@ -367,7 +364,7 @@ void set_and_print_var_P(CEnv env, Prob lp) {
 /**
  Method that set and print dual variables
  @param  (CEnv env, Prob lp, bool prob), environment of the problem,
-  problem and flag(true P1 problem, false P2 problem)
+ problem and flag(true P1 problem, false P2 problem)
  @return void
  */
 void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
@@ -382,7 +379,7 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 				num_rows - 1);
 
 		for (int i = 0; i < num_rows; i++) {
-			cout << dual_varVals_P1[i]<< " ";
+			cout << dual_varVals_P1[i] << " ";
 		}
 		cout << endl;
 

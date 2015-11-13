@@ -8,7 +8,6 @@
 #ifndef SOURCE_SECONDPROBLEM_H_
 #define SOURCE_SECONDPROBLEM_H_
 
-
 // Includes:
 #include "load.h"
 
@@ -19,7 +18,6 @@ public:
 	SecondProblem();
 	virtual ~SecondProblem();
 
-
 	// PREDICATES:
 	/**
 	 Method that set the second problem
@@ -28,16 +26,13 @@ public:
 	 */
 	void setupSP(CEnv env, Prob lp);
 
-
 	/** Method that evaluate the vector r as sum of rows of C (matrix of dual problem (13-19) + 21) and set r vector
 	 @param  none
 	 @return none
 	 */
 	void evaluate_rT();
 
-
 	void set_solution(CEnv env, Prob lp, bool y_til);
-
 
 	/**
 	 Method that solve the second problem (13-19) + 21)
@@ -100,14 +95,14 @@ public:
 	 */
 	void print_beta();
 	/**
-		 Method print y_tilde
-		 @param  none
-		 @return none
-		 */
+	 Method print y_tilde
+	 @param  none
+	 @return none
+	 */
 	void print_y_tilde();
 
 	// ATTRIBUTES:
-	std::set < vector<double> > R;
+	std::set<vector<double> > R;
 	vector<double> u;
 	vector<double> v;
 	vector<double> a;

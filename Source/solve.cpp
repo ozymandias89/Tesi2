@@ -15,29 +15,28 @@ using std::cout;
 using std::endl;
 using std::cerr;
 
-
 /**
  Method that create P1 problem (make a branch of admissible region),
  @param  (CEnv env, Prob lp, index),
  Environment of the problem, problem and index of fractional variable selected
  @return none
  */
-void create_P1_prob(CEnv env, Prob lp, int index){
+void create_P1_prob(CEnv env, Prob lp, int index) {
 
-		cout << endl;
-		cout << "SUB_PROBLEM P1" << endl;
+	cout << endl;
+	cout << "SUB_PROBLEM P1" << endl;
 
-		double rhs = floor(varVals[index]);
+	double rhs = floor(varVals[index]);
 
-		char sense = 'L';
-		int matbeg = 0;
-		const int idx = index;
-		const double coef = 1;
+	char sense = 'L';
+	int matbeg = 0;
+	const int idx = index;
+	const double coef = 1;
 
-		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
-				&coef, 0, 0);
+	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
+			&coef, 0, 0);
 
-		cout << "insert inequality x_" << index << " <= " << rhs << endl;
+	cout << "insert inequality x_" << index << " <= " << rhs << endl;
 
 }
 /**
@@ -111,7 +110,6 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
 				&varName);
 
-
 		//add cut
 		std::vector<int> idx;
 		std::vector<double> coef;
@@ -148,20 +146,16 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 				A[(num_constraint - 1)][i] = 0;
 		}
 
-
-
 		cout << "delete last inequality " << endl;
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 2, &rhs, &sense, &matbeg,
 				&idx[0], &coef[0], 0, 0);
 
-
 		b.push_back(rhs);
 
-
 		cout << "Resolve a new problem P1.. " << endl;
-		cout << "add inequality x_" << index << " >= " << rhs  << endl;
-		cout << "Now the new problem master is: "  << endl;
+		cout << "add inequality x_" << index << " >= " << rhs << endl;
+		cout << "Now the new problem master is: " << endl;
 		solve(env, lp);
 
 	}
@@ -207,53 +201,50 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		cout << "No solution for P2 problem exists " << endl;
 
 		// add Slack variables
-				static const char* varType = NULL;
-				double obj = 0.0;
-				double lb = 0.0;
-				double ub = CPX_INFBOUND;
-				snprintf(name, NAME_SIZE, "S_%i", num_constraint);
-				char* varName = (char*) (&name[0]);
-				CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
-						&varName);
+		static const char* varType = NULL;
+		double obj = 0.0;
+		double lb = 0.0;
+		double ub = CPX_INFBOUND;
+		snprintf(name, NAME_SIZE, "S_%i", num_constraint);
+		char* varName = (char*) (&name[0]);
+		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
+				&varName);
 
+		//add cut
+		std::vector<int> idx;
+		std::vector<double> coef;
 
-				//add cut
-				std::vector<int> idx;
-				std::vector<double> coef;
+		double rhs = floor(varVals[index]);
+		char sense = 'E';
+		int matbeg = 0;
 
-				double rhs = floor(varVals[index]);
-				char sense = 'E';
-				int matbeg = 0;
+		//x_k
+		idx.push_back(index);
+		coef.push_back(1);
 
-				//x_k
-				idx.push_back(index);
-				coef.push_back(1);
+		//S
+		idx.push_back(N);
+		coef.push_back(1);
 
-				//S
-				idx.push_back(N);
-				coef.push_back(1);
+		num_constraint++;
+		N++;
 
-				num_constraint++;
-				N++;
+		//add 0 to c
+		c.push_back(0);
 
-				//add 0 to c
-				c.push_back(0);
+		//extend A matrix
+		A.resize(num_constraint);
+		for (int i = 0; i < num_constraint; i++)
+			A[i].resize(N);
 
-				//extend A matrix
-				A.resize(num_constraint);
-				for (int i = 0; i < num_constraint; i++)
-					A[i].resize(N);
-
-				for (int i = 0; i < N; i++) {
-					if (i == index) {
-						A[(num_constraint - 1)][i] = 1;
-					} else if (i == N - 1) {
-						A[(num_constraint - 1)][i] = 1;
-					} else
-						A[(num_constraint - 1)][i] = 0;
-				}
-
-
+		for (int i = 0; i < N; i++) {
+			if (i == index) {
+				A[(num_constraint - 1)][i] = 1;
+			} else if (i == N - 1) {
+				A[(num_constraint - 1)][i] = 1;
+			} else
+				A[(num_constraint - 1)][i] = 0;
+		}
 
 		for (int i = 0; i < N; i++)
 			cout << A[(num_constraint - 1)][i] << " ";
@@ -267,11 +258,9 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 
 		cout << "Resolve a new problem P2.. " << endl;
 		cout << "add inequality x_" << index << " <= " << rhs << endl;
-		cout << "Now the new problem master is: "  << endl;
-
+		cout << "Now the new problem master is: " << endl;
 
 		b.push_back(rhs);
-
 
 		solve(env, lp);
 	}
@@ -332,7 +321,6 @@ void solve(CEnv env, Prob lp) {
 
 		/////////////////////////////////////////////////////
 
-
 		// ------------------------------------------------
 		// 9. only if both problems have solution else take
 		//		the best solution and stop
@@ -341,10 +329,10 @@ void solve(CEnv env, Prob lp) {
 			flag_find = false;
 
 			min_sol = std::min(*z, *(z + 1));
-			k=index;
+			k = index;
 		}
 
-	}else{
+	} else {
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		cout << "The last solution is the best integer solution. STOP" << endl;
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
@@ -364,11 +352,10 @@ void print_u_variables() {
 void print_v_variables() {
 
 	cout << "v variables (the last is v_0): " << endl;
-	for (std::vector<double>::const_iterator i =
-			dual_varVals_P2.begin(); i != dual_varVals_P2.end(); ++i)
+	for (std::vector<double>::const_iterator i = dual_varVals_P2.begin();
+			i != dual_varVals_P2.end(); ++i)
 		std::cout << *i << ' ';
 
 	cout << endl;
 }
-
 

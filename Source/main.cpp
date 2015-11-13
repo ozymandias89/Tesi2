@@ -19,7 +19,6 @@
  * -----------------x-----------------------------------------------------------
  */
 
-
 #include "solve.cpp"
 #include "SecondProblem.cpp"
 
@@ -45,13 +44,10 @@ int main(int argc, char const *argv[]) {
 		DECL_PROB(env, lp, "resolve problem RL");
 		setupLP(env, lp);
 
-
 		// --------------------------------------------------
 		// 2. program (first part)
 		// --------------------------------------------------
-		solve (env, lp);
-
-
+		solve(env, lp);
 
 		// ---------------------------------------------------------
 		// 3. if P_1 and P_2 have solution
@@ -66,7 +62,7 @@ int main(int argc, char const *argv[]) {
 			DECL_ENV(env_dual);
 			DECL_PROB(env_dual, lp_dual, "resolve second problem");
 //
-			print_matrix();
+//			print_matrix();
 //
 			SecondProblem* sec_prob = new SecondProblem();
 //
@@ -83,7 +79,6 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			sec_prob->evaluate_rT();
 
-
 			// --------------------------------------------------
 			// 6. Cycle
 			// --------------------------------------------------
@@ -91,12 +86,9 @@ int main(int argc, char const *argv[]) {
 			//while (Y!=Ytilde)
 			sec_prob->step8_1(env_dual, lp_dual);
 
-//			sec_prob->step8_2(env_dual, lp_dual);
+			sec_prob->step8_2(env_dual, lp_dual);
 
-
-	//		sec_prob->solve(env_dual, lp_dual, true);
-
-
+			//		sec_prob->solve(env_dual, lp_dual, true);
 
 			// --------------------------------------------------
 			// 6. Show dates
@@ -116,7 +108,8 @@ int main(int argc, char const *argv[]) {
 			cout << endl;
 			cout << "index fractional variable (e_k)= " << k << endl;
 
-			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
+			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
+					"../data/second_problem.lp", 0);
 
 			CPXfreeprob(env_dual, &lp_dual);
 			CPXcloseCPLEX(&env_dual);
@@ -127,10 +120,8 @@ int main(int argc, char const *argv[]) {
 		// 5. free allocate memory
 		// ---------------------------------------------------------
 
-
 		CPXfreeprob(env, &lp);
 		CPXcloseCPLEX(&env);
-
 
 	} catch (std::exception& e) {
 		std::cout << ">>>EXCEPTION: " << e.what() << std::endl;
