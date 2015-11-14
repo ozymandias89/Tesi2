@@ -59,9 +59,9 @@ public:
 	/**
 	 Test if y_tilde == y_barr
 	 @param  none
-	 @return void
+	 @return bool
 	 */
-	void y_tilde_EQ_y_bar();
+	bool y_tilde_EQ_y_bar();
 	/**
 	 Method print u
 	 @param  none

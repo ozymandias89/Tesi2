@@ -57,22 +57,12 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			// 4. Initialization of the second problem
 			// --------------------------------------------------
-//			cout << "Now we have solved both subproblems and we have the min z. " << endl;
-//			cout << "Your guide to all the data is shown here: " << endl;
 			DECL_ENV(env_dual);
 			DECL_PROB(env_dual, lp_dual, "resolve second problem");
-//
-//			print_matrix();
-//
 			SecondProblem* sec_prob = new SecondProblem();
-//
 			sec_prob->setupSP(env_dual, lp_dual);
-//
 
 			print_matrix();
-//
-//
-//			sec_prob->solve(env_dual, lp_dual, false);
 
 			// --------------------------------------------------
 			// 5. Evaluate vector r
@@ -82,14 +72,18 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			// 6. Cycle
 			// --------------------------------------------------
-
-		//	do {
+			bool flag;
+			do {
 				sec_prob->step8_1(env_dual, lp_dual);
 
 				sec_prob->step8_2(env_dual, lp_dual);
 
 				sec_prob->solve(env_dual, lp_dual);
-		//	}while (sec_prob->y_tilde_EQ_y_bar);
+
+				flag = sec_prob->y_tilde_EQ_y_bar();
+
+
+			} while (!flag);
 
 			// --------------------------------------------------
 			// 6. Show dates

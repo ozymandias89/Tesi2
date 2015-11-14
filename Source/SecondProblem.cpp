@@ -1025,12 +1025,159 @@ void SecondProblem::step8_2(CEnv env, Prob lp) {
 
 }
 
+bool SecondProblem::y_tilde_EQ_y_bar() {
 
+	bool equal = true;
+	double difference;
 
+	// --------------------------------------------------
+	// 1. c-a
+	// --------------------------------------------------
+	cout << endl;
 
-void y_tilde_EQ_y_bar(){
+	cout << "Comparison y bar and y til: " << endl;
 
+	cout << "vector c = ";
+	for (unsigned int i = 0; i < c.size(); i++)
+		cout << c[i] << " ";
 
+	cout << endl;
 
+	cout << "vector a = ";
+	for (unsigned int i = 0; i < a.size(); i++)
+		cout << a[i] << " ";
+
+	cout << endl;
+
+	for (unsigned int i = 0; i < a.size(); i++) {
+		difference = c[i] - a[i];
+
+		cout << difference << " ";
+		//tolerance error
+		if (difference < epsilon && difference > -epsilon)
+			difference = 0.0;
+
+		if (difference != 0) {
+			equal = false;
+			return equal;
+		}
+	}
+
+	cout << endl;
+
+	// --------------------------------------------------
+	// 2. z-b
+	// --------------------------------------------------
+
+	cout << "z = " << min_sol << endl;
+	cout << "beta = " << beta << endl;
+
+	difference = min_sol - beta;
+
+	cout << "difference = " << difference << endl;
+
+	//tolerance error
+	if (difference < epsilon && difference > -epsilon)
+		difference = 0.0;
+
+	if (difference != 0) {
+		equal = false;
+		return equal;
+	}
+
+	// --------------------------------------------------
+	// 3. u-u
+	// --------------------------------------------------
+	cout << "vector u (y \bar)= ";
+	for (unsigned int i = 0; i < dual_varVals_P1.size(); i++)
+		cout << dual_varVals_P1[i] << " ";
+
+	cout << endl;
+
+	cout << "vector u (y \til)= ";
+	for (unsigned int i = 0; i < u.size(); i++)
+		cout << u[i] << " ";
+
+	cout << endl;
+
+	for (unsigned int i = 0; i < u.size(); i++) {
+		difference = dual_varVals_P1[i] - u[i];
+
+		cout << difference << " ";
+		//tolerance error
+		if (difference < epsilon && difference > -epsilon)
+			difference = 0.0;
+
+		if (difference != 0) {
+			equal = false;
+			return equal;
+		}
+	}
+
+	// --------------------------------------------------
+	// 4. u_0-u_0
+	// --------------------------------------------------
+	cout << "u_0  (y \bar)= " << dual_varVals_P1.back() << endl;
+	cout << "u_0 (y \til)= " << u0 << endl;
+	difference = dual_varVals_P1.back() - u0;
+	cout << difference << " ";
+
+	//tolerance error
+	if (difference < epsilon && difference > -epsilon)
+		difference = 0.0;
+
+	if (difference != 0) {
+		equal = false;
+		return equal;
+	}
+
+	// --------------------------------------------------
+	// 5. v-v
+	// --------------------------------------------------
+	cout << "vector v (y \bar)= ";
+	for (unsigned int i = 0; i < dual_varVals_P2.size(); i++)
+		cout << dual_varVals_P2[i] << " ";
+
+	cout << endl;
+
+	cout << "vector v (y \til)= ";
+	for (unsigned int i = 0; i < v.size(); i++)
+		cout << v[i] << " ";
+
+	cout << endl;
+
+	for (unsigned int i = 0; i < v.size(); i++) {
+		difference = dual_varVals_P2[i] - v[i];
+		cout << difference << " ";
+
+		//tolerance error
+		if (difference < epsilon && difference > -epsilon)
+			difference = 0.0;
+
+		if (difference != 0) {
+			equal = false;
+			return equal;
+		}
+	}
+
+	// --------------------------------------------------
+	// 6. v_0-v_0
+	// --------------------------------------------------
+	cout << "v_0  (y \bar)= " << dual_varVals_P2.back() << endl;
+	cout << "v_0 (y \til)= " << v0 << endl;
+
+	difference = dual_varVals_P2.back() - v0;
+	cout << difference << " ";
+
+	//tolerance error
+	if (difference < epsilon && difference > -epsilon)
+		difference = 0.0;
+
+	if (difference != 0) {
+		equal = false;
+		return equal;
+	}
+
+	return equal;
 
 }
