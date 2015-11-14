@@ -32,16 +32,14 @@ public:
 	 */
 	void evaluate_rT();
 
-	void set_solution(CEnv env, Prob lp, bool y_til);
+	void set_solution(CEnv env, Prob lp);
 
 	/**
 	 Method that solve the second problem (13-19) + 21)
-	 y_til is false if you must only solve problem, true if we are
-	 in the cycle of the algorithm
-	 @param  CEnv env, Prob lp, bool y_til
+	 @param  CEnv env, Prob lp
 	 @return none
 	 */
-	void solve(CEnv env, Prob lp, bool y_til);
+	void solve(CEnv env, Prob lp);
 
 	/**
 	 Method that creates tight C'y >= d subsystem and adds to dual problem
@@ -57,6 +55,13 @@ public:
 	 */
 	void step8_2(CEnv env, Prob lp);
 
+
+	/**
+	 Test if y_tilde == y_barr
+	 @param  none
+	 @return void
+	 */
+	void y_tilde_EQ_y_bar();
 	/**
 	 Method print u
 	 @param  none
@@ -102,7 +107,7 @@ public:
 	void print_y_tilde();
 
 	// ATTRIBUTES:
-	std::set<vector<double> > R;
+	set<vector<double> > R;
 	vector<double> u;
 	vector<double> v;
 	vector<double> a;

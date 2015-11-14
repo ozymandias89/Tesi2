@@ -454,7 +454,7 @@ void SecondProblem::evaluate_rT() {
 
 }
 
-void SecondProblem::set_solution(CEnv env, Prob lp, bool y_til) {
+void SecondProblem::set_solution(CEnv env, Prob lp) {
 
 	vector<double> varibles;
 
@@ -476,8 +476,6 @@ void SecondProblem::set_solution(CEnv env, Prob lp, bool y_til) {
 	// get the names
 	CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
 			&surplus, 0, cur_numcols - 1);
-
-	if (!y_til) {
 
 		//  set variables
 		u0 = varibles[0];
@@ -503,13 +501,24 @@ void SecondProblem::set_solution(CEnv env, Prob lp, bool y_til) {
 		print_v0();
 		print_v();
 
-	} else {
+
+		//create y_tilde
+		y_tilde = a;
+		y_tilde.push_back(beta);
+		y_tilde.insert(y_tilde.end(), u.begin(), u.end());
+		y_tilde.push_back(u0);
+		y_tilde.insert(y_tilde.end(), v.begin(), v.end());
+		y_tilde.push_back(v0);
+
+//		cout << endl;
+//		cout << "y_tilde " << " = " << endl;
+//			for (unsigned int i = 0; i < y_tilde.size(); ++i)
+//				cout << y_tilde[i] << endl;
 
 		//add y tilde in the R set
-		y_tilde = varibles;
 		R.insert(y_tilde);
 
-	}
+
 
 	// free
 	free(cur_colname);
@@ -517,7 +526,7 @@ void SecondProblem::set_solution(CEnv env, Prob lp, bool y_til) {
 
 }
 
-void SecondProblem::solve(CEnv env, Prob lp, bool y_til) {
+void SecondProblem::solve(CEnv env, Prob lp) {
 
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 	int stat = CPXgetstat(env, lp);
@@ -527,7 +536,7 @@ void SecondProblem::solve(CEnv env, Prob lp, bool y_til) {
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 		print_objval(env, lp);
 
-		set_solution(env, lp, y_til);
+		set_solution(env, lp);
 	} else {
 		cerr << "Second problem has conflict!!!!!" << endl;
 		exit(1);
@@ -1013,5 +1022,15 @@ void SecondProblem::step8_2(CEnv env, Prob lp) {
 
 	idx.clear();
 	coef.clear();
+
+}
+
+
+
+
+void y_tilde_EQ_y_bar(){
+
+
+
 
 }

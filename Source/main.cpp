@@ -72,7 +72,7 @@ int main(int argc, char const *argv[]) {
 			print_matrix();
 //
 //
-			sec_prob->solve(env_dual, lp_dual, false);
+//			sec_prob->solve(env_dual, lp_dual, false);
 
 			// --------------------------------------------------
 			// 5. Evaluate vector r
@@ -83,12 +83,13 @@ int main(int argc, char const *argv[]) {
 			// 6. Cycle
 			// --------------------------------------------------
 
-			//while (Y!=Ytilde)
-			sec_prob->step8_1(env_dual, lp_dual);
+		//	do {
+				sec_prob->step8_1(env_dual, lp_dual);
 
-			sec_prob->step8_2(env_dual, lp_dual);
+				sec_prob->step8_2(env_dual, lp_dual);
 
-			//		sec_prob->solve(env_dual, lp_dual, true);
+				sec_prob->solve(env_dual, lp_dual);
+		//	}while (sec_prob->y_tilde_EQ_y_bar);
 
 			// --------------------------------------------------
 			// 6. Show dates
