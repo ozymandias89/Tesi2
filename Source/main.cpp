@@ -21,6 +21,7 @@
 
 #include "solve.cpp"
 #include "SecondProblem.cpp"
+#include "ThirdProblem.cpp"
 
 int main(int argc, char const *argv[]) {
 
@@ -82,6 +83,10 @@ int main(int argc, char const *argv[]) {
 
 				flag = sec_prob->y_tilde_EQ_y_bar();
 
+//				if (!flag){
+//					step 8.4
+//				}
+//
 
 			} while (!flag);
 
