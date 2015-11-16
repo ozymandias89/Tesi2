@@ -166,7 +166,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 		{
 			//per ogni riga della matrice (1 vincolo)
 			for (int i = 0; i < N; i++) {
-				coef = 0;
+				cof = 0;
 				rhs = 0;
 				//1* y_tilde[a] && 1*t[a]
 				int j = 0;
@@ -193,6 +193,8 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				//v and v_0 are 0.. skip
 
 				rhs = -rhs;
+
+				coef.push_back(cof);
 
 				//add constraints
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
@@ -224,11 +226,13 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			}
 
 			//u_0
-			coef += gam * t[j];
+			cof += gam * t[j];
 			rhs += gam * y_tilde[j];
 
 			//v and v_0 are 0... skip
 			rhs = -rhs;
+
+			coef.push_back(cof);
 
 			//add constraints
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
@@ -241,7 +245,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 		{
 			//per ogni riga della matrice (3 vincolo)
 			for (int i = 0; i < N; i++) {
-				coef = 0;
+				cof = 0;
 				rhs = 0;
 				//1* y_tilde[a] && 1*t[a]
 				int j = 0;
@@ -272,6 +276,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 				rhs = -rhs;
 
+				coef.push_back(cof);
 				//add constraints
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 						&matbeg, &idx[0], &coef[0], 0, 0);
@@ -308,11 +313,12 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			}
 
 			//v_0
-			coef += gam * t[j];
+			cof += gam * t[j];
 			rhs += gam * y_tilde[j];
 
 			rhs = -rhs;
 
+			coef.push_back(cof);
 			//add constraints
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
