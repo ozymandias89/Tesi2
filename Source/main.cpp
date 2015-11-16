@@ -74,7 +74,7 @@ int main(int argc, char const *argv[]) {
 			// 6. Cycle
 			// --------------------------------------------------
 			bool flag;
-			do {
+		//	do {
 				sec_prob->step8_1(env_dual, lp_dual);
 
 				sec_prob->step8_2(env_dual, lp_dual);
@@ -83,12 +83,18 @@ int main(int argc, char const *argv[]) {
 
 				flag = sec_prob->y_tilde_EQ_y_bar();
 
+				DECL_ENV(env_third);
+				DECL_PROB(env_third, lp_third, "resolve third problem");
+				ThirdProblem* third_prob = new ThirdProblem(sec_prob->y_tilde);
+				third_prob->setup(env_third, lp_third);
+
+
 //				if (!flag){
 //					step 8.4
 //				}
 //
 
-			} while (!flag);
+	//		} while (!flag);
 
 			// --------------------------------------------------
 			// 6. Show dates

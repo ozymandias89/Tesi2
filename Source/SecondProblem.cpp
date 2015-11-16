@@ -1089,7 +1089,7 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 	// 3. u-u
 	// --------------------------------------------------
 	cout << "vector u (y \bar)= ";
-	for (unsigned int i = 0; i < dual_varVals_P1.size(); i++)
+	for (unsigned int i = 0; i < dual_varVals_P1.size()-1; i++)
 		cout << dual_varVals_P1[i] << " ";
 
 	cout << endl;

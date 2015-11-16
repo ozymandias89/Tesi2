@@ -11,17 +11,25 @@
 // Includes:
 #include "load.h"
 
-class Third_problem {
+class ThirdProblem {
 public:
-	Third_problem();
-	virtual ~Third_problem();
+	ThirdProblem(vector <double> y_til);
+	virtual ~ThirdProblem();
 
 	// PREDICATES:
 
+	void y_tilde_MIN_y_bar();
 
+	/**
+	 Method that set the third problem
+	 @param  (CEnv env, Prob lp)
+	 @return void
+	 */
+	void setup(CEnv env, Prob lp);
 
 	// ATTRIBUTES:
-
+	vector<double> y_tilde;
+	vector<double> t;
 };
 
 #endif /* SOURCE_THIRDPROBLEM_H_ */
