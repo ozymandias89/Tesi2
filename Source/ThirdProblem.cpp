@@ -164,10 +164,11 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 		double cof;
 
 		{
-			//per ogni riga della matrice (1 vincolo)
+			//first constraint (second problem)
 			for (int i = 0; i < N; i++) {
 				cof = 0;
 				rhs = 0;
+
 				//1* y_tilde[a] && 1*t[a]
 				int j = 0;
 				while (j < N) {
@@ -183,28 +184,42 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				for (int iter = 0; iter < num_constraint; iter++) {
 					cof += A[iter][i] * t[j];
 					rhs += A[iter][i] * y_tilde[j];
+//					cout << "!!!" << t[j] << endl;
+//					cout << "###" << y_tilde[j] << endl;
+
 					j++;
 				}
 
 				if (i == k) {
 					cof -= t[j];
 					rhs -= y_tilde[j];
+//					cout << "!!!" << t[j] << endl;
+//					cout << "###" << y_tilde[j] << endl;
 				}
 				//v and v_0 are 0.. skip
 
 				rhs = -rhs;
 
+				//tolerance error
+				if (rhs < epsilon && rhs > -epsilon)
+					rhs = 0.0;
+
+				if (cof < epsilon && cof > -epsilon)
+					cof = 0.0;
+
 				coef.push_back(cof);
 
 				//add constraints
+				if (cof!=0)
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 						&matbeg, &idx[0], &coef[0], 0, 0);
 
 				idx.clear();
 				coef.clear();
+				//cout << endl;
 			}
 		}
-		{	//2 vincolo
+		{	//Second constraint
 			cof = 0;
 			rhs = 0;
 
@@ -227,14 +242,23 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 			//u_0
 			cof += gam * t[j];
+
 			rhs += gam * y_tilde[j];
 
 			//v and v_0 are 0... skip
 			rhs = -rhs;
 
+			//tolerance error
+			if (rhs < epsilon && rhs > -epsilon)
+				rhs = 0.0;
+
+			if (cof < epsilon && cof > -epsilon)
+				cof = 0.0;
+
 			coef.push_back(cof);
 
 			//add constraints
+			if (cof!=0)
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -243,7 +267,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 		}
 
 		{
-			//per ogni riga della matrice (3 vincolo)
+			//for each lines of matrix (third constraint)
 			for (int i = 0; i < N; i++) {
 				cof = 0;
 				rhs = 0;
@@ -252,6 +276,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				while (j < N) {
 					cof += t[j];
 					rhs += y_tilde[j];
+
 					j++;
 				}
 
@@ -259,12 +284,14 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				j++;
 
 				//u && u_0 are 0... skip
-				j += num_constraint;
+				j += num_constraint + 1;
 
 				//A_T * y_tilde[v] && A_T * t[v]
 				for (int iter = 0; iter < num_constraint; iter++) {
 					cof += A[iter][i] * t[j];
 					rhs += A[iter][i] * y_tilde[j];
+					//	cout << "!!!" << t[j] << endl;
+					//	cout << "###" << y_tilde[j] << endl;
 					j++;
 				}
 
@@ -276,13 +303,23 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 				rhs = -rhs;
 
+				//tolerance error
+				if (rhs < epsilon && rhs > -epsilon)
+					rhs = 0.0;
+
+				if (cof < epsilon && cof > -epsilon)
+					cof = 0.0;
+
 				coef.push_back(cof);
+
 				//add constraints
-				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-						&matbeg, &idx[0], &coef[0], 0, 0);
+				if (cof != 0)
+					CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs,
+							&sense, &matbeg, &idx[0], &coef[0], 0, 0);
 
 				idx.clear();
 				coef.clear();
+				//cout << endl;
 			}
 
 		}
@@ -302,13 +339,16 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			j++;
 
 			//u and u_0 are 0... skip
-			j += num_constraint;
+			j += num_constraint + 1;
 
 			//b_t * t[v]
 			for (int i = 0; i < num_constraint; i++) {
 				cof += b[i] * t[j];
 				rhs += b[i] * y_tilde[j];
 
+//				cout << "!!!" << t[j] << endl;
+//				cout << "###" << y_tilde[j] << endl;
+//
 				j++;
 			}
 
@@ -318,15 +358,26 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 			rhs = -rhs;
 
+			//tolerance error
+			if (rhs < epsilon && rhs > -epsilon)
+				rhs = 0.0;
+
+			if (cof < epsilon && cof > -epsilon)
+				cof = 0.0;
+
 			coef.push_back(cof);
+
 			//add constraints
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-					&matbeg, &idx[0], &coef[0], 0, 0);
+			if (cof != 0)
+				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+						&matbeg, &idx[0], &coef[0], 0, 0);
 
 			idx.clear();
 			coef.clear();
 
 		}
 	}
+
+	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/third_problem.lp", 0);
 
 }
