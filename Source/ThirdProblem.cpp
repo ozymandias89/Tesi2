@@ -46,9 +46,9 @@ void ThirdProblem::y_tilde_MIN_y_bar() {
 		difference = c[i] - y_tilde[j];
 
 		cout << difference << " ";
-		//tolerance error
-		if (difference < epsilon && difference > -epsilon)
-			difference = 0.0;
+//		//tolerance error
+//		if (difference < epsilon && difference > -epsilon)
+//			difference = 0.0;
 
 		t.push_back(difference);
 		j++;
@@ -68,9 +68,9 @@ void ThirdProblem::y_tilde_MIN_y_bar() {
 
 	cout << "difference = " << difference << endl;
 
-	//tolerance error
-	if (difference < epsilon && difference > -epsilon)
-		difference = 0.0;
+//	//tolerance error
+//	if (difference < epsilon && difference > -epsilon)
+//		difference = 0.0;
 
 	t.push_back(difference);
 	j++;
@@ -95,9 +95,9 @@ void ThirdProblem::y_tilde_MIN_y_bar() {
 		difference = dual_varVals_P1[i] - y_tilde[j];
 
 		cout << difference << " ";
-		//tolerance error
-		if (difference < epsilon && difference > -epsilon)
-			difference = 0.0;
+//		//tolerance error
+//		if (difference < epsilon && difference > -epsilon)
+//			difference = 0.0;
 
 		t.push_back(difference);
 		j++;
@@ -123,9 +123,9 @@ void ThirdProblem::y_tilde_MIN_y_bar() {
 		difference = dual_varVals_P2[i] - y_tilde[j];
 		cout << difference << " ";
 
-		//tolerance error
-		if (difference < epsilon && difference > -epsilon)
-			difference = 0.0;
+//		//tolerance error
+//		if (difference < epsilon && difference > -epsilon)
+//			difference = 0.0;
 
 		t.push_back(difference);
 		j++;
@@ -170,22 +170,23 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				rhs = 0;
 
 				//1* y_tilde[a] && 1*t[a]
-				int j = 0;
-				while (j < N) {
-					cof += t[j];
-					rhs += y_tilde[j];
-					j++;
-				}
+				cof += t[i];
+				rhs += y_tilde[i];
+//				cout << endl;
+//				cout << "a[i]! " << t[i] << endl;
+//				cout << "a[i]# " << y_tilde[i] << endl;
 
+				int j = N;
 				//beta are 0... skip
 				j++;
 
+//				cout << endl;
 				//A_T * y_tilde[u] && A_T * t[u]
 				for (int iter = 0; iter < num_constraint; iter++) {
 					cof += A[iter][i] * t[j];
 					rhs += A[iter][i] * y_tilde[j];
-//					cout << "!!!" << t[j] << endl;
-//					cout << "###" << y_tilde[j] << endl;
+//					cout << "u[i]! " << t[j] << endl;
+//					cout << "u[i]# " << y_tilde[j] << endl;
 
 					j++;
 				}
@@ -193,24 +194,24 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				if (i == k) {
 					cof -= t[j];
 					rhs -= y_tilde[j];
-//					cout << "!!!" << t[j] << endl;
-//					cout << "###" << y_tilde[j] << endl;
+//					cout << "u[0]! " << t[j] << endl;
+//					cout << "u[0]# " << y_tilde[j] << endl;
 				}
 				//v and v_0 are 0.. skip
 
 				rhs = -rhs;
 
-				//tolerance error
-				if (rhs < epsilon && rhs > -epsilon)
-					rhs = 0.0;
-
-				if (cof < epsilon && cof > -epsilon)
-					cof = 0.0;
+//				//tolerance error
+//				if (rhs < epsilon && rhs > -epsilon)
+//					rhs = 0.0;
+//
+//				if (cof < epsilon && cof > -epsilon)
+//					cof = 0.0;
 
 				coef.push_back(cof);
 
 				//add constraints
-				if (cof!=0)
+			//	if (cof!=0)
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 						&matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -226,39 +227,44 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			//a is 0...skip
 			int j = N;
 
+			cout << endl;
 			//-beta
 			cof -= t[j];
 			rhs -= y_tilde[j];
-
+//			cout << "beta! " << t[j] << endl;
+//			cout << "beta# " << y_tilde[j] << endl;
 			j++;
 
 			//u
 			for (int i = 0; i < num_constraint; i++) {
 				cof += b[i] * t[j];
 				rhs += b[i] * y_tilde[j];
-
+//				cout << "b[i] " << b[i] << "u[i]! " << t[j] << endl;
+//				cout << "u[i]# " << y_tilde[j] << endl;
 				j++;
 			}
 
 			//u_0
 			cof += gam * t[j];
+//			cout << "gam "<< gam << "u[0]! " << t[j] << endl;
 
 			rhs += gam * y_tilde[j];
+//			cout << "u[0]# " << y_tilde[j] << endl;
 
 			//v and v_0 are 0... skip
 			rhs = -rhs;
 
-			//tolerance error
-			if (rhs < epsilon && rhs > -epsilon)
-				rhs = 0.0;
-
-			if (cof < epsilon && cof > -epsilon)
-				cof = 0.0;
-
+//			//tolerance error
+//			if (rhs < epsilon && rhs > -epsilon)
+//				rhs = 0.0;
+//
+//			if (cof < epsilon && cof > -epsilon)
+//				cof = 0.0;
+//			cout << "####### " << cof;
 			coef.push_back(cof);
 
 			//add constraints
-			if (cof!=0)
+//			if (cof!=0)
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -269,17 +275,18 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 		{
 			//for each lines of matrix (third constraint)
 			for (int i = 0; i < N; i++) {
+
 				cof = 0;
 				rhs = 0;
 				//1* y_tilde[a] && 1*t[a]
-				int j = 0;
-				while (j < N) {
-					cof += t[j];
-					rhs += y_tilde[j];
 
-					j++;
-				}
+//				cout << endl;
+				cof += t[i];
+				rhs += y_tilde[i];
+//				cout << "a[i]! " << t[i] << endl;
+//				cout << "a[i]# " << y_tilde[i] << endl;
 
+				int j = N;
 				//beta are 0... skip
 				j++;
 
@@ -290,8 +297,8 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				for (int iter = 0; iter < num_constraint; iter++) {
 					cof += A[iter][i] * t[j];
 					rhs += A[iter][i] * y_tilde[j];
-					//	cout << "!!!" << t[j] << endl;
-					//	cout << "###" << y_tilde[j] << endl;
+//					cout << "v[i]! " << t[j] << endl;
+//					cout << "v[i]# " << y_tilde[j] << endl;
 					j++;
 				}
 
@@ -299,21 +306,23 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				if (i == k) {
 					cof -= t[j];
 					rhs -= y_tilde[j];
+//					cout << "v[0]! " << t[j] << endl;
+//					cout << "v[0]# " << y_tilde[j] << endl;
 				}
 
 				rhs = -rhs;
 
-				//tolerance error
-				if (rhs < epsilon && rhs > -epsilon)
-					rhs = 0.0;
-
-				if (cof < epsilon && cof > -epsilon)
-					cof = 0.0;
+//				//tolerance error
+//				if (rhs < epsilon && rhs > -epsilon)
+//					rhs = 0.0;
+//
+//				if (cof < epsilon && cof > -epsilon)
+//					cof = 0.0;
 
 				coef.push_back(cof);
 
 				//add constraints
-				if (cof != 0)
+//				if (cof != 0)
 					CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs,
 							&sense, &matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -325,7 +334,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 		}
 
 		{
-			//4 vincolo
+			//fourth constraint
 			cof = 0;
 			rhs = 0;
 
@@ -335,6 +344,8 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			//-beta
 			cof -= t[j];
 			rhs -= y_tilde[j];
+//			cout << "beta! " << t[j] << endl;
+//			cout << "beta# " << y_tilde[j] << endl;
 
 			j++;
 
@@ -345,32 +356,84 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			for (int i = 0; i < num_constraint; i++) {
 				cof += b[i] * t[j];
 				rhs += b[i] * y_tilde[j];
+//				cout << "v[i]! " << t[j] << endl;
+//				cout << "v[i]#" << y_tilde[j] << endl;
 
-//				cout << "!!!" << t[j] << endl;
-//				cout << "###" << y_tilde[j] << endl;
-//
 				j++;
 			}
 
 			//v_0
-			cof += gam * t[j];
-			rhs += gam * y_tilde[j];
+			cof += (gam+1) * t[j];
+			rhs += (gam+1) * y_tilde[j];
+//			cout << "v[0]! " << t[j] << endl;
+//			cout << "v[0]#" << y_tilde[j] << endl;
 
 			rhs = -rhs;
 
-			//tolerance error
-			if (rhs < epsilon && rhs > -epsilon)
-				rhs = 0.0;
-
-			if (cof < epsilon && cof > -epsilon)
-				cof = 0.0;
+//			//tolerance error
+//			if (rhs < epsilon && rhs > -epsilon)
+//				rhs = 0.0;
+//
+//			if (cof < epsilon && cof > -epsilon)
+//				cof = 0.0;
 
 			coef.push_back(cof);
 
 			//add constraints
-			if (cof != 0)
+	//		if (cof != 0)
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 						&matbeg, &idx[0], &coef[0], 0, 0);
+
+			idx.clear();
+			coef.clear();
+
+		}
+
+
+
+		{
+			// constraint -u_0 >= 0
+			cof = 0;
+			rhs = 0;
+
+			int j = N + 1 + num_constraint;
+			//-u
+			cof -= t[j];
+			rhs -= y_tilde[j];
+//			cout << "u_0! " << t[j] << endl;
+//			cout << "u_0# " << y_tilde[j] << endl;
+
+			rhs = -rhs;
+
+			coef.push_back(cof);
+
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+					&matbeg, &idx[0], &coef[0], 0, 0);
+
+			idx.clear();
+			coef.clear();
+
+		}
+
+
+
+		{
+			// constraint v_0 >= 0
+			cof = 0;
+			rhs = 0;
+
+			//v
+			cof += t.back();
+			rhs += y_tilde.back();
+//			cout << "v_0! " << t.back() << endl;
+//			cout << "v_0# " << y_tilde.back() << endl;
+
+			rhs = -rhs;
+
+			coef.push_back(cof);
+
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+					&matbeg, &idx[0], &coef[0], 0, 0);
 
 			idx.clear();
 			coef.clear();
@@ -379,5 +442,9 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 	}
 
 	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/third_problem.lp", 0);
+	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	double objval;
+		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &objval);
+		std::cout << "Obj val: " << objval << std::endl;
 
 }
