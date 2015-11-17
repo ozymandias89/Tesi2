@@ -27,6 +27,13 @@ public:
 	 */
 	void setup(CEnv env, Prob lp);
 
+	/**
+	 update y_bar step 8.4
+	 @param  (CEnv env, Prob lp)
+	 @return void
+	 */
+	void update_y_bar(CEnv env, Prob lp);
+
 	// ATTRIBUTES:
 	vector<double> y_tilde;
 	vector<double> t;

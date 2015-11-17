@@ -20,6 +20,7 @@ ThirdProblem::~ThirdProblem() {
 
 void ThirdProblem::y_tilde_MIN_y_bar() {
 
+	t.clear();
 	double difference;
 
 	// --------------------------------------------------
@@ -136,6 +137,7 @@ void ThirdProblem::y_tilde_MIN_y_bar() {
 void ThirdProblem::setup(CEnv env, Prob lp) {
 
 	{
+		// lambda variable
 		static const char* varType = NULL;
 		double obj = -1.0;
 		double lb = -CPX_INFBOUND;
@@ -202,16 +204,16 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				rhs = -rhs;
 
 //				//tolerance error
-//				if (rhs < epsilon && rhs > -epsilon)
-//					rhs = 0.0;
-//
-//				if (cof < epsilon && cof > -epsilon)
-//					cof = 0.0;
+				if (rhs < epsilon && rhs > -epsilon)
+					rhs = 0.0;
+
+				if (cof < epsilon && cof > -epsilon)
+					cof = 0.0;
 
 				coef.push_back(cof);
 
 				//add constraints
-			//	if (cof!=0)
+				//if (cof!=0)
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 						&matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -255,11 +257,11 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			rhs = -rhs;
 
 //			//tolerance error
-//			if (rhs < epsilon && rhs > -epsilon)
-//				rhs = 0.0;
-//
-//			if (cof < epsilon && cof > -epsilon)
-//				cof = 0.0;
+			if (rhs < epsilon && rhs > -epsilon)
+				rhs = 0.0;
+
+			if (cof < epsilon && cof > -epsilon)
+				cof = 0.0;
 //			cout << "####### " << cof;
 			coef.push_back(cof);
 
@@ -313,18 +315,18 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				rhs = -rhs;
 
 //				//tolerance error
-//				if (rhs < epsilon && rhs > -epsilon)
-//					rhs = 0.0;
-//
-//				if (cof < epsilon && cof > -epsilon)
-//					cof = 0.0;
+				if (rhs < epsilon && rhs > -epsilon)
+					rhs = 0.0;
+
+				if (cof < epsilon && cof > -epsilon)
+					cof = 0.0;
 
 				coef.push_back(cof);
 
 				//add constraints
 //				if (cof != 0)
-					CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs,
-							&sense, &matbeg, &idx[0], &coef[0], 0, 0);
+				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+						&matbeg, &idx[0], &coef[0], 0, 0);
 
 				idx.clear();
 				coef.clear();
@@ -363,33 +365,31 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			}
 
 			//v_0
-			cof += (gam+1) * t[j];
-			rhs += (gam+1) * y_tilde[j];
+			cof += (gam + 1) * t[j];
+			rhs += (gam + 1) * y_tilde[j];
 //			cout << "v[0]! " << t[j] << endl;
 //			cout << "v[0]#" << y_tilde[j] << endl;
 
 			rhs = -rhs;
 
 //			//tolerance error
-//			if (rhs < epsilon && rhs > -epsilon)
-//				rhs = 0.0;
-//
-//			if (cof < epsilon && cof > -epsilon)
-//				cof = 0.0;
+			if (rhs < epsilon && rhs > -epsilon)
+				rhs = 0.0;
+
+			if (cof < epsilon && cof > -epsilon)
+				cof = 0.0;
 
 			coef.push_back(cof);
 
 			//add constraints
-	//		if (cof != 0)
-				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-						&matbeg, &idx[0], &coef[0], 0, 0);
+			//		if (cof != 0)
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+					&matbeg, &idx[0], &coef[0], 0, 0);
 
 			idx.clear();
 			coef.clear();
 
 		}
-
-
 
 		{
 			// constraint -u_0 >= 0
@@ -404,6 +404,12 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 //			cout << "u_0# " << y_tilde[j] << endl;
 
 			rhs = -rhs;
+			//tolerance error
+			if (rhs < epsilon && rhs > -epsilon)
+				rhs = 0.0;
+
+			if (cof < epsilon && cof > -epsilon)
+				cof = 0.0;
 
 			coef.push_back(cof);
 
@@ -414,8 +420,6 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			coef.clear();
 
 		}
-
-
 
 		{
 			// constraint v_0 >= 0
@@ -429,7 +433,12 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 //			cout << "v_0# " << y_tilde.back() << endl;
 
 			rhs = -rhs;
+			//tolerance error
+			if (rhs < epsilon && rhs > -epsilon)
+				rhs = 0.0;
 
+			if (cof < epsilon && cof > -epsilon)
+				cof = 0.0;
 			coef.push_back(cof);
 
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
@@ -442,9 +451,103 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 	}
 
 	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/third_problem.lp", 0);
-	CHECKED_CPX_CALL(CPXprimopt, env, lp);
-	double objval;
-		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &objval);
-		std::cout << "Obj val: " << objval << std::endl;
+
+}
+
+void ThirdProblem::update_y_bar(CEnv env, Prob lp) {
+
+	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
+	int stat = CPXgetstat(env, lp);
+
+	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
+		CHECKED_CPX_CALL(CPXprimopt, env, lp);
+		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
+
+		print_objval(env, lp);
+
+		vector<double> varibles;
+
+		cout << "VARIABLES THIRD PROBLEM: " << endl;
+		int cur_numcols = 1;
+
+		varibles.resize(cur_numcols);
+		CHECKED_CPX_CALL(CPXgetx, env, lp, &varibles[0], 0, cur_numcols - 1);
+
+		int surplus;
+		status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0,
+				cur_numcols - 1);
+		int cur_colnamespace = -surplus; // the space needed to save the names
+
+		// allocate memory
+		char** cur_colname = (char **) malloc(sizeof(char *) * cur_numcols);
+		char* cur_colnamestore = (char *) malloc(cur_colnamespace);
+
+		// get the names
+		CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
+				&surplus, 0, cur_numcols - 1);
+
+		//  print index, name and value of lambda
+		cout << cur_colname[0] << " = " << varibles[0] << endl;
+
+		double lambda = varibles[0];
+
+		// free
+		free(cur_colname);
+		free(cur_colnamestore);
+
+
+		//lambda * (y_bar-y_tilde)
+		vector <double> r_mul_lamb;
+
+		cout << endl;
+
+		for (vector<double>::iterator it = t.begin() ; it != t.end(); ++it){
+			r_mul_lamb.push_back((*it * lambda));
+			cout << " r " << *it << " r_mul_lamb " << r_mul_lamb.back() << endl;
+		}
+
+		cout << endl;
+
+		//y_tilde + r_mul_lamb
+		int j=0;
+
+		//c
+		for (unsigned int i=0; i < c.size(); ++i) {
+			c[j] = y_tilde[j] + r_mul_lamb[j];
+			cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
+			j++;
+		}
+
+		cout << endl;
+
+		//z
+		min_sol= y_tilde[j] + r_mul_lamb[j];
+		cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
+		j++;
+
+		cout << endl;
+
+		//u and u_0
+		for (unsigned int i=0; i < dual_varVals_P1.size(); ++i){
+			dual_varVals_P1[i] = y_tilde[j] + r_mul_lamb[j];
+			cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
+			j++;
+		}
+
+		cout << endl;
+
+		//v and v_0
+		for (unsigned int i = 0; i < dual_varVals_P2.size(); ++i) {
+			dual_varVals_P2[i] = y_tilde[j] + r_mul_lamb[j];
+			cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
+			j++;
+		}
+
+
+
+	} else {
+		cerr << "Third  problem has conflict!!!!!" << endl;
+		exit(1);
+	}
 
 }

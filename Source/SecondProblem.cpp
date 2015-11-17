@@ -503,6 +503,7 @@ void SecondProblem::set_solution(CEnv env, Prob lp) {
 
 
 		//create y_tilde
+		y_tilde.clear();
 		y_tilde = a;
 		y_tilde.push_back(beta);
 		y_tilde.insert(y_tilde.end(), u.begin(), u.end());

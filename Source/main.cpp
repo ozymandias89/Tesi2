@@ -87,6 +87,8 @@ int main(int argc, char const *argv[]) {
 				DECL_PROB(env_third, lp_third, "resolve third problem");
 				ThirdProblem* third_prob = new ThirdProblem(sec_prob->y_tilde);
 				third_prob->setup(env_third, lp_third);
+				third_prob->update_y_bar(env_third, lp_third);
+
 
 
 //				if (!flag){
