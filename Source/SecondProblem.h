@@ -108,6 +108,7 @@ public:
 
 	// ATTRIBUTES:
 	set<vector<double> > R;
+	set<int> satisfy_constraint_list;
 	vector<double> u;
 	vector<double> v;
 	vector<double> a;

@@ -72,7 +72,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 		cout << "Initialization dual problem... " << endl;
 		// variables
 		static const char* varType = NULL;
-		double obj = 1.0;
+		double obj = 0;
 		double lb = -CPX_INFBOUND;
 		double ub = 0.0;
 
@@ -477,49 +477,51 @@ void SecondProblem::set_solution(CEnv env, Prob lp) {
 	CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
 			&surplus, 0, cur_numcols - 1);
 
-		//  set variables
-		u0 = varibles[0];
+	//  set variables
+	u0 = varibles[0];
 
-		for (int i = 1; i <= num_constraint; i++)
-			u.push_back(varibles[i]);
+	u.clear();
 
-		for (int i = num_constraint + 1; i < num_constraint + 1 + N; i++)
-			a.push_back(varibles[i]);
+	for (int i = 1; i <= num_constraint; i++)
+		u.push_back(varibles[i]);
 
-		beta = varibles[num_constraint + N + 1];
+	a.clear();
 
-		v0 = varibles[num_constraint + N + 2];
+	for (int i = num_constraint + 1; i < num_constraint + 1 + N; i++)
+		a.push_back(varibles[i]);
 
-		for (int i = num_constraint + N + 3; i < 2 * num_constraint + N + 3;
-				i++)
-			v.push_back(varibles[i]);
+	beta = varibles[num_constraint + N + 1];
 
-		print_u0();
-		print_u();
-		print_a();
-		print_beta();
-		print_v0();
-		print_v();
+	v0 = varibles[num_constraint + N + 2];
 
+	v.clear();
 
-		//create y_tilde
-		y_tilde.clear();
-		y_tilde = a;
-		y_tilde.push_back(beta);
-		y_tilde.insert(y_tilde.end(), u.begin(), u.end());
-		y_tilde.push_back(u0);
-		y_tilde.insert(y_tilde.end(), v.begin(), v.end());
-		y_tilde.push_back(v0);
+	for (int i = num_constraint + N + 3; i < 2 * num_constraint + N + 3; i++)
+		v.push_back(varibles[i]);
+
+	print_u0();
+	print_u();
+	print_a();
+	print_beta();
+	print_v0();
+	print_v();
+
+	//create y_tilde
+	y_tilde.clear();
+	y_tilde = a;
+	y_tilde.push_back(beta);
+	y_tilde.insert(y_tilde.end(), u.begin(), u.end());
+	y_tilde.push_back(u0);
+	y_tilde.insert(y_tilde.end(), v.begin(), v.end());
+	y_tilde.push_back(v0);
 
 //		cout << endl;
 //		cout << "y_tilde " << " = " << endl;
 //			for (unsigned int i = 0; i < y_tilde.size(); ++i)
 //				cout << y_tilde[i] << endl;
 
-		//add y tilde in the R set
-		R.insert(y_tilde);
-
-
+	//add y tilde in the R set
+	R.insert(y_tilde);
 
 	// free
 	free(cur_colname);
@@ -549,6 +551,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 	std::vector<int> idx;
 	std::vector<double> coef;
+	int count_constraint = 0;
 
 	// --------------------------------------------------
 	// Estimation A_T * u - e_k * u_0 + a = 0
@@ -584,18 +587,20 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 //		cout << "a[j] " << c[j] << endl;
 
 		//tolerance error
-		if (sum < epsilon && sum > -epsilon)
+		if (sum < epsilon_8_1 && sum > -epsilon_8_1)
 			sum = 0.0;
 
 		// --------------------------------------------------
 		//  print respect constraint
 		// --------------------------------------------------
 		cout << endl;
-		cout << "sum = " << sum << " constraint number " << j << endl;
+		cout << "sum = " << sum << " constraint number " << count_constraint
+				<< endl;
 		if (sum == 0) {
-			cout << "The constraint number " << j << " respects equation"
-					<< endl;
+			cout << "The constraint number " << count_constraint
+					<< " respects equation" << endl;
 			cout << endl << endl;
+
 			// --------------------------------------------------
 			// add new constraint A_T * u - e_k * u_0 + a = 0
 			// --------------------------------------------------
@@ -628,15 +633,24 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			coef.push_back(1);
 			nzcnt++;
 
+			// --------------------------------------------------
+			// add new satisfy constraint if isn't in set
+			// --------------------------------------------------
+			if (satisfy_constraint_list.count(count_constraint) == 0)
+				satisfy_constraint_list.insert(count_constraint);
+
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
 
 			idx.clear();
 			coef.clear();
-		} else
-			cout << "The constraint number " << j
+		} else {
+			cout << "The constraint number " << count_constraint
 					<< " doesn't respects the equation " << endl << endl;
-
+			if (satisfy_constraint_list.count(count_constraint) != 0)
+				throw std::runtime_error("Vincolo ora violato");
+		}
+		count_constraint++;
 	}
 
 	// --------------------------------------------------
@@ -670,7 +684,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	// --------------------------------------------------
 
 	//tolerance error
-	if (sum < epsilon && sum > -epsilon)
+	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
 		sum = 0.0;
 
 	cout << endl;
@@ -682,7 +696,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// add new constraint b_T * u + u_0 * gamma - b = 0
 		// --------------------------------------------------
 
-		cout << "The constraint with beta respect equation " << endl;
+		cout << "The constraint number " << count_constraint
+				<< " respect equation " << endl;
 		nzcnt = 0;
 		char sense = 'E';
 		int matbeg = 0;
@@ -712,16 +727,26 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		coef.push_back(-1);
 		nzcnt++;
 
+		// --------------------------------------------------
+		// add new satisfy constraint if isn't in set
+		// --------------------------------------------------
+		if (satisfy_constraint_list.count(count_constraint) == 0)
+			satisfy_constraint_list.insert(count_constraint);
+
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 				&matbeg, &idx[0], &coef[0], 0, 0);
 
 		idx.clear();
 		coef.clear();
 
-	} else
-		cout << "The constraint  with beta doesn't respects the equation "
-				<< endl << endl;
+	} else {
+		cout << "The constraint number " << count_constraint
+				<< " doesn't respects the equation " << endl << endl;
+		if (satisfy_constraint_list.count(count_constraint) != 0)
+			throw std::runtime_error("Vincolo ora violato");
+	}
 
+	count_constraint++;
 	// --------------------------------------------------
 	// Estimation A_T * u - e_k * u_0 + a = 0
 	// --------------------------------------------------
@@ -754,17 +779,18 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		//	cout << "a[j] " << c[j] << endl;
 
 		//tolerance error
-		if (sum < epsilon && sum > -epsilon)
+		if (sum < epsilon_8_1 && sum > -epsilon_8_1)
 			sum = 0.0;
 
 		// --------------------------------------------------
 		//  print respect constraint
 		// --------------------------------------------------
 		cout << endl;
-		cout << "sum = " << sum << " constraint number " << j << endl;
+		cout << "sum = " << sum << " constraint number " << count_constraint
+				<< endl;
 		if (sum == 0) {
-			cout << "The constraint number " << j << " respects equation"
-					<< endl;
+			cout << "The constraint number " << count_constraint
+					<< " respects equation" << endl;
 			cout << endl << endl;
 
 			// --------------------------------------------------
@@ -801,15 +827,25 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			coef.push_back(1);
 			nzcnt++;
 
+			// --------------------------------------------------
+			// add new satisfy constraint if isn't in set
+			// --------------------------------------------------
+			if (satisfy_constraint_list.count(count_constraint) == 0)
+				satisfy_constraint_list.insert(count_constraint);
+
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
 
 			idx.clear();
 			coef.clear();
 
-		} else
-			cout << "The constraint number " << j
+		} else {
+			cout << "The constraint number " << count_constraint
 					<< " doesn't respects the equation " << endl << endl;
+			if (satisfy_constraint_list.count(count_constraint) != 0)
+				throw std::runtime_error("Vincolo ora violato");
+		}
+		count_constraint++;
 	}
 
 	// --------------------------------------------------
@@ -840,13 +876,14 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	//  print respect constraint
 	// --------------------------------------------------
 	//tolerance error
-	if (sum < epsilon && sum > -epsilon)
+	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
 		sum = 0.0;
 
 	cout << endl;
 	cout << "sum = " << sum << endl;
 	if (sum == 0) {
-		cout << "The constraint with beta respects equation " << endl;
+		cout << "The constraint number " << count_constraint
+				<< " respect equation " << endl;
 
 		// --------------------------------------------------
 		// add new constraint b_T * v + v_0 * (gamma+1) - b = 0
@@ -880,16 +917,100 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		coef.push_back(-1);
 		nzcnt++;
 
+		// --------------------------------------------------
+		// add new satisfy constraint if isn't in set
+		// --------------------------------------------------
+		if (satisfy_constraint_list.count(count_constraint) == 0)
+			satisfy_constraint_list.insert(count_constraint);
+
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 				&matbeg, &idx[0], &coef[0], 0, 0);
 
 		idx.clear();
 		coef.clear();
-	} else
-		cout << "The constraint with beta doesn't respects the equation "
-				<< endl << endl;
+	} else {
+		cout << "The constraint number " << count_constraint
+				<< " doesn't respects the equation " << endl << endl;
+		if (satisfy_constraint_list.count(count_constraint) != 0)
+			throw std::runtime_error("Vincolo ora violato");
+	}
 
-}
+	count_constraint++;
+	// --------------------------------------------------
+	// Estimation -u_0>=0
+	// --------------------------------------------------
+	sum = 0;
+	sum -= dual_varVals_P1.back();
+
+	//tolerance error
+	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
+		sum = 0.0;
+
+	cout << endl;
+	cout << "sum = " << sum << endl;
+
+	if (sum == 0) {
+		nzcnt = 1;
+		idx.push_back(0);
+		coef.push_back(-1.0);
+
+		// --------------------------------------------------
+		// add new satisfy constraint if isn't in set
+		// --------------------------------------------------
+		if (satisfy_constraint_list.count(count_constraint) == 0)
+			satisfy_constraint_list.insert(count_constraint);
+
+
+		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+				&matbeg, &idx[0], &coef[0], 0, 0);
+
+		idx.clear();
+		coef.clear();
+	} else{
+		cout << "The constraint number " << count_constraint
+				<< " doesn't respects the equation " << endl << endl;
+		if (satisfy_constraint_list.count(count_constraint) != 0)
+			throw std::runtime_error("Vincolo ora violato");
+	}
+
+	count_constraint++;
+
+	// --------------------------------------------------
+	// Estimation v_0>=0
+	// --------------------------------------------------
+	sum = 0;
+	sum += dual_varVals_P2.back();
+
+	//tolerance error
+	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
+		sum = 0.0;
+
+	cout << endl;
+	cout << "sum = " << sum << endl;
+
+	if (sum == 0) {
+		nzcnt = 1;
+		idx.push_back(v_0);
+		coef.push_back(1.0);
+
+		// --------------------------------------------------
+		// add new satisfy constraint if isn't in set
+		// --------------------------------------------------
+		if (satisfy_constraint_list.count(count_constraint) == 0)
+			satisfy_constraint_list.insert(count_constraint);
+
+		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+				&matbeg, &idx[0], &coef[0], 0, 0);
+
+		idx.clear();
+		coef.clear();
+	} else {
+		cout << "The constraint number " << count_constraint
+				<< " doesn't respects the equation " << endl << endl;
+		if (satisfy_constraint_list.count(count_constraint) != 0)
+			throw std::runtime_error("Vincolo ora violato");
+	}
+	}
 
 void SecondProblem::step8_2(CEnv env, Prob lp) {
 
@@ -1055,7 +1176,7 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 
 		cout << difference << " ";
 		//tolerance error
-		if (difference < epsilon && difference > -epsilon)
+		if (difference < epsilon_8_3 && difference > -epsilon_8_3)
 			difference = 0.0;
 
 		if (difference != 0) {
@@ -1078,7 +1199,7 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 	cout << "difference = " << difference << endl;
 
 	//tolerance error
-	if (difference < epsilon && difference > -epsilon)
+	if (difference < epsilon_8_3 && difference > -epsilon_8_3)
 		difference = 0.0;
 
 	if (difference != 0) {
@@ -1090,7 +1211,7 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 	// 3. u-u
 	// --------------------------------------------------
 	cout << "vector u (y \bar)= ";
-	for (unsigned int i = 0; i < dual_varVals_P1.size()-1; i++)
+	for (unsigned int i = 0; i < dual_varVals_P1.size() - 1; i++)
 		cout << dual_varVals_P1[i] << " ";
 
 	cout << endl;
@@ -1106,7 +1227,7 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 
 		cout << difference << " ";
 		//tolerance error
-		if (difference < epsilon && difference > -epsilon)
+		if (difference < epsilon_8_3 && difference > -epsilon_8_3)
 			difference = 0.0;
 
 		if (difference != 0) {
@@ -1124,7 +1245,7 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 	cout << difference << " ";
 
 	//tolerance error
-	if (difference < epsilon && difference > -epsilon)
+	if (difference < epsilon_8_3 && difference > -epsilon_8_3)
 		difference = 0.0;
 
 	if (difference != 0) {
@@ -1152,7 +1273,7 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 		cout << difference << " ";
 
 		//tolerance error
-		if (difference < epsilon && difference > -epsilon)
+		if (difference < epsilon_8_3 && difference > -epsilon_8_3)
 			difference = 0.0;
 
 		if (difference != 0) {
@@ -1171,7 +1292,7 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 	cout << difference << " ";
 
 	//tolerance error
-	if (difference < epsilon && difference > -epsilon)
+	if (difference < epsilon_8_3 && difference > -epsilon_8_3)
 		difference = 0.0;
 
 	if (difference != 0) {
@@ -1179,6 +1300,7 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 		return equal;
 	}
 
+	cout << endl;
 	return equal;
 
 }

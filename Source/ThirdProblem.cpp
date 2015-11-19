@@ -20,7 +20,7 @@ ThirdProblem::~ThirdProblem() {
 
 void ThirdProblem::y_tilde_MIN_y_bar() {
 
-	t.clear();
+
 	double difference;
 
 	// --------------------------------------------------
@@ -204,10 +204,10 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				rhs = -rhs;
 
 //				//tolerance error
-				if (rhs < epsilon && rhs > -epsilon)
+				if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
 					rhs = 0.0;
 
-				if (cof < epsilon && cof > -epsilon)
+				if (cof < epsilon_8_4 && cof > -epsilon_8_4)
 					cof = 0.0;
 
 				coef.push_back(cof);
@@ -257,10 +257,10 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			rhs = -rhs;
 
 //			//tolerance error
-			if (rhs < epsilon && rhs > -epsilon)
+			if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
 				rhs = 0.0;
 
-			if (cof < epsilon && cof > -epsilon)
+			if (cof < epsilon_8_4 && cof > -epsilon_8_4)
 				cof = 0.0;
 //			cout << "####### " << cof;
 			coef.push_back(cof);
@@ -315,10 +315,10 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				rhs = -rhs;
 
 //				//tolerance error
-				if (rhs < epsilon && rhs > -epsilon)
+				if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
 					rhs = 0.0;
 
-				if (cof < epsilon && cof > -epsilon)
+				if (cof < epsilon_8_4 && cof > -epsilon_8_4)
 					cof = 0.0;
 
 				coef.push_back(cof);
@@ -373,10 +373,10 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			rhs = -rhs;
 
 //			//tolerance error
-			if (rhs < epsilon && rhs > -epsilon)
+			if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
 				rhs = 0.0;
 
-			if (cof < epsilon && cof > -epsilon)
+			if (cof < epsilon_8_4 && cof > -epsilon_8_4)
 				cof = 0.0;
 
 			coef.push_back(cof);
@@ -405,10 +405,10 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 			rhs = -rhs;
 			//tolerance error
-			if (rhs < epsilon && rhs > -epsilon)
+			if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
 				rhs = 0.0;
 
-			if (cof < epsilon && cof > -epsilon)
+			if (cof < epsilon_8_4 && cof > -epsilon_8_4)
 				cof = 0.0;
 
 			coef.push_back(cof);
@@ -434,10 +434,10 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 			rhs = -rhs;
 			//tolerance error
-			if (rhs < epsilon && rhs > -epsilon)
+			if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
 				rhs = 0.0;
 
-			if (cof < epsilon && cof > -epsilon)
+			if (cof < epsilon_8_4 && cof > -epsilon_8_4)
 				cof = 0.0;
 			coef.push_back(cof);
 
@@ -496,33 +496,41 @@ void ThirdProblem::update_y_bar(CEnv env, Prob lp) {
 		free(cur_colnamestore);
 
 
-		//lambda * (y_bar-y_tilde)
 		vector <double> r_mul_lamb;
 
 		cout << endl;
 
+		//-------------------------------------------------
+		// lambda * (y_bar-y_tilde)
+		//-------------------------------------------------
+
 		for (vector<double>::iterator it = t.begin() ; it != t.end(); ++it){
 			r_mul_lamb.push_back((*it * lambda));
-			cout << " r " << *it << " r_mul_lamb " << r_mul_lamb.back() << endl;
+		//	cout << " r " << *it << " r_mul_lamb " << r_mul_lamb.back() << endl;
 		}
 
-		cout << endl;
+		//cout << endl;
 
-		//y_tilde + r_mul_lamb
+
+
+		//-------------------------------------------------
+		// y_tilde + r_mul_lamb
+		//-------------------------------------------------
+
 		int j=0;
 
 		//c
 		for (unsigned int i=0; i < c.size(); ++i) {
 			c[j] = y_tilde[j] + r_mul_lamb[j];
-			cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
+		//	cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
 			j++;
 		}
 
-		cout << endl;
+	//	cout << endl;
 
 		//z
 		min_sol= y_tilde[j] + r_mul_lamb[j];
-		cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
+	//	cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
 		j++;
 
 		cout << endl;
@@ -530,7 +538,7 @@ void ThirdProblem::update_y_bar(CEnv env, Prob lp) {
 		//u and u_0
 		for (unsigned int i=0; i < dual_varVals_P1.size(); ++i){
 			dual_varVals_P1[i] = y_tilde[j] + r_mul_lamb[j];
-			cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
+		//	cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
 			j++;
 		}
 
@@ -539,7 +547,7 @@ void ThirdProblem::update_y_bar(CEnv env, Prob lp) {
 		//v and v_0
 		for (unsigned int i = 0; i < dual_varVals_P2.size(); ++i) {
 			dual_varVals_P2[i] = y_tilde[j] + r_mul_lamb[j];
-			cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
+		//	cout << " y_tilde " << y_tilde[j] << " r_mul_lamb " << r_mul_lamb[j] << endl;
 			j++;
 		}
 

@@ -70,37 +70,7 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			sec_prob->evaluate_rT();
 
-			// --------------------------------------------------
-			// 6. Cycle
-			// --------------------------------------------------
-			bool flag;
-		//	do {
-				sec_prob->step8_1(env_dual, lp_dual);
 
-				sec_prob->step8_2(env_dual, lp_dual);
-
-				sec_prob->solve(env_dual, lp_dual);
-
-				flag = sec_prob->y_tilde_EQ_y_bar();
-
-				DECL_ENV(env_third);
-				DECL_PROB(env_third, lp_third, "resolve third problem");
-				ThirdProblem* third_prob = new ThirdProblem(sec_prob->y_tilde);
-				third_prob->setup(env_third, lp_third);
-				third_prob->update_y_bar(env_third, lp_third);
-
-
-
-//				if (!flag){
-//					step 8.4
-//				}
-//
-
-	//		} while (!flag);
-
-			// --------------------------------------------------
-			// 6. Show dates
-			// --------------------------------------------------
 			cout << endl;
 			print_vect_b();
 			cout << endl;
@@ -115,6 +85,56 @@ int main(int argc, char const *argv[]) {
 			cout << "min solution= " << min_sol << endl;
 			cout << endl;
 			cout << "index fractional variable (e_k)= " << k << endl;
+
+			// --------------------------------------------------
+			// 6. Cycle
+			// --------------------------------------------------
+			bool flag;
+			int iteration=0;
+			int original_constraint = CPXgetnumrows(env_dual, lp_dual);
+
+			do {
+
+				sec_prob->step8_1(env_dual, lp_dual);
+
+				sec_prob->step8_2(env_dual, lp_dual);
+
+				int num_constraint = CPXgetnumrows(env_dual, lp_dual);
+
+				sec_prob->solve(env_dual, lp_dual);
+
+				flag = sec_prob->y_tilde_EQ_y_bar();
+
+				if (!flag) {
+					DECL_ENV(env_third);
+					DECL_PROB(env_third, lp_third, "resolve third problem");
+					ThirdProblem* third_prob = new ThirdProblem(
+							sec_prob->y_tilde);
+					third_prob->setup(env_third, lp_third);
+					third_prob->update_y_bar(env_third, lp_third);
+
+					free (third_prob);
+					iteration++;
+				}
+
+				cout << endl;
+				print_vect_c();
+				cout << endl;
+				cout << "min solution= " << min_sol << endl;
+				cout << endl;
+				print_u_variables();
+				cout << endl;
+				print_v_variables();
+				cout << endl;
+
+				CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual, original_constraint, num_constraint - 1);
+			} while (!flag && iteration < 2);
+
+			// --------------------------------------------------
+			// 6. Show dates
+			// --------------------------------------------------
+
+
 
 			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
 					"../data/second_problem.lp", 0);
