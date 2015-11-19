@@ -90,7 +90,6 @@ int main(int argc, char const *argv[]) {
 			// 6. Cycle
 			// --------------------------------------------------
 			bool flag;
-			int iteration=0;
 			int original_constraint = CPXgetnumrows(env_dual, lp_dual);
 
 			do {
@@ -114,7 +113,6 @@ int main(int argc, char const *argv[]) {
 					third_prob->update_y_bar(env_third, lp_third);
 
 					free (third_prob);
-					iteration++;
 				}
 
 				cout << endl;
@@ -127,17 +125,15 @@ int main(int argc, char const *argv[]) {
 				print_v_variables();
 				cout << endl;
 
+				CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
+									"../data/second_problem.lp", 0);
+
 				CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual, original_constraint, num_constraint - 1);
-			} while (!flag && iteration < 2);
+			} while (!flag);
 
 			// --------------------------------------------------
 			// 6. Show dates
 			// --------------------------------------------------
-
-
-
-			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
-					"../data/second_problem.lp", 0);
 
 			CPXfreeprob(env_dual, &lp_dual);
 			CPXcloseCPLEX(&env_dual);

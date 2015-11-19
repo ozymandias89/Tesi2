@@ -76,7 +76,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 	static double z[2];
 	z[0] = CPX_INFBOUND;
 	z[1] = CPX_INFBOUND;
-	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 
@@ -175,7 +175,7 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 
 	double z = CPX_INFBOUND;
 
-	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 
@@ -280,7 +280,7 @@ void solve(CEnv env, Prob lp) {
 	// 3. solve linear problem
 	// --------------------------------------------------
 	cout << "PROBLEM MASTER:" << endl;
-	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	// --------------------------------------------------
 	// 4. print solution
