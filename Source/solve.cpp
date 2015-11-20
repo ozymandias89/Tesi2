@@ -292,7 +292,9 @@ void solve(CEnv env, Prob lp) {
 	//STOP CONDITION
 	if (unbounded || infeasible) {
 		cout << endl;
-		cout << " STOP CONDITION STEP 4 " << endl;
+		cout << " STOP CONDITION STEP 3 " << endl;
+		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
+		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 		exit(0);
 	}
 
@@ -349,7 +351,7 @@ void solve(CEnv env, Prob lp) {
 
 	} else {
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-		cout << "The last solution is the best integer solution. STOP" << endl;
+		cout << "The last solution is the best integer solution. STOP CONDITION STEP 4 " << endl;
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 	}
 
