@@ -350,10 +350,9 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 void ThirdProblem::update_y_bar(CEnv env, Prob lp) {
 
-	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
-	int stat = CPXgetstat(env, lp);
+	bool infeasible = test_problem_infeasible(env, lp);
 
-	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
+	if (!infeasible) {
 		CHECKED_CPX_CALL(CPXprimopt, env, lp);
 
 //		print_objval(env, lp);

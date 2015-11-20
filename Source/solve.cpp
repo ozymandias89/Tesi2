@@ -78,13 +78,13 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 	z[1] = CPX_INFBOUND;
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
-	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 
-	int stat = CPXgetstat(env, lp);
+	bool infeasible = test_problem_infeasible(env, lp);
+
 	int cur_numrows = CPXgetnumrows(env, lp);
 
 // print and set solution and create and resolve P_2 problem"
-	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
+	if (!infeasible) {
 		cout << "FEASIBLE " << endl;
 		gam = floor(varVals[index]);
 		print_objval(env, lp);
@@ -177,13 +177,11 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
-	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
-
-	int stat = CPXgetstat(env, lp);
+	bool infeasible = test_problem_infeasible(env, lp);
 
 	int cur_numrows = CPXgetnumrows(env, lp);
 
-	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
+	if (!infeasible) {
 		cout << "FEASIBLE " << endl;
 		print_objval(env, lp);
 		set_and_print_var_P(env, lp);
@@ -267,6 +265,7 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 
 	return z;
 }
+
 /**
  Method solve, solve the original problem, then branch in P_1 and P_2 problem
  and resolve recursively the two sub_problems.
@@ -276,11 +275,27 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
  */
 void solve(CEnv env, Prob lp) {
 
-	// --------------------------------------------------
-	// 3. solve linear problem
-	// --------------------------------------------------
-	cout << "PROBLEM MASTER:" << endl;
-	CHECKED_CPX_CALL(CPXlpopt, env, lp);
+	//this problem are infeasible?
+	bool infeasible = test_problem_infeasible(env, lp);
+
+	if (!infeasible) {
+		// --------------------------------------------------
+		// 3. solve linear problem
+		// --------------------------------------------------
+		cout << "PROBLEM MASTER:" << endl;
+		CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	}
+
+	//this problem are unbounded?
+	bool unbounded = test_problem_unbounded(env, lp);
+
+	//STOP CONDITION
+	if (unbounded || infeasible) {
+		cout << endl;
+		cout << " STOP CONDITION STEP 4 " << endl;
+		exit(0);
+	}
+
 
 	// --------------------------------------------------
 	// 4. print solution

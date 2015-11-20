@@ -532,12 +532,14 @@ void SecondProblem::set_solution(CEnv env, Prob lp) {
 
 void SecondProblem::solve(CEnv env, Prob lp) {
 
-	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
-	int stat = CPXgetstat(env, lp);
+	bool infeasible = test_problem_infeasible(env, lp);
 
-	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
+	if (!infeasible) {
 		CHECKED_CPX_CALL(CPXprimopt, env, lp);
 		//print_objval(env, lp);
+
+		if(test_problem_unbounded(env, lp))
+			throw std::runtime_error("Second problem are unbounded");
 
 		set_solution(env, lp);
 	} else {
