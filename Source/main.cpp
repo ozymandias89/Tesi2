@@ -63,12 +63,10 @@ int main(int argc, char const *argv[]) {
 			SecondProblem* sec_prob = new SecondProblem();
 			sec_prob->setupSP(env_dual, lp_dual);
 
-
 			// --------------------------------------------------
 			// 5. Evaluate vector r
 			// --------------------------------------------------
 			sec_prob->evaluate_rT();
-
 
 			// --------------------------------------------------
 			// 6. Cycle step 8
@@ -86,7 +84,6 @@ int main(int argc, char const *argv[]) {
 
 				sec_prob->solve(env_dual, lp_dual);
 
-
 				// --------------------------------------------------
 				// 7. STOP condition
 				// --------------------------------------------------
@@ -99,30 +96,25 @@ int main(int argc, char const *argv[]) {
 							sec_prob->y_tilde);
 					third_prob->setup(env_third, lp_third);
 					print_vect_c();
-					cout << " beta " << min_sol <<endl;
+					cout << " beta " << min_sol << endl;
 					print_u_variables();
 					print_v_variables();
 					third_prob->update_y_bar(env_third, lp_third);
 
-					free (third_prob);
+					free(third_prob);
 				}
-
 
 				CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
 						"../data/second_problem.lp", 0);
 
-				CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual, original_constraint, num_constraint - 1);
+				CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual,
+						original_constraint, num_constraint - 1);
 			} while (!flag);
-
-
-
-
 
 			// --------------------------------------------------
 			// 8. ADD constraint R in the first problem
 			// --------------------------------------------------
 			add_constraint_R(env, lp, sec_prob->R);
-
 
 			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 
@@ -130,11 +122,7 @@ int main(int argc, char const *argv[]) {
 			CPXcloseCPLEX(&env_dual);
 			free(sec_prob);
 
-			flag_find = true;
 		}
-
-
-
 
 		// ---------------------------------------------------------
 		// 5. free allocate memory
