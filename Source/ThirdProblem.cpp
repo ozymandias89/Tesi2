@@ -70,7 +70,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 	{
 		// lambda variable
 		static const char* varType = NULL;
-		double obj = -1.0;
+		double obj = 1.0;
 		double lb = -CPX_INFBOUND;
 		double ub = CPX_INFBOUND;
 
@@ -79,6 +79,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
 				&varName);
 
+		CPXchgobjsen (env, lp, CPX_MAX);
 	}
 
 	{
@@ -354,7 +355,6 @@ void ThirdProblem::update_y_bar(CEnv env, Prob lp) {
 
 	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
 		CHECKED_CPX_CALL(CPXprimopt, env, lp);
-		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 
 //		print_objval(env, lp);
 
