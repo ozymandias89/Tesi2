@@ -75,6 +75,14 @@ public:
 	 @return none
 	 */
 	void print_v();
+
+	/**
+	 Method print r
+	 @param  none
+	 @return none
+	 */
+
+	void print_r();
 	/**
 	 Method print a
 	 @param  none
@@ -107,7 +115,7 @@ public:
 	void print_y_tilde();
 
 	// ATTRIBUTES:
-	set<vector<double> > R;
+	set< vector<double> > R;
 	set<int> satisfy_constraint_list;
 	vector<double> u;
 	vector<double> v;

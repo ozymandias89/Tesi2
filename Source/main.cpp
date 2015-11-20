@@ -63,7 +63,6 @@ int main(int argc, char const *argv[]) {
 			SecondProblem* sec_prob = new SecondProblem();
 			sec_prob->setupSP(env_dual, lp_dual);
 
-			print_matrix();
 
 			// --------------------------------------------------
 			// 5. Evaluate vector r
@@ -71,23 +70,8 @@ int main(int argc, char const *argv[]) {
 			sec_prob->evaluate_rT();
 
 
-			cout << endl;
-			print_vect_b();
-			cout << endl;
-			print_vect_c();
-			cout << endl;
-			print_u_variables();
-			cout << endl;
-			print_v_variables();
-			cout << endl;
-			cout << "gamma= " << gam << endl;
-			cout << endl;
-			cout << "min solution= " << min_sol << endl;
-			cout << endl;
-			cout << "index fractional variable (e_k)= " << k << endl;
-
 			// --------------------------------------------------
-			// 6. Cycle
+			// 6. Cycle step 8
 			// --------------------------------------------------
 			bool flag;
 			int original_constraint = CPXgetnumrows(env_dual, lp_dual);
@@ -102,6 +86,10 @@ int main(int argc, char const *argv[]) {
 
 				sec_prob->solve(env_dual, lp_dual);
 
+
+				// --------------------------------------------------
+				// 7. STOP condition
+				// --------------------------------------------------
 				flag = sec_prob->y_tilde_EQ_y_bar();
 
 				if (!flag) {
@@ -110,35 +98,43 @@ int main(int argc, char const *argv[]) {
 					ThirdProblem* third_prob = new ThirdProblem(
 							sec_prob->y_tilde);
 					third_prob->setup(env_third, lp_third);
+					print_vect_c();
+					cout << " beta " << min_sol <<endl;
+					print_u_variables();
+					print_v_variables();
 					third_prob->update_y_bar(env_third, lp_third);
 
 					free (third_prob);
 				}
 
-				cout << endl;
-				print_vect_c();
-				cout << endl;
-				cout << "min solution= " << min_sol << endl;
-				cout << endl;
-				print_u_variables();
-				cout << endl;
-				print_v_variables();
-				cout << endl;
 
 				CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
-									"../data/second_problem.lp", 0);
+						"../data/second_problem.lp", 0);
 
 				CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual, original_constraint, num_constraint - 1);
 			} while (!flag);
 
+
+
+
+
 			// --------------------------------------------------
-			// 6. Show dates
+			// 8. ADD constraint R in the first problem
 			// --------------------------------------------------
+			add_constraint_R(env, lp, sec_prob->R);
+
+
+			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 
 			CPXfreeprob(env_dual, &lp_dual);
 			CPXcloseCPLEX(&env_dual);
 			free(sec_prob);
+
+			flag_find = true;
 		}
+
+
+
 
 		// ---------------------------------------------------------
 		// 5. free allocate memory

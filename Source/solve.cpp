@@ -322,7 +322,7 @@ void solve(CEnv env, Prob lp) {
 		/////////////////////////////////////////////////////
 
 		// ------------------------------------------------
-		// 9. only if both problems have solution else take
+		// 9. only if both problems have solution else get
 		//		the best solution and stop
 		// ------------------------------------------------
 		if (*z < CPX_INFBOUND && *(z + 1) < CPX_INFBOUND && flag_find) {

@@ -76,6 +76,23 @@ int gam;
 //min_sol from P_1/P_2
 double min_sol;
 
+
+/**
+ change sign matrix A
+ @param  none
+ @return void
+ */
+inline void change_sign_A() {
+	for (unsigned int i = 0; i < A.size(); i++) {
+		for (unsigned int j = 0; j < A[i].size(); j++) {
+			if (A[i][j] != 0)
+				A[i][j] = -A[i][j];
+		}
+	}
+}
+
+
+
 /**
  Method that load from file the problem (for example of format file see folder data)
  @param  (ifstream &) , object ifstream
@@ -339,6 +356,7 @@ void set_and_print_var_P(CEnv env, Prob lp) {
 	cout << "PRIMAL VARIABLES: " << endl;
 	int cur_numcols = CPXgetnumcols(env, lp);
 
+	varVals.clear();
 	varVals.resize(cur_numcols);
 	CHECKED_CPX_CALL(CPXgetx, env, lp, &varVals[0], 0, cur_numcols - 1);
 
@@ -377,6 +395,7 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 	int num_rows = CPXgetnumrows(env, lp);
 
 	if (prob) {
+		dual_varVals_P1.clear();
 		dual_varVals_P1.resize(num_rows);
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P1[0], 0,
 				num_rows - 1);
@@ -387,6 +406,7 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 		cout << endl;
 
 	} else {
+		dual_varVals_P2.clear();
 		dual_varVals_P2.resize(num_rows);
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P2[0], 0,
 				num_rows - 1);
@@ -396,6 +416,92 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 		}
 		cout << endl;
 	}
+
+}
+
+void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R){
+
+	//change sign matrix A
+	change_sign_A();
+
+	static const char* varType = NULL;
+	double obj = 0.0;
+	double lb = 0.0;
+	double ub = CPX_INFBOUND;
+	char sense = 'E';
+	int matbeg = 0;
+	int nzcnt=0;
+
+	std::vector<int> idx;
+	std::vector<double> coef;
+
+
+
+	std::vector <double> y_tilde;
+	int iterator = N;
+
+	//for each element in a set insert a new constraint
+	for (std::set< std::vector<double> >::iterator it = R.begin(); it != R.end(); ++it)
+	{
+		nzcnt=0;
+
+		// add Slack variables
+		snprintf(name, NAME_SIZE, "S_%i", num_constraint);
+		char* varName = (char*) (&name[0]);
+		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
+				&varName);
+
+		//-S
+		coef.push_back(-1);
+		idx.push_back(N);
+		nzcnt++;
+
+	    y_tilde = *it;
+
+
+	    //a_T * x
+		for (int i = 0; i < iterator; i++) {
+
+			if (y_tilde[i] != 0) {
+				coef.push_back(y_tilde[i]);
+				idx.push_back(i);
+				nzcnt++;
+			}
+		}
+
+
+	    //beta
+	    double rhs = y_tilde[iterator];
+
+
+	    num_constraint++;
+	    N++;
+
+		//add 0 to c
+		c.push_back(0);
+
+		//extend A matrix
+		A.resize(num_constraint);
+		for (int i = 0; i < num_constraint; i++)
+			A[i].resize(N);
+
+		for (int i = 0; i < iterator; i++)
+				A[(num_constraint - 1)][i] = y_tilde[i];
+
+		A[(num_constraint - 1)][N-1] = -1;
+
+		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense, &matbeg,
+				&idx[0], &coef[0], 0, 0);
+
+		b.push_back(rhs);
+
+		idx.clear();
+		coef.clear();
+	}
+
+
+
+
 
 }
 
