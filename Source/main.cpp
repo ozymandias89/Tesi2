@@ -48,12 +48,13 @@ int main(int argc, char const *argv[]) {
 		// --------------------------------------------------
 		// 2. program (first part)
 		// --------------------------------------------------
-		solve(env, lp);
 
-		// ---------------------------------------------------------
-		// 3. if P_1 and P_2 have solution
-		// ---------------------------------------------------------
-		if (!flag_find) {
+		do {
+			solve(env, lp);
+
+			// ---------------------------------------------------------
+			// 3. if P_1 and P_2 have solution
+			// ---------------------------------------------------------
 
 			// --------------------------------------------------
 			// 4. Initialization of the second problem
@@ -116,14 +117,13 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			add_constraint_R(env, lp, sec_prob->R);
 
-			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-
 			CPXfreeprob(env_dual, &lp_dual);
 			CPXcloseCPLEX(&env_dual);
 			free(sec_prob);
+			flag_find = true;
+			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 
-		}
-
+		} while (1);
 		// ---------------------------------------------------------
 		// 5. free allocate memory
 		// ---------------------------------------------------------

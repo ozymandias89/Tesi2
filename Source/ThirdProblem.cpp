@@ -350,10 +350,12 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 void ThirdProblem::update_y_bar(CEnv env, Prob lp) {
 
+	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+
 	bool infeasible = test_problem_infeasible(env, lp);
 
 	if (!infeasible) {
-		CHECKED_CPX_CALL(CPXprimopt, env, lp);
+
 
 //		print_objval(env, lp);
 
@@ -364,7 +366,6 @@ void ThirdProblem::update_y_bar(CEnv env, Prob lp) {
 
 		varibles.resize(cur_numcols);
 		CHECKED_CPX_CALL(CPXgetx, env, lp, &varibles[0], 0, cur_numcols - 1);
-
 		int surplus;
 		status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0,
 				cur_numcols - 1);

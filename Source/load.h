@@ -100,11 +100,12 @@ inline bool test_problem_unbounded(CEnv env, Prob lp) {
 	std::vector<double> z;
 	int cur_numcols = CPXgetnumcols(env, lp);
 	z.resize(cur_numcols);
-	if (CPXgetray(env, lp, &z[0]) == CPX_STAT_UNBOUNDED) {
+	int stat= CPXgetray(env, lp, &z[0]);
+	if ( stat == CPXERR_NOT_UNBOUNDED) {
 
-		return true;
-	} else
 		return false;
+	} else
+		return true;
 
 }
 
@@ -116,6 +117,7 @@ inline bool test_problem_unbounded(CEnv env, Prob lp) {
 inline bool test_problem_infeasible(CEnv env, Prob lp) {
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 	int stat = CPXgetstat(env, lp);
+	cout << " !!!!!!!!!!!!!!! " << stat;
 	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
 		return false;
 	} else
@@ -293,23 +295,36 @@ void setupLP(CEnv env, Prob lp) {
  @return int, return index of higher variable functional (-1 if no variable is fractional)
  */
 int select_fractionar_var(std::vector<double> varVals) {
+	/*
+	// Selects first fractionary variable
+	int index = -1,
+		i = 0;
 
-	double threesold = 0.5;
-	double temp;
-	double temp2;
-	int index = -1;
+	while (index == -1 && i < Num_original_variables) {
+		double value = varVals[i];
 
-	for (int i = 0; i < Num_original_variables; ++i) {
-
-		temp = (varVals[i] - (int) varVals[i]);
-		temp2 = fabs((temp - 0.5));
-
-		if (temp2 < threesold) {
-			threesold = temp2;
+		if (fabs(value - round(value)) >= 10e-6) {
 			index = i;
 		}
 
+		i++;
 	}
+	*/
+
+	// Selects variable with maximal fractionary value
+	int index = -1;
+	double max_fractionary = 10e-6;
+
+	for (int i = 0; i < Num_original_variables; i++) {
+		const double value = varVals[i],
+				     fractionary = fabs(value - round(value));
+
+		if (fractionary > max_fractionary) {
+			max_fractionary = fractionary;
+			index = i;
+		}
+	}
+
 	return index;
 }
 

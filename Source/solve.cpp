@@ -76,7 +76,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 	static double z[2];
 	z[0] = CPX_INFBOUND;
 	z[1] = CPX_INFBOUND;
-	CHECKED_CPX_CALL(CPXlpopt, env, lp);
+	CHECKED_CPX_CALL(CPXprimopt, env, lp);
 
 
 	bool infeasible = test_problem_infeasible(env, lp);
@@ -175,7 +175,7 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 
 	double z = CPX_INFBOUND;
 
-	CHECKED_CPX_CALL(CPXlpopt, env, lp);
+	CHECKED_CPX_CALL(CPXprimopt, env, lp);
 
 	bool infeasible = test_problem_infeasible(env, lp);
 
@@ -275,16 +275,13 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
  */
 void solve(CEnv env, Prob lp) {
 
+	// --------------------------------------------------
+	// 3. solve linear problem
+	// --------------------------------------------------
+	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+
 	//this problem are infeasible?
 	bool infeasible = test_problem_infeasible(env, lp);
-
-	if (!infeasible) {
-		// --------------------------------------------------
-		// 3. solve linear problem
-		// --------------------------------------------------
-		cout << "PROBLEM MASTER:" << endl;
-		CHECKED_CPX_CALL(CPXprimopt, env, lp);
-	}
 
 	//this problem are unbounded?
 	bool unbounded = test_problem_unbounded(env, lp);
@@ -294,10 +291,9 @@ void solve(CEnv env, Prob lp) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 3 " << endl;
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 		exit(0);
 	}
-
+	cout << "PROBLEM MASTER:" << endl;
 
 	// --------------------------------------------------
 	// 4. print solution
@@ -321,6 +317,7 @@ void solve(CEnv env, Prob lp) {
 	// --------------------------------------------------------
 	// 7. if x solution aren't integer create P1 and P2 problem
 	// --------------------------------------------------------
+	cout << "INDEX:::" << index << endl;
 	if (index != -1) {
 
 		cout << endl;
@@ -353,6 +350,7 @@ void solve(CEnv env, Prob lp) {
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		cout << "The last solution is the best integer solution. STOP CONDITION STEP 4 " << endl;
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
+		exit(0);
 	}
 
 }

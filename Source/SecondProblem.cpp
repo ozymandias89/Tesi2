@@ -396,7 +396,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 		}
 
 	}
-	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);
+
 }
 
 void SecondProblem::evaluate_rT() {
@@ -532,15 +532,14 @@ void SecondProblem::set_solution(CEnv env, Prob lp) {
 
 void SecondProblem::solve(CEnv env, Prob lp) {
 
+	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+
+	if(test_problem_unbounded(env, lp))
+				throw std::runtime_error("Second problem are unbounded");
+
 	bool infeasible = test_problem_infeasible(env, lp);
 
 	if (!infeasible) {
-		CHECKED_CPX_CALL(CPXprimopt, env, lp);
-		//print_objval(env, lp);
-
-		if(test_problem_unbounded(env, lp))
-			throw std::runtime_error("Second problem are unbounded");
-
 		set_solution(env, lp);
 	} else {
 		cerr << "Second problem has conflict!!!!!" << endl;
@@ -647,7 +646,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 //					<< " doesn't respects the equation " << endl << endl;
 			if (satisfy_constraint_list.count(count_constraint) != 0)
 				throw std::runtime_error(
-						"Violated constraint that before was sotisfied!");
+						"Violated constraint that before was satisfied!");
 		}
 		count_constraint++;
 	}
@@ -739,7 +738,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 //				<< " doesn't respects the equation " << endl << endl;
 		if (satisfy_constraint_list.count(count_constraint) != 0)
 			throw std::runtime_error(
-					"Violated constraint that before was sotisfied!");
+					"Violated constraint that before was satisfied!");
 	}
 
 	count_constraint++;
@@ -835,7 +834,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 //			cout << "The constraint number " << count_constraint
 //					<< " doesn't respects the equation " << endl << endl;
 			if (satisfy_constraint_list.count(count_constraint) != 0)
-				throw std::runtime_error("Vincolo ora violato");
+				throw std::runtime_error("Violated constraint that before was satisfied! ");
 		}
 		count_constraint++;
 	}
@@ -917,7 +916,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 //				<< " doesn't respects the equation " << endl << endl;
 		if (satisfy_constraint_list.count(count_constraint) != 0)
 			throw std::runtime_error(
-					"Violated constraint that before was sotisfied!");
+					"Violated constraint that before was satisfied!");
 	}
 
 	count_constraint++;
@@ -994,7 +993,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 //				<< " doesn't respects the equation " << endl << endl;
 		if (satisfy_constraint_list.count(count_constraint) != 0)
 			throw std::runtime_error(
-					"Violated constraint that before was sotisfied!");
+					"Violated constraint that before was satisfied!");
 	}
 }
 
@@ -1100,6 +1099,7 @@ void SecondProblem::step8_2(CEnv env, Prob lp) {
 	idx.clear();
 	coef.clear();
 
+	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);
 }
 
 bool SecondProblem::y_tilde_EQ_y_bar() {
