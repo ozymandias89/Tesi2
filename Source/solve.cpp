@@ -76,7 +76,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 	static double z[2];
 	z[0] = CPX_INFBOUND;
 	z[1] = CPX_INFBOUND;
-	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 
 	bool infeasible = test_problem_infeasible(env, lp);
@@ -175,7 +175,7 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 
 	double z = CPX_INFBOUND;
 
-	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	bool infeasible = test_problem_infeasible(env, lp);
 
@@ -278,7 +278,7 @@ void solve(CEnv env, Prob lp) {
 	// --------------------------------------------------
 	// 3. solve linear problem
 	// --------------------------------------------------
-	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	//this problem are infeasible?
 	bool infeasible = test_problem_infeasible(env, lp);

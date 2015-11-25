@@ -73,7 +73,6 @@ int main(int argc, char const *argv[]) {
 			int original_constraint = CPXgetnumrows(env_dual, lp_dual);
 
 			do {
-				sec_prob->print_c();
 
 				sec_prob->step8_1(env_dual, lp_dual);
 
@@ -106,6 +105,7 @@ int main(int argc, char const *argv[]) {
 						original_constraint, num_constraint - 1);
 
 			} while (!flag);
+
 
 			// --------------------------------------------------
 			// 8. ADD constraint R in the first problem
