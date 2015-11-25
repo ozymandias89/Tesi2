@@ -19,6 +19,8 @@ public:
 	virtual ~SecondProblem();
 
 	// PREDICATES:
+	void set_up_variable(CEnv env, Prob lp);
+
 	/**
 	 Method that set the second problem
 	 @param  (CEnv env, Prob lp)
@@ -32,14 +34,14 @@ public:
 	 */
 	void evaluate_rT();
 
-	void set_solution(CEnv env, Prob lp);
+	void set_solution(CEnv env, Prob lp,bool verbose);
 
 	/**
 	 Method that solve the second problem (13-19) + 21)
 	 @param  CEnv env, Prob lp
 	 @return none
 	 */
-	void solve(CEnv env, Prob lp);
+	void solve(CEnv env, Prob lp, bool verbose=false);
 
 	/**
 	 Method that creates tight C'y >= d subsystem and adds to dual problem
@@ -53,7 +55,7 @@ public:
 	 @param  CEnv env, Prob lp
 	 @return void
 	 */
-	void step8_2(CEnv env, Prob lp);
+	void step8_2(CEnv env, Prob lp, bool verbose=false);
 
 
 	/**
@@ -83,6 +85,8 @@ public:
 	 */
 
 	void print_r();
+
+	void print_c();
 	/**
 	 Method print a
 	 @param  none
@@ -117,6 +121,7 @@ public:
 	// ATTRIBUTES:
 	set< vector<double> > R;
 	set<int> satisfy_constraint_list;
+	vector<double> cost;
 	vector<double> u;
 	vector<double> v;
 	vector<double> a;
@@ -125,6 +130,7 @@ public:
 	double beta;
 	vector<double> rt;
 	vector<double> y_tilde;
+
 
 };
 

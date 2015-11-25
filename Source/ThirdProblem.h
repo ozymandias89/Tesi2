@@ -13,12 +13,14 @@
 
 class ThirdProblem {
 public:
-	ThirdProblem(vector <double> y_til);
+	ThirdProblem(vector <double> y_til, vector <double> cost, bool verbose=false);
 	virtual ~ThirdProblem();
 
 	// PREDICATES:
 
-	void y_tilde_MIN_y_bar();
+	void print_vector(vector <double> vector);
+
+	void y_tilde_MIN_y_bar(vector<double> c,bool verbose);
 
 	/**
 	 Method that set the third problem
@@ -27,16 +29,21 @@ public:
 	 */
 	void setup(CEnv env, Prob lp);
 
+
+	void solve(CEnv env, Prob lp);
+
+
 	/**
 	 update y_bar step 8.4
 	 @param  (CEnv env, Prob lp)
 	 @return void
 	 */
-	void update_y_bar(CEnv env, Prob lp);
+	void update_y_bar(CEnv env, Prob lp,vector<double>& c, bool verbose=false);
 
 	// ATTRIBUTES:
 	vector<double> y_tilde;
 	vector<double> t;
+	double lambda;
 };
 
 #endif /* SOURCE_THIRDPROBLEM_H_ */

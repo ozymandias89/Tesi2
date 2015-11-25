@@ -76,7 +76,6 @@ int gam;
 //min_sol from P_1/P_2
 double min_sol;
 
-
 /**
  change sign matrix A
  @param  none
@@ -100,8 +99,8 @@ inline bool test_problem_unbounded(CEnv env, Prob lp) {
 	std::vector<double> z;
 	int cur_numcols = CPXgetnumcols(env, lp);
 	z.resize(cur_numcols);
-	int stat= CPXgetray(env, lp, &z[0]);
-	if ( stat == CPXERR_NOT_UNBOUNDED) {
+	int stat = CPXgetray(env, lp, &z[0]);
+	if (stat == CPXERR_NOT_UNBOUNDED) {
 
 		return false;
 	} else
@@ -117,7 +116,7 @@ inline bool test_problem_unbounded(CEnv env, Prob lp) {
 inline bool test_problem_infeasible(CEnv env, Prob lp) {
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 	int stat = CPXgetstat(env, lp);
-	cout << " !!!!!!!!!!!!!!! " << stat;
+	cout << "Status problem " << stat << endl;
 	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
 		return false;
 	} else
@@ -296,28 +295,28 @@ void setupLP(CEnv env, Prob lp) {
  */
 int select_fractionar_var(std::vector<double> varVals) {
 	/*
-	// Selects first fractionary variable
-	int index = -1,
-		i = 0;
+	 // Selects first fractionary variable
+	 int index = -1,
+	 i = 0;
 
-	while (index == -1 && i < Num_original_variables) {
-		double value = varVals[i];
+	 while (index == -1 && i < Num_original_variables) {
+	 double value = varVals[i];
 
-		if (fabs(value - round(value)) >= 10e-6) {
-			index = i;
-		}
+	 if (fabs(value - round(value)) >= 10e-6) {
+	 index = i;
+	 }
 
-		i++;
-	}
-	*/
+	 i++;
+	 }
+	 */
 
 	// Selects variable with maximal fractionary value
 	int index = -1;
 	double max_fractionary = 10e-6;
 
 	for (int i = 0; i < Num_original_variables; i++) {
-		const double value = varVals[i],
-				     fractionary = fabs(value - round(value));
+		const double value = varVals[i], fractionary = fabs(
+				value - round(value));
 
 		if (fractionary > max_fractionary) {
 			max_fractionary = fractionary;
@@ -390,6 +389,20 @@ void print_objval(CEnv env, Prob lp) {
 
 }
 
+void print_y_bar() {
+	cout << "y bar= : ";
+	for (int i = 0; i < N; i++)
+		cout << c[i] << " ";
+	cout << min_sol << " ";
+	for (unsigned int i = 0; i < dual_varVals_P1.size(); i++) {
+		cout << dual_varVals_P1[i] << " ";
+	}
+	for (unsigned int i = 0; i < dual_varVals_P2.size(); i++) {
+		cout << dual_varVals_P2[i] << " ";
+	}
+	cout << endl;
+}
+
 /**
  Method that set and print primal variable
  @param  (CEnv env, Prob lp), environmant of the problem and problem
@@ -435,7 +448,6 @@ void set_and_print_var_P(CEnv env, Prob lp) {
 void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 
 	cout << endl;
-	cout << "DUAL VARIABLES (the last is u_0 or v_0): " << endl;
 	int num_rows = CPXgetnumrows(env, lp);
 
 	if (prob) {
@@ -444,6 +456,7 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P1[0], 0,
 				num_rows - 1);
 
+		cout << "DUAL VARIABLES (the last is u_0): " << endl;
 		for (int i = 0; i < num_rows; i++) {
 			cout << dual_varVals_P1[i] << " ";
 		}
@@ -454,7 +467,7 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 		dual_varVals_P2.resize(num_rows);
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P2[0], 0,
 				num_rows - 1);
-
+		cout << "DUAL VARIABLES (the last is v_0): " << endl;
 		for (int i = 0; i < num_rows; i++) {
 			cout << dual_varVals_P2[i] << " ";
 		}
@@ -463,7 +476,7 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 
 }
 
-void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R){
+void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R) {
 
 	//change sign matrix A
 	change_sign_A();
@@ -474,20 +487,18 @@ void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R){
 	double ub = CPX_INFBOUND;
 	char sense = 'E';
 	int matbeg = 0;
-	int nzcnt=0;
+	int nzcnt = 0;
 
 	std::vector<int> idx;
 	std::vector<double> coef;
 
-
-
-	std::vector <double> y_tilde;
+	std::vector<double> y_tilde;
 	int iterator = N;
 
 	//for each element in a set insert a new constraint
-	for (std::set< std::vector<double> >::iterator it = R.begin(); it != R.end(); ++it)
-	{
-		nzcnt=0;
+	for (std::set<std::vector<double> >::iterator it = R.begin(); it != R.end();
+			++it) {
+		nzcnt = 0;
 
 		// add Slack variables
 		snprintf(name, NAME_SIZE, "S_%i", num_constraint);
@@ -500,10 +511,9 @@ void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R){
 		idx.push_back(N);
 		nzcnt++;
 
-	    y_tilde = *it;
+		y_tilde = *it;
 
-
-	    //a_T * x
+		//a_T * x
 		for (int i = 0; i < iterator; i++) {
 
 			if (y_tilde[i] != 0) {
@@ -513,13 +523,11 @@ void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R){
 			}
 		}
 
+		//beta
+		double rhs = y_tilde[iterator];
 
-	    //beta
-	    double rhs = y_tilde[iterator];
-
-
-	    num_constraint++;
-	    N++;
+		num_constraint++;
+		N++;
 
 		//add 0 to c
 		c.push_back(0);
@@ -530,22 +538,18 @@ void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R){
 			A[i].resize(N);
 
 		for (int i = 0; i < iterator; i++)
-				A[(num_constraint - 1)][i] = y_tilde[i];
+			A[(num_constraint - 1)][i] = y_tilde[i];
 
-		A[(num_constraint - 1)][N-1] = -1;
+		A[(num_constraint - 1)][N - 1] = -1;
 
-		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense, &matbeg,
-				&idx[0], &coef[0], 0, 0);
+		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+				&matbeg, &idx[0], &coef[0], 0, 0);
 
 		b.push_back(rhs);
 
 		idx.clear();
 		coef.clear();
 	}
-
-
-
-
 
 }
 

@@ -9,7 +9,7 @@
 
 SecondProblem::SecondProblem() {
 	// TODO Auto-generated constructor stub
-
+	 this->cost=c;
 }
 
 SecondProblem::~SecondProblem() {
@@ -36,6 +36,14 @@ void SecondProblem::print_r() {
 	cout << endl;
 	cout << "vector r " << endl;
 	for (std::vector<double>::const_iterator j = rt.begin(); j != rt.end(); ++j)
+		cout << *j << " ";
+	cout << endl << endl;
+}
+
+void SecondProblem::print_c() {
+	cout << endl;
+	cout << "vector c " << endl;
+	for (std::vector<double>::const_iterator j = cost.begin(); j != cost.end(); ++j)
 		cout << *j << " ";
 	cout << endl << endl;
 }
@@ -74,65 +82,69 @@ void SecondProblem::print_y_tilde() {
 	cout << endl;
 }
 
+void SecondProblem::set_up_variable(CEnv env, Prob lp) {
+
+	// ----------------------------------------------------
+	// second problem order of variable: (u_0 u a b v_0 v)
+	// ----------------------------------------------------
+
+	cout << endl;
+	cout << "Initialization dual problem... " << endl;
+	// variables
+	static const char* varType = NULL;
+	double obj = 0;
+	double lb = -CPX_INFBOUND;
+	double ub = 0.0;
+
+	// variable u_0
+	snprintf(name, NAME_SIZE, "u_%i", 0);
+	char* varName = (char*) (&name[0]);
+	CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType, &varName);
+
+	ub = CPX_INFBOUND;
+
+	// variable u
+	for (int i = 1; i <= num_constraint; i++) {
+		snprintf(name, NAME_SIZE, "u_%i", i);
+		varName = (char*) (&name[0]);
+		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
+				&varName);
+	}
+
+	// variables a
+	for (int i = 0; i < N; i++) {
+		snprintf(name, NAME_SIZE, "a_%i", i);
+		varName = (char*) (&name[0]);
+		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
+				&varName);
+	}
+
+	// variables b
+	snprintf(name, NAME_SIZE, "b");
+	varName = (char*) (&name[0]);
+	CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType, &varName);
+
+	// variables v_0
+	lb = 0.0;
+	snprintf(name, NAME_SIZE, "v_%i", 0);
+	varName = (char*) (&name[0]);
+	CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType, &varName);
+
+	lb = -CPX_INFBOUND;
+
+	// variables v
+	for (int i = 1; i <= num_constraint; i++) {
+		snprintf(name, NAME_SIZE, "v_%i", i);
+		varName = (char*) (&name[0]);
+		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
+				&varName);
+	}
+
+}
+
 void SecondProblem::setupSP(CEnv env, Prob lp) {
 
-	{
-		cout << endl;
-		cout << "Initialization dual problem... " << endl;
-		// variables
-		static const char* varType = NULL;
-		double obj = 0;
-		double lb = -CPX_INFBOUND;
-		double ub = 0.0;
-
-		// variable u_0
-		snprintf(name, NAME_SIZE, "u_%i", 0);
-		char* varName = (char*) (&name[0]);
-		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
-				&varName);
-
-		ub = CPX_INFBOUND;
-
-		// variable u
-		for (int i = 1; i <= num_constraint; i++) {
-			snprintf(name, NAME_SIZE, "u_%i", i);
-			varName = (char*) (&name[0]);
-			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
-					&varName);
-		}
-
-		// variables a
-		for (int i = 0; i < N; i++) {
-			snprintf(name, NAME_SIZE, "a_%i", i);
-			varName = (char*) (&name[0]);
-			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
-					&varName);
-		}
-
-		// variables b
-		snprintf(name, NAME_SIZE, "b");
-		varName = (char*) (&name[0]);
-		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
-				&varName);
-
-		// variables v_0
-		lb = 0.0;
-		snprintf(name, NAME_SIZE, "v_%i", 0);
-		varName = (char*) (&name[0]);
-		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
-				&varName);
-
-		lb = -CPX_INFBOUND;
-
-		// variables v
-		for (int i = 1; i <= num_constraint; i++) {
-			snprintf(name, NAME_SIZE, "v_%i", i);
-			varName = (char*) (&name[0]);
-			CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
-					&varName);
-		}
-
-	}
+	set_up_variable(env, lp);
 
 	// constraints -A_T * u - e_k * u_0 + a
 	std::vector<std::vector<double> > temp = A;
@@ -357,7 +369,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 			int nzcnt = 0;
 
 			for (int iter = 0; iter < N; iter++) {
-				r += temp[i][iter] * c[iter];
+				r += temp[i][iter] * cost[iter];
 				if (temp[i][iter] != 0) {
 					idx.push_back(num_constraint + 1 + iter);
 					coef.push_back(temp[i][iter]);
@@ -450,10 +462,9 @@ void SecondProblem::evaluate_rT() {
 
 	rt.insert(rt.begin(), temp.begin(), temp.end());
 
-
 }
 
-void SecondProblem::set_solution(CEnv env, Prob lp) {
+void SecondProblem::set_solution(CEnv env, Prob lp, bool verbose) {
 
 	vector<double> varibles;
 
@@ -499,13 +510,6 @@ void SecondProblem::set_solution(CEnv env, Prob lp) {
 	for (int i = num_constraint + N + 3; i < 2 * num_constraint + N + 3; i++)
 		v.push_back(varibles[i]);
 
-//	print_u0();
-//	print_u();
-//	print_a();
-//	print_beta();
-//	print_v0();
-//	print_v();
-
 	//create y_tilde
 	y_tilde.clear();
 	y_tilde = a;
@@ -515,12 +519,16 @@ void SecondProblem::set_solution(CEnv env, Prob lp) {
 	y_tilde.insert(y_tilde.end(), v.begin(), v.end());
 	y_tilde.push_back(v0);
 
-	cout << endl;
-	cout << "y_tilde in set " << " = ";
-	for (unsigned int i = 0; i < y_tilde.size(); ++i)
-		cout << y_tilde[i] << " ";
-
-	cout << endl;
+	if (verbose) {
+		print_y_bar();
+		print_y_tilde();
+		print_u0();
+		print_u();
+		print_a();
+		print_beta();
+		print_v0();
+		print_v();
+	}
 	//add y tilde in the R set
 	R.insert(y_tilde);
 
@@ -530,17 +538,17 @@ void SecondProblem::set_solution(CEnv env, Prob lp) {
 
 }
 
-void SecondProblem::solve(CEnv env, Prob lp) {
+void SecondProblem::solve(CEnv env, Prob lp, bool verbose) {
 
 	CHECKED_CPX_CALL(CPXprimopt, env, lp);
 
-	if(test_problem_unbounded(env, lp))
-				throw std::runtime_error("Second problem are unbounded");
+	if (test_problem_unbounded(env, lp))
+		throw std::runtime_error("Second problem are unbounded");
 
 	bool infeasible = test_problem_infeasible(env, lp);
 
 	if (!infeasible) {
-		set_solution(env, lp);
+		set_solution(env, lp, verbose);
 	} else {
 		cerr << "Second problem has conflict!!!!!" << endl;
 		exit(1);
@@ -581,7 +589,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		}
 
 		//  +a_i
-		sum += c[j];
+		sum += cost[j];
 
 		//tolerance error
 		if (sum < epsilon_8_1 && sum > -epsilon_8_1)
@@ -590,13 +598,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		//  print respect constraint
 		// --------------------------------------------------
-//		cout << endl;
-//		cout << "sum = " << sum << " constraint number " << count_constraint
-//				<< endl;
+
 		if (sum == 0) {
-//			cout << "The constraint number " << count_constraint
-//					<< " respects equation" << endl;
-//			cout << endl << endl;
 
 			// --------------------------------------------------
 			// add new constraint A_T * u - e_k * u_0 + a = 0
@@ -642,11 +645,14 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			idx.clear();
 			coef.clear();
 		} else {
-//			cout << "The constraint number " << count_constraint
-//					<< " doesn't respects the equation " << endl << endl;
-			if (satisfy_constraint_list.count(count_constraint) != 0)
+			if (satisfy_constraint_list.count(count_constraint) != 0) {
+				cout << "The constraint number " << count_constraint
+						<< " doesn't respects the equation " << "sum = " << sum
+						<< endl << endl;
+
 				throw std::runtime_error(
 						"Violated constraint that before was satisfied!");
+			}
 		}
 		count_constraint++;
 	}
@@ -681,17 +687,12 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
 		sum = 0.0;
 
-//	cout << endl;
-//	cout << " sum = " << sum << endl;
-
 	if (sum == 0) {
 
 		// --------------------------------------------------
 		// add new constraint b_T * u + u_0 * gamma - b = 0
 		// --------------------------------------------------
 
-//		cout << "The constraint number " << count_constraint
-//				<< " respect equation " << endl;
 		nzcnt = 0;
 		char sense = 'E';
 		int matbeg = 0;
@@ -734,11 +735,14 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		coef.clear();
 
 	} else {
-//		cout << "The constraint number " << count_constraint
-//				<< " doesn't respects the equation " << endl << endl;
-		if (satisfy_constraint_list.count(count_constraint) != 0)
+		if (satisfy_constraint_list.count(count_constraint) != 0) {
+			cout << "The constraint number " << count_constraint
+					<< " doesn't respects the equation " << "sum = " << sum
+					<< endl << endl;
+
 			throw std::runtime_error(
 					"Violated constraint that before was satisfied!");
+		}
 	}
 
 	count_constraint++;
@@ -767,7 +771,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 		//  +a_i
 
-		sum += c[j];
+		sum += cost[j];
 
 		//tolerance error
 		if (sum < epsilon_8_1 && sum > -epsilon_8_1)
@@ -776,14 +780,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		//  print respect constraint
 		// --------------------------------------------------
-//		cout << endl;
-//		cout << "sum = " << sum << " constraint number " << count_constraint
-//				<< endl;
-		if (sum == 0) {
-//			cout << "The constraint number " << count_constraint
-//					<< " respects equation" << endl;
-//			cout << endl << endl;
 
+		if (sum == 0) {
 			// --------------------------------------------------
 			// add new constraint A_T * v - e_k * v_0 + a = 0
 			// --------------------------------------------------
@@ -831,10 +829,15 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			coef.clear();
 
 		} else {
-//			cout << "The constraint number " << count_constraint
-//					<< " doesn't respects the equation " << endl << endl;
-			if (satisfy_constraint_list.count(count_constraint) != 0)
-				throw std::runtime_error("Violated constraint that before was satisfied! ");
+
+			if (satisfy_constraint_list.count(count_constraint) != 0) {
+				cout << "The constraint number " << count_constraint
+						<< " doesn't respects the equation " << "sum = " << sum
+						<< endl << endl;
+
+				throw std::runtime_error(
+						"Violated constraint that before was satisfied! ");
+			}
 		}
 		count_constraint++;
 	}
@@ -912,11 +915,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		idx.clear();
 		coef.clear();
 	} else {
-//		cout << "The constraint number " << count_constraint
-//				<< " doesn't respects the equation " << endl << endl;
-		if (satisfy_constraint_list.count(count_constraint) != 0)
+		if (satisfy_constraint_list.count(count_constraint) != 0) {
+			cout << "The constraint number " << count_constraint
+					<< " doesn't respects the equation " << "sum = " << sum
+					<< endl << endl;
 			throw std::runtime_error(
 					"Violated constraint that before was satisfied!");
+		}
 	}
 
 	count_constraint++;
@@ -929,9 +934,6 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	//tolerance error
 	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
 		sum = 0.0;
-
-//	cout << endl;
-//	cout << "sum = " << sum << endl;
 
 	if (sum == 0) {
 		nzcnt = 1;
@@ -950,11 +952,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		idx.clear();
 		coef.clear();
 	} else {
-//		cout << "The constraint number " << count_constraint
-//				<< " doesn't respects the equation " << endl << endl;
-		if (satisfy_constraint_list.count(count_constraint) != 0)
+		if (satisfy_constraint_list.count(count_constraint) != 0) {
+			cout << "The constraint number " << count_constraint
+					<< " doesn't respects the equation " << "sum = " << sum
+					<< endl << endl;
 			throw std::runtime_error(
-					"Violated constraint that before was sotisfied!");
+					"Violated constraint that before was satisfied!");
+		}
 	}
 
 	count_constraint++;
@@ -968,9 +972,6 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	//tolerance error
 	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
 		sum = 0.0;
-
-//	cout << endl;
-//	cout << "sum = " << sum << endl;
 
 	if (sum == 0) {
 		nzcnt = 1;
@@ -989,15 +990,17 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		idx.clear();
 		coef.clear();
 	} else {
-//		cout << "The constraint number " << count_constraint
-//				<< " doesn't respects the equation " << endl << endl;
-		if (satisfy_constraint_list.count(count_constraint) != 0)
+		if (satisfy_constraint_list.count(count_constraint) != 0) {
+			cout << "The constraint number " << count_constraint
+					<< " doesn't respects the equation " << "sum = " << sum
+					<< endl << endl;
 			throw std::runtime_error(
 					"Violated constraint that before was satisfied!");
+		}
 	}
 }
 
-void SecondProblem::step8_2(CEnv env, Prob lp) {
+void SecondProblem::step8_2(CEnv env, Prob lp, bool verbose) {
 
 	std::vector<int> idx;
 	std::vector<double> coef;
@@ -1010,31 +1013,46 @@ void SecondProblem::step8_2(CEnv env, Prob lp) {
 	int i = 0;
 
 	while (i < N) {
-		r += rt[i] * c[i];
+		r += rt[i] * cost[i];
+		if (verbose)
+					cout << rt[i] << "  " << cost[i] << endl;
 		i++;
 	}
 
 	r += rt[i] * min_sol;
+	if (verbose)
+	cout << rt[i] << "  " << min_sol << endl;
 	i++;
 
 	int j = 0;
 	while (i < N + 1 + num_constraint) {
 		r += rt[i] * dual_varVals_P1[j];
+		if (verbose)
+		cout << rt[i] << "  " << dual_varVals_P1[j] << endl;
+
 		i++;
 		j++;
 	}
 
 	r += rt[i] * dual_varVals_P1[j];
+	if (verbose)
+	cout << rt[i] << "  " << dual_varVals_P1[j] << endl;
+
 	i++;
 
 	j = 0;
 	while (i < N + 2 + num_constraint + num_constraint) {
 		r += rt[i] * dual_varVals_P2[j];
+		if (verbose)
+		cout << rt[i] << "  " << dual_varVals_P2[j] << endl;
+
 		i++;
 		j++;
 	}
 
 	r += rt[i] * dual_varVals_P2[j];
+	if (verbose)
+	cout << rt[i] << "  " << dual_varVals_P2[j] << endl;
 
 
 	// --------------------------------------------------
@@ -1099,7 +1117,7 @@ void SecondProblem::step8_2(CEnv env, Prob lp) {
 	idx.clear();
 	coef.clear();
 
-	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/second_problem.lp", 0);
+
 }
 
 bool SecondProblem::y_tilde_EQ_y_bar() {
@@ -1112,7 +1130,7 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 	// --------------------------------------------------
 
 	for (unsigned int i = 0; i < a.size(); i++) {
-		difference = c[i] - a[i];
+		difference = cost[i] - a[i];
 
 		//tolerance error
 		if (difference < epsilon_8_3 && difference > -epsilon_8_3)
@@ -1123,7 +1141,6 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 			return equal;
 		}
 	}
-
 
 	// --------------------------------------------------
 	// 2. z-b

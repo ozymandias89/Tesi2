@@ -7,10 +7,10 @@
 
 #include "ThirdProblem.h"
 
-ThirdProblem::ThirdProblem(vector<double> y_til) {
+ThirdProblem::ThirdProblem(vector<double> y_til, vector<double> c, bool verbose) {
 	// TODO Auto-generated constructor stub
 	this->y_tilde = y_til;
-	y_tilde_MIN_y_bar();
+	y_tilde_MIN_y_bar(c,verbose);
 
 }
 
@@ -18,8 +18,16 @@ ThirdProblem::~ThirdProblem() {
 	// TODO Auto-generated destructor stub
 }
 
-void ThirdProblem::y_tilde_MIN_y_bar() {
+void ThirdProblem::print_vector(vector<double> vector) {
 
+	for (unsigned int i = 0; i < vector.size(); i++)
+		cout << vector[i] << " ";
+
+	cout << endl;
+
+}
+
+void ThirdProblem::y_tilde_MIN_y_bar(vector<double> c, bool verbose) {
 
 	double difference;
 
@@ -31,6 +39,8 @@ void ThirdProblem::y_tilde_MIN_y_bar() {
 	for (unsigned int i = 0; i < c.size(); i++) {
 		difference = c[i] - y_tilde[j];
 		t.push_back(difference);
+		if (verbose)
+			cout << "a_" << i << "  =" << difference << endl;
 		j++;
 	}
 
@@ -41,6 +51,9 @@ void ThirdProblem::y_tilde_MIN_y_bar() {
 	difference = min_sol - y_tilde[j];
 
 	t.push_back(difference);
+	if (verbose)
+		cout << "beta  = " << difference << endl;
+
 	j++;
 
 	// --------------------------------------------------
@@ -49,6 +62,8 @@ void ThirdProblem::y_tilde_MIN_y_bar() {
 
 	for (unsigned int i = 0; i < dual_varVals_P1.size(); i++) {
 		difference = dual_varVals_P1[i] - y_tilde[j];
+		if (verbose)
+			cout << "u  =" << difference << endl;
 		t.push_back(difference);
 		j++;
 	}
@@ -59,8 +74,15 @@ void ThirdProblem::y_tilde_MIN_y_bar() {
 
 	for (unsigned int i = 0; i < dual_varVals_P2.size(); i++) {
 		difference = dual_varVals_P2[i] - y_tilde[j];
+		if (verbose)
+			cout << "v  =" << difference << endl;
 		t.push_back(difference);
 		j++;
+	}
+
+	if (verbose) {
+		cout << "Vector t: " << endl;
+		print_vector(t);
 	}
 
 }
@@ -79,7 +101,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
 				&varName);
 
-		CPXchgobjsen (env, lp, CPX_MAX);
+		CPXchgobjsen(env, lp, CPX_MAX);
 	}
 
 	{
@@ -198,7 +220,6 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 				cof += t[i];
 				rhs += y_tilde[i];
-
 
 				int j = N;
 				//beta are 0... skip
@@ -344,18 +365,18 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 		}
 	}
 
-	CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/third_problem.lp", 0);
-
 }
 
-void ThirdProblem::update_y_bar(CEnv env, Prob lp) {
+void ThirdProblem::solve(CEnv env, Prob lp) {
 
 	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+
+	if (test_problem_unbounded(env, lp))
+			throw std::runtime_error("Second problem are unbounded");
 
 	bool infeasible = test_problem_infeasible(env, lp);
 
 	if (!infeasible) {
-
 
 //		print_objval(env, lp);
 
@@ -382,64 +403,68 @@ void ThirdProblem::update_y_bar(CEnv env, Prob lp) {
 		//  print index, name and value of lambda
 		cout << cur_colname[0] << " = " << varibles[0] << endl;
 
-		double lambda = varibles[0];
+		lambda = varibles[0];
 
 		// free
 		free(cur_colname);
 		free(cur_colnamestore);
 
+	} else {
+		cerr << "Third  problem has conflict or unbounded!!!!!" << endl;
+		exit(1);
+	}
 
-		vector <double> r_mul_lamb;
+}
 
-		cout << endl;
+void ThirdProblem::update_y_bar(CEnv env, Prob lp,vector<double>& c, bool verbose) {
 
-		//-------------------------------------------------
-		// lambda * (y_bar-y_tilde)
-		//-------------------------------------------------
+	vector<double> r_mul_lamb;
 
-		for (vector<double>::iterator it = t.begin() ; it != t.end(); ++it){
-			r_mul_lamb.push_back((*it * lambda));
-		}
+	cout << endl;
 
-		//-------------------------------------------------
-		// y_tilde + r_mul_lamb
-		//-------------------------------------------------
+	//-------------------------------------------------
+	// lambda * (y_bar-y_tilde)
+	//-------------------------------------------------
 
-		int j=0;
+	for (vector<double>::iterator it = t.begin(); it != t.end(); ++it) {
+		r_mul_lamb.push_back((*it * lambda));
+	}
 
-		//c
-		for (unsigned int i=0; i < c.size(); ++i) {
-			c[j] = y_tilde[j] + r_mul_lamb[j];
-			j++;
-		}
+	//-------------------------------------------------
+	// UPDATE y bar
+	//-------------------------------------------------
 
-		//z
-		min_sol= y_tilde[j] + r_mul_lamb[j];
+	int j = 0;
+
+	//c
+	for (unsigned int i = 0; i < c.size(); ++i) {
+		c[j] = y_tilde[j] + r_mul_lamb[j];
 		j++;
+	}
 
+	//z
+	min_sol = y_tilde[j] + r_mul_lamb[j];
+	j++;
 
-		//u and u_0
-		for (unsigned int i=0; i < dual_varVals_P1.size(); ++i){
-			dual_varVals_P1[i] = y_tilde[j] + r_mul_lamb[j];
-			j++;
-		}
+	//u and u_0
+	for (unsigned int i = 0; i < dual_varVals_P1.size(); ++i) {
+		dual_varVals_P1[i] = y_tilde[j] + r_mul_lamb[j];
+		j++;
+	}
 
-		cout << endl;
+	cout << endl;
 
-		//v and v_0
-		for (unsigned int i = 0; i < dual_varVals_P2.size(); ++i) {
-			dual_varVals_P2[i] = y_tilde[j] + r_mul_lamb[j];
-			j++;
-		}
+	//v and v_0
+	for (unsigned int i = 0; i < dual_varVals_P2.size(); ++i) {
+		dual_varVals_P2[i] = y_tilde[j] + r_mul_lamb[j];
+		j++;
+	}
 
+	if (verbose) {
 		print_vect_c();
-		cout << " beta " << min_sol <<endl;
+		cout << " beta " << min_sol << endl;
 		print_u_variables();
 		print_v_variables();
-
-	} else {
-		cerr << "Third  problem has conflict!!!!!" << endl;
-		exit(1);
 	}
 
 }

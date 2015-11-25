@@ -291,6 +291,9 @@ void solve(CEnv env, Prob lp) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 3 " << endl;
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
+		// free allocate memory
+		CPXfreeprob(env, &lp);
+		//CPXcloseCPLEX(env);
 		exit(0);
 	}
 	cout << "PROBLEM MASTER:" << endl;
@@ -317,7 +320,6 @@ void solve(CEnv env, Prob lp) {
 	// --------------------------------------------------------
 	// 7. if x solution aren't integer create P1 and P2 problem
 	// --------------------------------------------------------
-	cout << "INDEX:::" << index << endl;
 	if (index != -1) {
 
 		cout << endl;
@@ -348,8 +350,11 @@ void solve(CEnv env, Prob lp) {
 
 	} else {
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-		cout << "The last solution is the best integer solution. STOP CONDITION STEP 4 " << endl;
+		cout<< "The last solution is the best integer solution. STOP CONDITION STEP 4 "<< endl;
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
+		// free allocate memory
+		CPXfreeprob(env, &lp);
+		//CPXcloseCPLEX(env);
 		exit(0);
 	}
 
