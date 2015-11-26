@@ -636,12 +636,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			// --------------------------------------------------
 			// add new satisfy constraint if isn't in set
 			// --------------------------------------------------
-			if (satisfy_constraint_list.count(count_constraint) == 0)
+			if (satisfy_constraint_list.count(count_constraint) == 0){
 				satisfy_constraint_list.insert(count_constraint);
 
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
-
+			cout << "The constraint number " << count_constraint << " add " << endl << endl;
+			}
 			idx.clear();
 			coef.clear();
 		} else {
@@ -725,12 +726,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		// add new satisfy constraint if isn't in set
 		// --------------------------------------------------
-		if (satisfy_constraint_list.count(count_constraint) == 0)
+		if (satisfy_constraint_list.count(count_constraint) == 0){
 			satisfy_constraint_list.insert(count_constraint);
 
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 				&matbeg, &idx[0], &coef[0], 0, 0);
-
+		cout << "The constraint number " << count_constraint << " add " << endl << endl;
+		}
 		idx.clear();
 		coef.clear();
 
@@ -819,12 +821,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			// --------------------------------------------------
 			// add new satisfy constraint if isn't in set
 			// --------------------------------------------------
-			if (satisfy_constraint_list.count(count_constraint) == 0)
+			if (satisfy_constraint_list.count(count_constraint) == 0){
 				satisfy_constraint_list.insert(count_constraint);
 
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
-
+			cout << "The constraint number " << count_constraint << " add " << endl << endl;
+			}
 			idx.clear();
 			coef.clear();
 
@@ -907,12 +910,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		// add new satisfy constraint if isn't in set
 		// --------------------------------------------------
-		if (satisfy_constraint_list.count(count_constraint) == 0)
+		if (satisfy_constraint_list.count(count_constraint) == 0){
 			satisfy_constraint_list.insert(count_constraint);
 
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 				&matbeg, &idx[0], &coef[0], 0, 0);
-
+		cout << "The constraint number " << count_constraint << " add " << endl << endl;
+		}
 		idx.clear();
 		coef.clear();
 	} else {
@@ -945,12 +949,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		// add new satisfy constraint if isn't in set
 		// --------------------------------------------------
-		if (satisfy_constraint_list.count(count_constraint) == 0)
+		if (satisfy_constraint_list.count(count_constraint) == 0){
 			satisfy_constraint_list.insert(count_constraint);
 
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 				&matbeg, &idx[0], &coef[0], 0, 0);
-
+		cout << "The constraint number " << count_constraint << " add " << endl << endl;
+		}
 		idx.clear();
 		coef.clear();
 	} else {
@@ -984,12 +989,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		// add new satisfy constraint if isn't in set
 		// --------------------------------------------------
-		if (satisfy_constraint_list.count(count_constraint) == 0)
+		if (satisfy_constraint_list.count(count_constraint) == 0){
 			satisfy_constraint_list.insert(count_constraint);
 
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 				&matbeg, &idx[0], &coef[0], 0, 0);
-
+		cout << "The constraint number " << count_constraint << " add " << endl << endl;
+		}
 		idx.clear();
 		coef.clear();
 	} else {

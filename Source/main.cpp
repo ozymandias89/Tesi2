@@ -70,7 +70,7 @@ int main(int argc, char const *argv[]) {
 			// 6. Cycle step 8
 			// --------------------------------------------------
 			bool flag;
-			int original_constraint = CPXgetnumrows(env_dual, lp_dual);
+
 
 			do {
 
@@ -102,9 +102,8 @@ int main(int argc, char const *argv[]) {
 					free(third_prob);
 
 				}
-
-				CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual,
-						original_constraint, num_constraint - 1);
+				//delete last constraint ry=ry
+				CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual, num_constraint - 1, num_constraint - 1);
 
 			} while (!flag);
 
