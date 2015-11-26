@@ -213,12 +213,12 @@ void load_problem(ifstream &myfile) {
 			std::istringstream it(line);
 			j = 0;
 			if (i >= num_constraint) {
-				cerr << "Matrix don't respect standard line";
+				cerr << "Matrix doesn't respect standard line";
 				exit(1);
 			}
 			while (it >> number) {
 				if (j >= N) {
-					cerr << "Matrix don't respect standard columns";
+					cerr << "Matrix doesn't respect standard columns";
 					exit(1);
 				}
 				A[i][j] = atof(number.c_str());

@@ -369,7 +369,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 void ThirdProblem::solve(CEnv env, Prob lp) {
 
-	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	if (test_problem_unbounded(env, lp))
 			throw std::runtime_error("Second problem are unbounded");

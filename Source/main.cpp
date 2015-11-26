@@ -97,6 +97,8 @@ int main(int argc, char const *argv[]) {
 					third_prob->solve(env_third, lp_third);
 					third_prob->update_y_bar(env_third, lp_third, sec_prob->cost);
 
+					CPXfreeprob(env_third, &lp_third);
+					CPXcloseCPLEX(&env_third);
 					free(third_prob);
 
 				}
@@ -116,6 +118,7 @@ int main(int argc, char const *argv[]) {
 			CPXcloseCPLEX(&env_dual);
 			free(sec_prob);
 			flag_find = true;
+			//flag_step1_2=false;
 
 			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 

@@ -156,6 +156,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 		cout << "Resolve a new problem P1.. " << endl;
 		cout << "add inequality x_" << index << " >= " << rhs << endl;
 		cout << "Now the new problem master is: " << endl;
+		//flag_step1_2 is true;
 		solve(env, lp);
 
 	}
@@ -259,12 +260,15 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		cout << "Now the new problem master is: " << endl;
 
 		b.push_back(rhs);
-
+		//flag_step1_2 is true;
 		solve(env, lp);
 	}
 
 	return z;
 }
+
+void step1(CEnv env, Prob lp){}
+void step2(CEnv env, Prob lp){}
 
 /**
  Method solve, solve the original problem, then branch in P_1 and P_2 problem
@@ -274,6 +278,13 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
  @return void
  */
 void solve(CEnv env, Prob lp) {
+
+	//todo
+//	if (flag_step1_2){
+//		step_1 (env, lp);
+//		step_2 (env, lp);
+//	}
+
 
 	// --------------------------------------------------
 	// 3. solve linear problem

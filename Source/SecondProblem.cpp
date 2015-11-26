@@ -540,7 +540,7 @@ void SecondProblem::set_solution(CEnv env, Prob lp, bool verbose) {
 
 void SecondProblem::solve(CEnv env, Prob lp, bool verbose) {
 
-	CHECKED_CPX_CALL(CPXprimopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	if (test_problem_unbounded(env, lp))
 		throw std::runtime_error("Second problem are unbounded");
@@ -650,8 +650,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 						<< " doesn't respects the equation " << "sum = " << sum
 						<< endl << endl;
 				cout << "Violated constraint that before was satisfied!" << endl;
-//				throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
+				throw std::runtime_error(
+					"Violated constraint that before was satisfied!");
 			}
 		}
 		count_constraint++;
@@ -740,8 +740,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 					<< " doesn't respects the equation " << "sum = " << sum
 					<< endl << endl;
 			cout << "Violated constraint that before was satisfied!" << endl;
-//				throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
+				throw std::runtime_error(
+						"Violated constraint that before was satisfied!");
 		}
 	}
 
@@ -836,8 +836,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 						<< endl << endl;
 
 				cout << "Violated constraint that before was satisfied!" << endl;
-//				throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
+				throw std::runtime_error(
+						"Violated constraint that before was satisfied!");
 			}
 		}
 		count_constraint++;
@@ -921,8 +921,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 					<< " doesn't respects the equation " << "sum = " << sum
 					<< endl << endl;
 			cout << "Violated constraint that before was satisfied!" << endl;
-//				throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
+				throw std::runtime_error(
+						"Violated constraint that before was satisfied!");
 		}
 	}
 
@@ -959,8 +959,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 					<< " doesn't respects the equation " << "sum = " << sum
 					<< endl << endl;
 			cout << "Violated constraint that before was satisfied!" << endl;
-//				throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
+      			throw std::runtime_error(
+						"Violated constraint that before was satisfied!");
 		}
 	}
 
@@ -998,8 +998,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 					<< " doesn't respects the equation " << "sum = " << sum
 					<< endl << endl;
 			cout << "Violated constraint that before was satisfied!" << endl;
-//				throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
+				throw std::runtime_error(
+						"Violated constraint that before was satisfied!");
 		}
 	}
 }

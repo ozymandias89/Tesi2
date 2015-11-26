@@ -11,6 +11,7 @@
 
 #include "load.h"
 static bool flag_find = true;
+static bool flag_step1_2 = true;
 
 
 void create_P1_prob(CEnv env, Prob lp, int index);
@@ -18,6 +19,10 @@ void create_P2_prob(CEnv env, Prob lp, int index);
 
 double* solve_P1_Problem(CEnv env, Prob lp, int index);
 double solve_P2_Problem(CEnv env, Prob lp, int index);
+
+void step1(CEnv env, Prob lp);
+
+void step2(CEnv env, Prob lp);
 
 void solve(CEnv env, Prob lp);
 
