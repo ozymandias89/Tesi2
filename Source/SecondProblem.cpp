@@ -334,11 +334,9 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		//  (gamma+1) * v0
 		// --------------------------------------------------
-		if (gam != 0) {
 			idx.push_back(v_0);
 			coef.push_back(gam + 1);
 			nzcnt++;
-		}
 
 		// --------------------------------------------------
 		//  -b
@@ -949,12 +947,13 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		// add new satisfy constraint if isn't in set
 		// --------------------------------------------------
-		if (satisfy_constraint_list.count(count_constraint) == 0){
+		if (satisfy_constraint_list.count(count_constraint) == 0) {
 			satisfy_constraint_list.insert(count_constraint);
 
-		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-				&matbeg, &idx[0], &coef[0], 0, 0);
-		cout << "The constraint number " << count_constraint << " add " << endl << endl;
+			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+					&matbeg, &idx[0], &coef[0], 0, 0);
+			cout << "The constraint number " << count_constraint << " add "
+					<< endl << endl;
 		}
 		idx.clear();
 		coef.clear();

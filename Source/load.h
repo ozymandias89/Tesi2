@@ -121,6 +121,7 @@ inline bool test_problem_infeasible(CEnv env, Prob lp) {
 		return false;
 	} else
 		return true;
+
 }
 
 /**

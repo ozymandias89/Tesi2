@@ -19,23 +19,27 @@
  * -----------------x-----------------------------------------------------------
  */
 
+#include "generator.h"
 #include "solve.cpp"
 #include "SecondProblem.cpp"
 #include "ThirdProblem.cpp"
 
 int main(int argc, char const *argv[]) {
 
-	if (argc < 2) { // you must insert file
-		throw std::runtime_error("usage: ./main filename.txt");
+	string file;
 
-	}
+	(argc < 2) ? file = generate_canonical_matrix(5, 20) : file = argv[1];
 
-	ifstream myfile(argv[1], std::ios::in);
-
+	ifstream myfile(file.c_str(), std::ios::in);
 	load_problem(myfile);
 
 	myfile.close();
 
+	print_matrix();
+	print_vect_c();
+	print_vect_b();
+
+	int iter=0;
 	try {
 
 		// --------------------------------------------------
@@ -60,17 +64,33 @@ int main(int argc, char const *argv[]) {
 
 			SecondProblem* sec_prob = new SecondProblem();
 			sec_prob->setupSP(env_dual, lp_dual);
+			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
+					"../data/second_problem.lp", 0);
+
+			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 
 			// --------------------------------------------------
 			// 5. Evaluate vector r
 			// --------------------------------------------------
 			sec_prob->evaluate_rT();
 
+			print_matrix();
+			print_vect_c();
+			print_vect_b();
+			sec_prob->print_r();
+
+			cout << gam;
+
+
 			// --------------------------------------------------
 			// 6. Cycle step 8
 			// --------------------------------------------------
 			bool flag;
+//			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Feasibility,   1e-3);
+//			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Optimality,   1e-5);
 
+			if (iter == 0)
+				exit(0);
 
 			do {
 
@@ -79,7 +99,10 @@ int main(int argc, char const *argv[]) {
 				sec_prob->step8_2(env_dual, lp_dual);
 
 				int num_constraint = CPXgetnumrows(env_dual, lp_dual);
-
+//
+//				CPXsetintparam (env, CPXPARAM_Conflict_Display, 2);
+//				CHECKED_CPX_CALL(CPXlpopt, env_dual, lp_dual);
+//
 				sec_prob->solve(env_dual, lp_dual);
 
 				// --------------------------------------------------
@@ -90,12 +113,16 @@ int main(int argc, char const *argv[]) {
 				if (!flag) {
 					DECL_ENV(env_third);
 					DECL_PROB(env_third, lp_third, "resolve third problem");
-					ThirdProblem* third_prob = new ThirdProblem(sec_prob->y_tilde, sec_prob->cost);
+					ThirdProblem* third_prob = new ThirdProblem(
+							sec_prob->y_tilde, sec_prob->cost);
 					third_prob->setup(env_third, lp_third);
-					CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
-					CHECKED_CPX_CALL(CPXwriteprob, env_third, lp_third, "../data/third_problem.lp", 0);
+					CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
+							"../data/second_problem.lp", 0);
+					CHECKED_CPX_CALL(CPXwriteprob, env_third, lp_third,
+							"../data/third_problem.lp", 0);
 					third_prob->solve(env_third, lp_third);
-					third_prob->update_y_bar(env_third, lp_third, sec_prob->cost);
+					third_prob->update_y_bar(env_third, lp_third,
+							sec_prob->cost);
 
 					CPXfreeprob(env_third, &lp_third);
 					CPXcloseCPLEX(&env_third);
@@ -103,10 +130,10 @@ int main(int argc, char const *argv[]) {
 
 				}
 				//delete last constraint ry=ry
-				CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual, num_constraint - 1, num_constraint - 1);
+				CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual,
+						num_constraint - 1, num_constraint - 1);
 
 			} while (!flag);
-
 
 			// --------------------------------------------------
 			// 8. ADD constraint R in the first problem
@@ -121,6 +148,7 @@ int main(int argc, char const *argv[]) {
 
 			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 
+			iter++;
 		} while (1);
 
 	} catch (std::exception& e) {
