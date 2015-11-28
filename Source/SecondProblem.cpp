@@ -377,6 +377,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 			}
 			r += b[i] * min_sol + dual_varVals_P1[i] + dual_varVals_P2[i];
 
+
 			//b[i]*beta
 			if (b[i] != 0) {
 				idx.push_back(num_constraint + 1 + N);
@@ -554,7 +555,7 @@ void SecondProblem::solve(CEnv env, Prob lp, bool verbose) {
 
 }
 
-void SecondProblem::step8_1(CEnv env, Prob lp) {
+void SecondProblem::step8_1(CEnv env, Prob lp, bool verbose) {
 
 	std::vector<int> idx;
 	std::vector<double> coef;
@@ -747,7 +748,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 
 	count_constraint++;
 	// --------------------------------------------------
-	// Estimation A_T * u - e_k * u_0 + a = 0
+	// Estimation A_T * v - e_k * u_v + a = 0
 	// --------------------------------------------------
 
 	//  A_T * v
@@ -894,11 +895,9 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 		}
 
 		//  (gamma+1) * v0
-		if (gam != 0) {
 			idx.push_back(v_0);
 			coef.push_back(gam + 1);
 			nzcnt++;
-		}
 
 		//  -b
 		idx.push_back(num_constraint + N + 1);

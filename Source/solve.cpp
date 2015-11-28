@@ -188,10 +188,6 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		set_and_print_var_P(env, lp);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
 		set_and_print_var_D(env, lp, false);
-
-		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
-
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 		cout << "delete last inequality " << endl;
 

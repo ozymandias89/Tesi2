@@ -35,10 +35,6 @@ int main(int argc, char const *argv[]) {
 
 	myfile.close();
 
-	print_matrix();
-	print_vect_c();
-	print_vect_b();
-
 	int iter=0;
 	try {
 
@@ -53,9 +49,12 @@ int main(int argc, char const *argv[]) {
 		// 2. program (first part)
 		// --------------------------------------------------
 		do {
+			print_matrix();
+			print_vect_c();
+			print_vect_b();
 
 			solve(env, lp);
-
+			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 			// ---------------------------------------------------------
 			// 3. if P_1 and P_2 have solution initialization of the second problem
 			// ---------------------------------------------------------
@@ -64,24 +63,18 @@ int main(int argc, char const *argv[]) {
 
 			SecondProblem* sec_prob = new SecondProblem();
 			sec_prob->setupSP(env_dual, lp_dual);
-			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
-					"../data/second_problem.lp", 0);
-
-			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 
 			// --------------------------------------------------
 			// 5. Evaluate vector r
 			// --------------------------------------------------
 			sec_prob->evaluate_rT();
 
-			print_matrix();
-			print_vect_c();
-			print_vect_b();
 			sec_prob->print_r();
+			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
+														"../data/second_problem.lp", 0);
 
-			cout << gam;
-
-
+			if (iter==1)
+				exit(0);
 			// --------------------------------------------------
 			// 6. Cycle step 8
 			// --------------------------------------------------
@@ -89,8 +82,7 @@ int main(int argc, char const *argv[]) {
 //			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Feasibility,   1e-3);
 //			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Optimality,   1e-5);
 
-			if (iter == 0)
-				exit(0);
+
 
 			do {
 
@@ -98,12 +90,23 @@ int main(int argc, char const *argv[]) {
 
 				sec_prob->step8_2(env_dual, lp_dual);
 
+				print_matrix();
+				sec_prob->print_c();
+				print_u_variables();
+				print_v_variables();
+				print_vect_b();
+				sec_prob->print_r();
+
+				cout << "min sol" << min_sol<< endl;
+
 				int num_constraint = CPXgetnumrows(env_dual, lp_dual);
 //
 //				CPXsetintparam (env, CPXPARAM_Conflict_Display, 2);
 //				CHECKED_CPX_CALL(CPXlpopt, env_dual, lp_dual);
 //
-				sec_prob->solve(env_dual, lp_dual);
+
+
+				sec_prob->solve(env_dual, lp_dual, true);
 
 				// --------------------------------------------------
 				// 7. STOP condition
@@ -116,8 +119,7 @@ int main(int argc, char const *argv[]) {
 					ThirdProblem* third_prob = new ThirdProblem(
 							sec_prob->y_tilde, sec_prob->cost);
 					third_prob->setup(env_third, lp_third);
-					CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
-							"../data/second_problem.lp", 0);
+
 					CHECKED_CPX_CALL(CPXwriteprob, env_third, lp_third,
 							"../data/third_problem.lp", 0);
 					third_prob->solve(env_third, lp_third);
@@ -135,10 +137,14 @@ int main(int argc, char const *argv[]) {
 
 			} while (!flag);
 
+
 			// --------------------------------------------------
 			// 8. ADD constraint R in the first problem
 			// --------------------------------------------------
+
+			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 			add_constraint_R(env, lp, sec_prob->R);
+
 
 			CPXfreeprob(env_dual, &lp_dual);
 			CPXcloseCPLEX(&env_dual);

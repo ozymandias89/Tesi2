@@ -45,14 +45,14 @@ public:
 
 	/**
 	 Method that creates tight C'y >= d subsystem and adds to dual problem
-	 @param  CEnv env, Prob lp
+	 @param  CEnv env, Prob lp, bool verbose
 	 @return void
 	 */
-	void step8_1(CEnv env, Prob lp);
+	void step8_1(CEnv env, Prob lp, bool verbose=false);
 
 	/**
 	 Method that add constraint r_T * y = r_T * y
-	 @param  CEnv env, Prob lp
+	 @param  CEnv env, Prob lp, bool verbose
 	 @return void
 	 */
 	void step8_2(CEnv env, Prob lp, bool verbose=false);
