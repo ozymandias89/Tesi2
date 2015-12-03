@@ -34,7 +34,7 @@ char errmsg[BUF_SIZE];
 const int NAME_SIZE = 512;
 char name[NAME_SIZE];
 
-const double epsilon_8_1 = 1.e-6L;
+const double epsilon_8_1 = 1.e-5L;
 const double epsilon_8_3 = 1.e-6L;
 const double epsilon_8_4 = 1.e-6L;
 
@@ -53,6 +53,9 @@ int k;
 //number of constraint
 int num_constraint;
 
+//slack_variable
+int slack=0;
+
 //Coefficient cost
 std::vector<double> c;
 
@@ -61,6 +64,9 @@ std::vector<std::vector<double> > A;
 
 //known terms
 std::vector<double> b;
+
+//set Z
+std::set<int> Z;
 
 //primary variables
 std::vector<double> varVals;
@@ -230,6 +236,13 @@ void load_problem(ifstream &myfile) {
 
 		}
 	}
+
+	//set integer variables
+	srand(1);
+	int N_int_var = rand() %N + 1;
+	for (int i =0; i < N_int_var; i++)
+		Z.insert(rand() %N);
+
 
 }
 
@@ -502,7 +515,8 @@ void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R) {
 		nzcnt = 0;
 
 		// add Slack variables
-		snprintf(name, NAME_SIZE, "S_%i", num_constraint);
+		snprintf(name, NAME_SIZE, "S_%i", slack);
+		slack++;
 		char* varName = (char*) (&name[0]);
 		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
 				&varName);

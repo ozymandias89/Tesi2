@@ -78,7 +78,6 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 	z[1] = CPX_INFBOUND;
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
-
 	bool infeasible = test_problem_infeasible(env, lp);
 
 	int cur_numrows = CPXgetnumrows(env, lp);
@@ -105,7 +104,8 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 		double obj = 0.0;
 		double lb = 0.0;
 		double ub = CPX_INFBOUND;
-		snprintf(name, NAME_SIZE, "S_%i", num_constraint);
+		snprintf(name, NAME_SIZE, "S_%i", slack);
+		slack++;
 		char* varName = (char*) (&name[0]);
 		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
 				&varName);
@@ -156,7 +156,8 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 		cout << "Resolve a new problem P1.. " << endl;
 		cout << "add inequality x_" << index << " >= " << rhs << endl;
 		cout << "Now the new problem master is: " << endl;
-		//flag_step1_2 is true;
+
+		flag_step1 = true;
 		solve(env, lp);
 
 	}
@@ -200,7 +201,8 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		double obj = 0.0;
 		double lb = 0.0;
 		double ub = CPX_INFBOUND;
-		snprintf(name, NAME_SIZE, "S_%i", num_constraint);
+		snprintf(name, NAME_SIZE, "S_%i", slack);
+		slack++;
 		char* varName = (char*) (&name[0]);
 		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
 				&varName);
@@ -256,15 +258,171 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 		cout << "Now the new problem master is: " << endl;
 
 		b.push_back(rhs);
-		//flag_step1_2 is true;
+		flag_step1 = true;
 		solve(env, lp);
 	}
 
 	return z;
 }
 
-void step1(CEnv env, Prob lp){}
-void step2(CEnv env, Prob lp){}
+void solve_integer_problem(CEnv env, Prob lp) {
+
+	//change problem to integer
+	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_MILP);
+
+	//set varibles to integer
+	char ctype[N];
+	for (int i = 0; i < N; i++) {
+		if (i < Num_original_variables) {
+			ctype[i] = CPX_INTEGER;
+		} else
+			ctype[i] = CPX_CONTINUOUS;
+	}
+	const_cast<char *>(ctype);
+	CHECKED_CPX_CALL(CPXcopyctype, env, lp, ctype);
+
+	//check feasible
+	bool infeasible = test_problem_infeasible(env, lp);
+
+	if (!infeasible) {
+		cout << "Problem solved to integer: " << endl;
+		CHECKED_CPX_CALL(CPXmipopt, env, lp);
+		print_objval(env, lp);
+		set_and_print_var_P(env, lp);
+
+	} else {
+		cout << endl;
+		cout << " Integer problem not resolvable! " << endl;
+		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
+		// free allocate memory
+		CPXfreeprob(env, &lp);
+		CPXcloseCPLEX(const_cast<cpxenv **>(&env));
+		exit(0);
+	}
+
+	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_LP);
+}
+
+void remove_constraint(CEnv env, Prob lp, int constraint) {
+
+	print_matrix();
+	print_vect_c();
+	print_vect_b();
+
+	cout << "Delete redundant constraint number: " << constraint << endl;
+	CHECKED_CPX_CALL(CPXdelrows, env, lp, constraint, constraint);
+
+	if (constraint < Num_original_constraints) {
+		b.erase(b.begin() + constraint);
+		A[constraint].clear();
+		A.erase(A.begin() + constraint);
+
+		Num_original_constraints--;
+		num_constraint--;
+
+	} else {
+
+		int column = (Num_original_variables + constraint
+				- Num_original_constraints);
+		CHECKED_CPX_CALL(CPXdelcols, env, lp, column, column);
+
+		b.erase(b.begin() + constraint);
+
+		for (unsigned int i = 0; i < A.size(); ++i) {
+			A[i].erase(A[i].begin() + column);
+		}
+
+		A[constraint].clear();
+		A.erase(A.begin() + constraint);
+
+		c.erase(c.begin() + column);
+
+		num_constraint--;
+		N--;
+	}
+
+	print_matrix();
+	print_vect_c();
+	print_vect_b();
+
+}
+
+void step1(CEnv env, Prob lp) {
+
+	//------------------------------------------------
+	// TEST if original problem is feasible
+	//------------------------------------------------
+
+	//change problem to integer
+	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_MILP);
+
+	cout << " STEP 1..." << endl;
+	cout << "index of variable set to integer in set Z is: ";
+	//set to integer variables in Z set
+	char ctype[N];
+	for (int i = 0; i < N; i++) {
+		if (Z.count(i) != 0) {
+			ctype[i] = CPX_INTEGER;
+			cout << i << " ";
+		} else
+			ctype[i] = CPX_CONTINUOUS;
+	}
+
+	cout << endl;
+	//	const_cast<char *>(ctype);
+	CHECKED_CPX_CALL(CPXcopyctype, env, lp, ctype);
+
+	//check feasible
+	bool infeasible = test_problem_infeasible(env, lp);
+
+	//----------------------------------------------------------------
+	// Remove redundant constraint (if exist) else STOP CONDITION 1
+	//----------------------------------------------------------------
+	if (!infeasible) {
+		bool flag_redundant;
+		do {
+			flag_redundant = false;
+			int num_cols = CPXgetnumcols(env, lp);
+			int num_rows = CPXgetnumrows(env, lp);
+			double redlb[num_cols], redub[num_cols];
+			for (int i = 0; i < num_cols; ++i) {
+				redlb[i] = 0;
+				redub[i] = CPX_INFBOUND;
+			}
+			int rstat[num_rows];
+			CHECKED_CPX_CALL(CPXbasicpresolve, env, lp, redlb, redub,
+					&rstat[0]);
+
+			int i = 0;
+			while (i < num_rows) {
+				if (rstat[i] == -1) {
+					flag_redundant = true;
+					break;
+				}
+				i++;
+			}
+
+			//remove constraint
+			if (flag_redundant) {
+				cout << "Constraint index " << i << " is redundant " << endl;
+				remove_constraint(env, lp, i);
+			}
+			cout << endl;
+
+		} while (flag_redundant);
+
+	} else {
+		cout << endl;
+		cout << " STOP CONDITION STEP 1 " << endl;
+		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
+		// free allocate memory
+		CPXfreeprob(env, &lp);
+		CPXcloseCPLEX(const_cast<cpxenv **>(&env));
+		exit(0);
+	}
+
+	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_LP);
+}
 
 /**
  Method solve, solve the original problem, then branch in P_1 and P_2 problem
@@ -276,31 +434,25 @@ void step2(CEnv env, Prob lp){}
 void solve(CEnv env, Prob lp) {
 
 	//todo
-//	if (flag_step1_2){
-//		step_1 (env, lp);
-//		step_2 (env, lp);
-//	}
+	if (flag_step1)
+		step1 (env, lp);
 
-
-	// --------------------------------------------------
-	// 3. solve linear problem
-	// --------------------------------------------------
+// --------------------------------------------------
+// 3. solve linear problem
+// --------------------------------------------------
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
-
-	//this problem are infeasible?
-	bool infeasible = test_problem_infeasible(env, lp);
 
 	//this problem are unbounded?
 	bool unbounded = test_problem_unbounded(env, lp);
 
 	//STOP CONDITION
-	if (unbounded || infeasible) {
+	if (unbounded) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 3 " << endl;
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		// free allocate memory
 		CPXfreeprob(env, &lp);
-		//CPXcloseCPLEX(env);
+		CPXcloseCPLEX(const_cast<cpxenv **>(&env));
 		exit(0);
 	}
 	cout << "PROBLEM MASTER:" << endl;
@@ -357,11 +509,13 @@ void solve(CEnv env, Prob lp) {
 
 	} else {
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-		cout<< "The last solution is the best integer solution. STOP CONDITION STEP 4 "<< endl;
+		cout
+				<< "The last solution is the best integer solution. STOP CONDITION STEP 4 "
+				<< endl;
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 		// free allocate memory
 		CPXfreeprob(env, &lp);
-		//CPXcloseCPLEX(env);
+		CPXcloseCPLEX(const_cast<cpxenv **>(&env));
 		exit(0);
 	}
 
