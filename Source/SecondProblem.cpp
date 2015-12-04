@@ -410,7 +410,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 
 }
 
-void SecondProblem::evaluate_rT() {
+void SecondProblem::evaluate_rT(bool verbose) {
 
 	double sum = 0;
 
@@ -460,6 +460,9 @@ void SecondProblem::evaluate_rT() {
 		temp.push_back(2.0);
 
 	rt.insert(rt.begin(), temp.begin(), temp.end());
+
+	if (verbose)
+		print_r();
 
 }
 

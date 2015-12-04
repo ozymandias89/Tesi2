@@ -21,8 +21,9 @@
 
 #include "generator.h"
 #include "solve.cpp"
-#include "SecondProblem.cpp"
-#include "ThirdProblem.cpp"
+#include <sstream>
+//#include "SecondProblem.cpp"
+//#include "ThirdProblem.cpp"
 
 int main(int argc, char const *argv[]) {
 
@@ -31,15 +32,30 @@ int main(int argc, char const *argv[]) {
 	// 1. Parameters (generate problem)
 	// --------------------------------------------------
 	string file;
+	bool verbose;
 
-	if (argc == 2) {
+	if (argc == 3) {
 		file = argv[1];
-	} else if (argc == 3) {
+		std::stringstream ss(argv[2]);
+		if (!(ss >> std::boolalpha >> verbose)) {
+			cerr << "Parameters error!!!!!" << endl;
+			exit(1);
+		}
+	} else if (argc == 4) {
 		int num_rows = strtol(argv[1], NULL, 10);
 		int limit = strtol(argv[2], NULL, 10);
 		file = generate_canonical_matrix(num_rows, limit);
+		std::stringstream ss(argv[3]);
+		if (!(ss >> std::boolalpha >> verbose)) {
+			cerr << "Parameters error!!!!!" << endl;
+			exit(1);
+		}
 	} else {
 		cerr << "Parameters error!!!!!" << endl;
+		cout << "The correct syntax is:" << endl << "./main (string)'path_name_file' (bool)verbose"
+				<< endl << "or (to generate random matrix)" << endl
+				<< "./main (int)number_constraints (int)limit_number_coefficients generate (bool)verbose"
+				<< endl;
 		exit(1);
 	}
 
@@ -67,17 +83,12 @@ int main(int argc, char const *argv[]) {
 		// 2. program (first part)
 		// --------------------------------------------------
 //		do {
+			//solve_integer_problem(env, lp, verbose);
 
-			solve_integer_problem(env, lp);
-
-			solve(env, lp);
+			solve(env, lp, verbose);
 
 			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-//
-//			if (iter==0)
-//				exit(0);
-//
-//
+
 //			// ---------------------------------------------------------
 //			// 3. if P_1 and P_2 have solution initialization of the second problem
 //			// ---------------------------------------------------------
@@ -87,22 +98,24 @@ int main(int argc, char const *argv[]) {
 //			SecondProblem* sec_prob = new SecondProblem();
 //			sec_prob->setupSP(env_dual, lp_dual);
 //
+//			CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual, "../data/second_problem.lp", 0);
+//
 //			// --------------------------------------------------
 //			// 5. Evaluate vector r
 //			// --------------------------------------------------
-//			sec_prob->evaluate_rT();
+//		//	sec_prob->evaluate_rT(verbose);
 //
 //			// --------------------------------------------------
 //			// 6. Cycle step 8
 //			// --------------------------------------------------
 //			bool flag;
-////			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Feasibility,   1e-3);
-////			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Optimality,   1e-5);
-//
+//			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Feasibility,   1e-5);
+//			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Optimality,   1e-5);
+
 //
 //
 //			do {
-//				sec_prob->step8_1(env_dual, lp_dual);
+				//sec_prob->step8_1(env_dual, lp_dual);
 //
 //				sec_prob->step8_2(env_dual, lp_dual);
 //

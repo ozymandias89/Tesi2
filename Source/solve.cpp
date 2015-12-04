@@ -17,14 +17,16 @@ using std::cerr;
 
 /**
  Method that create P1 problem (make a branch of admissible region),
- @param  (CEnv env, Prob lp, index),
- Environment of the problem, problem and index of fractional variable selected
+ @param  (CEnv env, Prob lp, int index, bool verbose)
+ Environment of the problem, problem , index of fractional variable selected and verbose
  @return none
  */
-void create_P1_prob(CEnv env, Prob lp, int index) {
+void create_P1_prob(CEnv env, Prob lp, int index, bool verbose) {
 
-	cout << endl;
-	cout << "SUB_PROBLEM P1" << endl;
+	if (verbose) {
+		cout << endl;
+		cout << "SUB_PROBLEM P1" << endl;
+	}
 
 	double rhs = floor(varVals[index]);
 
@@ -36,7 +38,8 @@ void create_P1_prob(CEnv env, Prob lp, int index) {
 	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
 			&coef, 0, 0);
 
-	cout << "insert inequality x_" << index << " <= " << rhs << endl;
+	if (verbose)
+		cout << "insert inequality x_" << index << " <= " << rhs << endl;
 
 }
 /**
@@ -45,10 +48,12 @@ void create_P1_prob(CEnv env, Prob lp, int index) {
  Environment of the problem, problem and index of fractional variable selected
  @return none
  */
-void create_P2_prob(CEnv env, Prob lp, int index) {
+void create_P2_prob(CEnv env, Prob lp, int index, bool verbose) {
 
-	cout << endl;
-	cout << "SUB_PROBLEM P2" << endl;
+	if (verbose) {
+		cout << endl;
+		cout << "SUB_PROBLEM P2" << endl;
+	}
 
 	double rhs = floor(varVals[index]) + 1;
 	char sense = 'G';
@@ -59,7 +64,8 @@ void create_P2_prob(CEnv env, Prob lp, int index) {
 	CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 1, &rhs, &sense, &matbeg, &idx,
 			&coef, 0, 0);
 
-	cout << "insert inequality x_" << index << " >= " << rhs << endl;
+	if (verbose)
+		cout << "insert inequality x_" << index << " >= " << rhs << endl;
 
 }
 
@@ -71,33 +77,36 @@ void create_P2_prob(CEnv env, Prob lp, int index) {
  @return double*, pointer to vector[2] where the first element is
  the result of P1 sub_problem, the second is the result of sub_P2 problem
  */
-double* solve_P1_Problem(CEnv env, Prob lp, int index) {
+double* solve_P1_Problem(CEnv env, Prob lp, int index, bool verbose) {
 
 	static double z[2];
 	z[0] = CPX_INFBOUND;
 	z[1] = CPX_INFBOUND;
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
-	bool infeasible = test_problem_infeasible(env, lp);
+	bool infeasible = test_problem_infeasible(env, lp, verbose);
 
 	int cur_numrows = CPXgetnumrows(env, lp);
 
 // print and set solution and create and resolve P_2 problem"
 	if (!infeasible) {
-		cout << "FEASIBLE " << endl;
+		if (verbose)
+			cout << "FEASIBLE " << endl;
 		gam = floor(varVals[index]);
-		print_objval(env, lp);
-		set_and_print_var_P(env, lp);
+		print_objval(env, lp, verbose);
+		set_and_print_var_P(env, lp, verbose);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z[0]);
-		set_and_print_var_D(env, lp, true);
+		set_and_print_var_D(env, lp, true, verbose);
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
-		cout << "delete last inequality " << endl;
+		if (verbose)
+			cout << "delete last inequality " << endl;
 
-		create_P2_prob(env, lp, index);
-		z[1] = solve_P2_Problem(env, lp, index);
+		create_P2_prob(env, lp, index, verbose);
+		z[1] = solve_P2_Problem(env, lp, index, verbose);
 
 	} else {
-		cout << "No solution for P1 problem exists.. " << endl;
+		if (verbose)
+			cout << "No solution for P1 problem exists.. " << endl;
 
 		// add Slack variables
 		static const char* varType = NULL;
@@ -146,19 +155,22 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 				A[(num_constraint - 1)][i] = 0;
 		}
 
-		cout << "delete last inequality " << endl;
+		if (verbose)
+			cout << "delete last inequality " << endl;
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 2, &rhs, &sense, &matbeg,
 				&idx[0], &coef[0], 0, 0);
 
 		b.push_back(rhs);
 
-		cout << "Resolve a new problem P1.. " << endl;
-		cout << "add inequality x_" << index << " >= " << rhs << endl;
-		cout << "Now the new problem master is: " << endl;
+		if (verbose) {
+			cout << "Resolve a new problem P1.. " << endl;
+			cout << "add inequality x_" << index << " >= " << rhs << endl;
+			cout << "Restart from step 1 with new problem master: " << endl;
+		}
 
 		flag_step1 = true;
-		solve(env, lp);
+		solve(env, lp, verbose);
 
 	}
 
@@ -169,32 +181,34 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index) {
 /**
  Method that create P2 problem (make a branch of admissible region),
  return solution if exist, otherwise return INFINITE value
- @param  (CEnv env, Prob lp, index),
- Environment of the problem, problem and index of fractional variable selected
+ @param  (CEnv env, Prob lp, int index, bool verbose)
+ Environment of the problem, problem , index of fractional variable selected and verbose
  @return double , result of P2 sub_problem
  */
-double solve_P2_Problem(CEnv env, Prob lp, int index) {
+double solve_P2_Problem(CEnv env, Prob lp, int index, bool verbose) {
 
 	double z = CPX_INFBOUND;
 
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
-	bool infeasible = test_problem_infeasible(env, lp);
+	bool infeasible = test_problem_infeasible(env, lp, verbose);
 
 	int cur_numrows = CPXgetnumrows(env, lp);
 
 	if (!infeasible) {
-		cout << "FEASIBLE " << endl;
-		print_objval(env, lp);
-		set_and_print_var_P(env, lp);
+		if (verbose)
+			cout << "FEASIBLE " << endl;
+		print_objval(env, lp, verbose);
+		set_and_print_var_P(env, lp, verbose);
 		CHECKED_CPX_CALL(CPXgetobjval, env, lp, &z);
-		set_and_print_var_D(env, lp, false);
+		set_and_print_var_D(env, lp, false, verbose);
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
-		cout << "delete last inequality " << endl;
+		if (verbose)
+			cout << "delete last inequality " << endl;
 
 	} else {
-
-		cout << "No solution for P2 problem exists " << endl;
+		if (verbose)
+			cout << "No solution for P2 problem exists " << endl;
 
 		// add Slack variables
 		static const char* varType = NULL;
@@ -243,29 +257,33 @@ double solve_P2_Problem(CEnv env, Prob lp, int index) {
 				A[(num_constraint - 1)][i] = 0;
 		}
 
-		for (int i = 0; i < N; i++)
-			cout << A[(num_constraint - 1)][i] << " ";
+		if (verbose) {
+			for (int i = 0; i < N; i++)
+				cout << A[(num_constraint - 1)][i] << " ";
 
-		cout << endl;
+			cout << endl;
 
-		cout << "delete last inequality " << endl;
+			cout << "delete last inequality " << endl;
+		}
 		CHECKED_CPX_CALL(CPXdelrows, env, lp, cur_numrows - 1, cur_numrows - 1);
 		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, 2, &rhs, &sense, &matbeg,
 				&idx[0], &coef[0], 0, 0);
 
-		cout << "Resolve a new problem P2.. " << endl;
-		cout << "add inequality x_" << index << " <= " << rhs << endl;
-		cout << "Now the new problem master is: " << endl;
+		if (verbose) {
+			cout << "Resolve a new problem P2.. " << endl;
+			cout << "add inequality x_" << index << " <= " << rhs << endl;
+			cout << "Restart from step 1 with new problem master: " << endl;
+		}
 
 		b.push_back(rhs);
 		flag_step1 = true;
-		solve(env, lp);
+		solve(env, lp, verbose);
 	}
 
 	return z;
 }
 
-void solve_integer_problem(CEnv env, Prob lp) {
+void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 
 	//change problem to integer
 	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_MILP);
@@ -278,17 +296,19 @@ void solve_integer_problem(CEnv env, Prob lp) {
 		} else
 			ctype[i] = CPX_CONTINUOUS;
 	}
-	const_cast<char *>(ctype);
+	//const_cast<char *>(ctype);
 	CHECKED_CPX_CALL(CPXcopyctype, env, lp, ctype);
 
 	//check feasible
-	bool infeasible = test_problem_infeasible(env, lp);
+	bool infeasible = test_problem_infeasible(env, lp, verbose);
 
 	if (!infeasible) {
-		cout << "Problem solved to integer: " << endl;
-		CHECKED_CPX_CALL(CPXmipopt, env, lp);
-		print_objval(env, lp);
-		set_and_print_var_P(env, lp);
+		if (verbose) {
+			cout << "Problem solved to integer: " << endl;
+			CHECKED_CPX_CALL(CPXmipopt, env, lp);
+			print_objval(env, lp, verbose);
+			set_and_print_var_P(env, lp, verbose);
+		}
 
 	} else {
 		cout << endl;
@@ -303,13 +323,15 @@ void solve_integer_problem(CEnv env, Prob lp) {
 	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_LP);
 }
 
-void remove_constraint(CEnv env, Prob lp, int constraint) {
+void remove_constraint(CEnv env, Prob lp, int constraint, bool verbose) {
 
-	print_matrix();
-	print_vect_c();
-	print_vect_b();
+	if (verbose) {
+		print_matrix();
+		print_vect_c();
+		print_vect_b();
+		cout << "Delete redundant constraint number: " << constraint << endl;
+	}
 
-	cout << "Delete redundant constraint number: " << constraint << endl;
 	CHECKED_CPX_CALL(CPXdelrows, env, lp, constraint, constraint);
 
 	if (constraint < Num_original_constraints) {
@@ -341,13 +363,21 @@ void remove_constraint(CEnv env, Prob lp, int constraint) {
 		N--;
 	}
 
-	print_matrix();
-	print_vect_c();
-	print_vect_b();
+	if (verbose) {
+		print_matrix();
+		print_vect_c();
+		print_vect_b();
+	}
 
 }
 
-void step1(CEnv env, Prob lp) {
+/**
+ Method that solve MIP problem, then remove redundant constraints from
+ @param  (CEnv env, Prob lp, bool verbose),
+ Environment of the problem, problem and verbose
+ @return void
+ */
+void step1(CEnv env, Prob lp, bool verbose) {
 
 	//------------------------------------------------
 	// TEST if original problem is feasible
@@ -356,24 +386,29 @@ void step1(CEnv env, Prob lp) {
 	//change problem to integer
 	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_MILP);
 
-	cout << " STEP 1..." << endl;
-	cout << "index of variable set to integer in set Z is: ";
+	if (verbose) {
+		cout << endl;
+		cout << "STEP 1:" << endl;
+		cout << "index of variables set to integer in set Z is: ";
+	}
 	//set to integer variables in Z set
 	char ctype[N];
 	for (int i = 0; i < N; i++) {
 		if (Z.count(i) != 0) {
 			ctype[i] = CPX_INTEGER;
+			if (verbose)
 			cout << i << " ";
 		} else
 			ctype[i] = CPX_CONTINUOUS;
 	}
 
-	cout << endl;
+	if (verbose)
+		cout << endl;
 	//	const_cast<char *>(ctype);
 	CHECKED_CPX_CALL(CPXcopyctype, env, lp, ctype);
 
 	//check feasible
-	bool infeasible = test_problem_infeasible(env, lp);
+	bool infeasible = test_problem_infeasible(env, lp, verbose);
 
 	//----------------------------------------------------------------
 	// Remove redundant constraint (if exist) else STOP CONDITION 1
@@ -404,10 +439,14 @@ void step1(CEnv env, Prob lp) {
 
 			//remove constraint
 			if (flag_redundant) {
-				cout << "Constraint index " << i << " is redundant " << endl;
-				remove_constraint(env, lp, i);
+				if (verbose)
+					cout << "Constraint index " << i << " is redundant "
+							<< endl;
+				remove_constraint(env, lp, i, verbose);
+			} else if (!flag_redundant && verbose) {
+				cout << "No detect redundant constraints. " << endl;
+				cout << endl;
 			}
-			cout << endl;
 
 		} while (flag_redundant);
 
@@ -431,21 +470,25 @@ void step1(CEnv env, Prob lp) {
  Environment of the problem, problem and index of fractional variables selected
  @return void
  */
-void solve(CEnv env, Prob lp) {
+void solve(CEnv env, Prob lp, bool verbose) {
 
-	//todo
+	// --------------------------------------------------
+	// 1. STEP_1
+	// --------------------------------------------------
 	if (flag_step1)
-		step1 (env, lp);
+		step1(env, lp, verbose);
 
-// --------------------------------------------------
-// 3. solve linear problem
-// --------------------------------------------------
+	// --------------------------------------------------
+	// 2. solve linear problem
+	// --------------------------------------------------
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	//this problem are unbounded?
 	bool unbounded = test_problem_unbounded(env, lp);
 
-	//STOP CONDITION
+	// --------------------------------------------------
+	// 3. STOP CONDITION
+	// --------------------------------------------------
 	if (unbounded) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 3 " << endl;
@@ -455,18 +498,20 @@ void solve(CEnv env, Prob lp) {
 		CPXcloseCPLEX(const_cast<cpxenv **>(&env));
 		exit(0);
 	}
-	cout << "PROBLEM MASTER:" << endl;
+
+	if (verbose)
+		cout << "PROBLEM MASTER:" << endl;
 
 	// --------------------------------------------------
 	// 4. print solution
 	// --------------------------------------------------
-	print_objval(env, lp);
+	print_objval(env, lp, verbose);
 
 	// --------------------------------------------------
 	// 5. set number and value of variable
 	//    (cur_numcols,varVals) and print these
 	// --------------------------------------------------
-	set_and_print_var_P(env, lp);
+	set_and_print_var_P(env, lp, verbose);
 
 	// --------------------------------------------------
 	// 6. chose the best fractional variable
@@ -481,18 +526,21 @@ void solve(CEnv env, Prob lp) {
 	// --------------------------------------------------------
 	if (index != -1) {
 
-		cout << endl;
-		cout << "More fractional variable choose " << varVals[index] << endl;
+		if (verbose) {
+			cout << endl;
+			cout << "More fractional variable choose " << varVals[index]
+					<< endl;
 
-		cout << "Index of variable choose: " << index << endl;
+			cout << "Index of variable choose: " << index << endl;
+		}
 
 		//create problem P_1
-		create_P1_prob(env, lp, index);
+		create_P1_prob(env, lp, index, verbose);
 
 		// --------------------------------------------------------
 		// 8. solve sub_problems (P_1 and P_2) return min solution
 		// --------------------------------------------------------
-		double* z = solve_P1_Problem(env, lp, index);
+		double* z = solve_P1_Problem(env, lp, index, verbose);
 
 		/////////////////////////////////////////////////////
 

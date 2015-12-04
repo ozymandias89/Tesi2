@@ -29,16 +29,16 @@ public:
 	void setupSP(CEnv env, Prob lp);
 
 	/** Method that evaluate the vector r as sum of rows of C (matrix of dual problem (13-19) + 21) and set r vector
-	 @param  none
+	 @param  bool verbose
 	 @return none
 	 */
-	void evaluate_rT();
+	void evaluate_rT(bool verbose=false);
 
 	void set_solution(CEnv env, Prob lp,bool verbose);
 
 	/**
 	 Method that solve the second problem (13-19) + 21)
-	 @param  CEnv env, Prob lp
+	 @param  CEnv env, Prob lp, bool verbose
 	 @return none
 	 */
 	void solve(CEnv env, Prob lp, bool verbose=false);

@@ -54,7 +54,7 @@ int k;
 int num_constraint;
 
 //slack_variable
-int slack=0;
+int slack = 0;
 
 //Coefficient cost
 std::vector<double> c;
@@ -116,13 +116,14 @@ inline bool test_problem_unbounded(CEnv env, Prob lp) {
 
 /**
  Method that test if the problem are infeasible
- @param  CEnv env, Prob lp
+ @param  CEnv env, Prob lp, bool verbose
  @return bool
  */
-inline bool test_problem_infeasible(CEnv env, Prob lp) {
+inline bool test_problem_infeasible(CEnv env, Prob lp, bool verbose) {
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 	int stat = CPXgetstat(env, lp);
-	cout << "Status problem " << stat << endl;
+	if (verbose)
+		cout << "Status problem " << stat << endl;
 	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
 		return false;
 	} else
@@ -239,10 +240,9 @@ void load_problem(ifstream &myfile) {
 
 	//set integer variables
 	srand(1);
-	int N_int_var = rand() %N + 1;
-	for (int i =0; i < N_int_var; i++)
-		Z.insert(rand() %N);
-
+	int N_int_var = rand() % N + 1;
+	for (int i = 0; i < N_int_var; i++)
+		Z.insert(rand() % N);
 
 }
 
@@ -391,15 +391,18 @@ void print_vect_b() {
 }
 /**
  Method that print object function
- @param  (CEnv env, Prob lp), environment of the problem and problem
+ @param  (CEnv env, Prob lp, bool verbose), environment of the problem and problem and verbose
  @return void
  */
-void print_objval(CEnv env, Prob lp) {
-	cout << endl;
+void print_objval(CEnv env, Prob lp, bool verbose) {
+	if (verbose)
+		cout << endl;
 	double objval;
 	CHECKED_CPX_CALL(CPXgetobjval, env, lp, &objval);
-	std::cout << "Obj val: " << objval << std::endl;
-	cout << endl;
+	if (verbose) {
+		std::cout << "Obj val: " << objval << std::endl;
+		cout << endl;
+	}
 
 }
 
@@ -419,12 +422,13 @@ void print_y_bar() {
 
 /**
  Method that set and print primal variable
- @param  (CEnv env, Prob lp), environmant of the problem and problem
+ @param  (CEnv env, Prob lp, bool verbose), environmant of the problem, problem and verbose
  @return void
  */
-void set_and_print_var_P(CEnv env, Prob lp) {
+void set_and_print_var_P(CEnv env, Prob lp, bool verbose) {
 
-	cout << "PRIMAL VARIABLES: " << endl;
+	if (verbose)
+		cout << "PRIMAL VARIABLES: " << endl;
 	int cur_numcols = CPXgetnumcols(env, lp);
 
 	varVals.clear();
@@ -444,9 +448,11 @@ void set_and_print_var_P(CEnv env, Prob lp) {
 	CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
 			&surplus, 0, cur_numcols - 1);
 
-	//  print index, name and value of each column
-	for (int i = 0; i < cur_numcols; i++) {
-		cout << cur_colname[i] << " = " << varVals[i] << endl;
+	if (verbose) {
+		//  print index, name and value of each column
+		for (int i = 0; i < cur_numcols; i++) {
+			cout << cur_colname[i] << " = " << varVals[i] << endl;
+		}
 	}
 	// free
 	free(cur_colname);
@@ -455,13 +461,14 @@ void set_and_print_var_P(CEnv env, Prob lp) {
 
 /**
  Method that set and print dual variables
- @param  (CEnv env, Prob lp, bool prob), environment of the problem,
- problem and flag(true P1 problem, false P2 problem)
+ @param  (CEnv env, Prob lp, bool prob,  bool verbose), environment of the problem,
+ problem , flag(true P1 problem, false P2 problem) and bool verbose
  @return void
  */
-void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
+void set_and_print_var_D(CEnv env, Prob lp, bool prob, bool verbose) {
 
-	cout << endl;
+	if (verbose)
+		cout << endl;
 	int num_rows = CPXgetnumrows(env, lp);
 
 	if (prob) {
@@ -470,22 +477,26 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob) {
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P1[0], 0,
 				num_rows - 1);
 
-		cout << "DUAL VARIABLES (the last is u_0): " << endl;
-		for (int i = 0; i < num_rows; i++) {
-			cout << dual_varVals_P1[i] << " ";
+		if (verbose) {
+			cout << "DUAL VARIABLES (the last is u_0): " << endl;
+			for (int i = 0; i < num_rows; i++) {
+				cout << dual_varVals_P1[i] << " ";
+			}
+			cout << endl;
 		}
-		cout << endl;
 
 	} else {
 		dual_varVals_P2.clear();
 		dual_varVals_P2.resize(num_rows);
 		CHECKED_CPX_CALL(CPXgetpi, env, lp, &dual_varVals_P2[0], 0,
 				num_rows - 1);
-		cout << "DUAL VARIABLES (the last is v_0): " << endl;
-		for (int i = 0; i < num_rows; i++) {
-			cout << dual_varVals_P2[i] << " ";
+		if (verbose) {
+			cout << "DUAL VARIABLES (the last is v_0): " << endl;
+			for (int i = 0; i < num_rows; i++) {
+				cout << dual_varVals_P2[i] << " ";
+			}
+			cout << endl;
 		}
-		cout << endl;
 	}
 
 }
