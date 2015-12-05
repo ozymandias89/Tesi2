@@ -15,12 +15,6 @@ using std::cout;
 using std::endl;
 using std::cerr;
 
-/**
- Method that create P1 problem (make a branch of admissible region),
- @param  (CEnv env, Prob lp, int index, bool verbose)
- Environment of the problem, problem , index of fractional variable selected and verbose
- @return none
- */
 void create_P1_prob(CEnv env, Prob lp, int index, bool verbose) {
 
 	if (verbose) {
@@ -43,12 +37,6 @@ void create_P1_prob(CEnv env, Prob lp, int index, bool verbose) {
 
 }
 
-/**
- Method that create P2 problem (make a branch of admissible region),
- @param  (CEnv env, Prob lp, index),
- Environment of the problem, problem and index of fractional variable selected
- @return none
- */
 void create_P2_prob(CEnv env, Prob lp, int index, bool verbose) {
 
 	if (verbose) {
@@ -70,14 +58,6 @@ void create_P2_prob(CEnv env, Prob lp, int index, bool verbose) {
 
 }
 
-/**
- Method that create P1 sub_problem (make a branch of admissible region),
- return solution if exist, otherwise return INFINITE value
- @param  (CEnv env, Prob lp, index, bool verbose),
- Environment of the problem, problem , index of fractional variable selected and bool verbose
- @return double*, pointer to vector[2] where the first element is
- the result of P1 sub_problem, the second is the result of sub_P2 problem
- */
 double* solve_P1_Problem(CEnv env, Prob lp, int index, bool verbose) {
 
 	static double z[2];
@@ -179,13 +159,6 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index, bool verbose) {
 
 }
 
-/**
- Method that create P2 problem (make a branch of admissible region),
- return solution if exist, otherwise return INFINITE value
- @param  (CEnv env, Prob lp, int index, bool verbose)
- Environment of the problem, problem , index of fractional variable selected and verbose
- @return double , result of P2 sub_problem
- */
 double solve_P2_Problem(CEnv env, Prob lp, int index, bool verbose) {
 
 	double z = CPX_INFBOUND;
@@ -284,12 +257,6 @@ double solve_P2_Problem(CEnv env, Prob lp, int index, bool verbose) {
 	return z;
 }
 
-/**
- Method that solve the problem to integer
- @param  (CEnv env, Prob lp, int index, bool verbose)
- Environment of the problem, problem , index of fractional variable selected and verbose
- @return void
- */
 void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 
 	//change problem to integer
@@ -331,12 +298,6 @@ void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_LP);
 }
 
-/**
- Ausiliar method that remove constraint and update data structures
- @param  (CEnv env, Prob lp, bool verbose),
- Environment of the problem, problem and verbose
- @return void
- */
 void remove_constraint(CEnv env, Prob lp, int constraint, bool verbose) {
 
 	if (verbose) {
@@ -385,12 +346,6 @@ void remove_constraint(CEnv env, Prob lp, int constraint, bool verbose) {
 
 }
 
-/**
- Method that solve MIP problem, then remove redundant constraints from primary problem
- @param  (CEnv env, Prob lp, bool verbose),
- Environment of the problem, problem and verbose
- @return void
- */
 void step1(CEnv env, Prob lp, bool verbose) {
 
 	//------------------------------------------------
@@ -478,13 +433,6 @@ void step1(CEnv env, Prob lp, bool verbose) {
 	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_LP);
 }
 
-/**
- Method solve, solve the original problem, then branch in P_1 and P_2 problem
- and resolve recursively the two sub_problems.
- @param  (CEnv env, Prob lp, index),
- Environment of the problem, problem and index of fractional variables selected
- @return void
- */
 void solve(CEnv env, Prob lp, bool verbose) {
 
 	// --------------------------------------------------
@@ -585,11 +533,6 @@ void solve(CEnv env, Prob lp, bool verbose) {
 
 }
 
-/**
- Print u variable primal problem
- @param none
- @return void
- */
 void print_u_variables() {
 	cout << "u variables (the last is u_0): " << endl;
 	for (std::vector<double>::const_iterator i = dual_varVals_P1.begin();
@@ -599,11 +542,6 @@ void print_u_variables() {
 	cout << endl;
 }
 
-/**
- Print v variable primal problem
- @param none
- @return void
- */
 void print_v_variables() {
 
 	cout << "v variables (the last is v_0): " << endl;

@@ -34,6 +34,11 @@ public:
 	 */
 	void evaluate_rT();
 
+	/**
+	 Auxiliar method, set variables result from second problem and insert y tilde in set R
+	 @param  (CEnv env, Prob lp)
+	 @return none
+	 */
 	void set_solution(CEnv env, Prob lp);
 
 	/**
@@ -63,28 +68,25 @@ public:
 	 @return bool
 	 */
 	bool y_tilde_EQ_y_bar();
+
 	/**
 	 Method print u
 	 @param  none
 	 @return none
 	 */
 	void print_u();
-
 	/**
 	 Method print v
 	 @param  none
 	 @return none
 	 */
 	void print_v();
-
 	/**
 	 Method print r
 	 @param  none
 	 @return none
 	 */
-
 	void print_r();
-
 	void print_c();
 	/**
 	 Method print a

@@ -11,7 +11,7 @@ ThirdProblem::ThirdProblem(vector<double> y_til, vector<double> c,
 		bool verbose) {
 	this->verbose = verbose;
 	this->y_tilde = y_til;
-	y_tilde_MIN_y_bar(c);
+	y_bar_MIN_y_tilde(c);
 
 }
 
@@ -19,16 +19,7 @@ ThirdProblem::~ThirdProblem() {
 	// TODO Auto-generated destructor stub
 }
 
-void ThirdProblem::print_vector(vector<double> vector) {
-
-	for (unsigned int i = 0; i < vector.size(); i++)
-		cout << vector[i] << " ";
-
-	cout << endl;
-
-}
-
-void ThirdProblem::y_tilde_MIN_y_bar(vector<double> c) {
+void ThirdProblem::y_bar_MIN_y_tilde(vector<double> c) {
 
 	double difference;
 
@@ -89,6 +80,15 @@ void ThirdProblem::y_tilde_MIN_y_bar(vector<double> c) {
 		cout << "Vector t (y_bar - y_tilde): " << endl;
 		print_vector(t);
 	}
+
+}
+
+void ThirdProblem::print_vector(vector<double> vector) {
+
+	for (unsigned int i = 0; i < vector.size(); i++)
+		cout << vector[i] << " ";
+
+	cout << endl;
 
 }
 
@@ -471,8 +471,10 @@ void ThirdProblem::update_y_bar(CEnv env, Prob lp, vector<double>& c) {
 		for (unsigned int i = 0; i < c.size(); ++i)
 			cout << c[i] << " ";
 		cout << "beta " << min_sol << endl;
-		print_u_variables();
-		print_v_variables();
+		cout << "u variables (the last is u_0): " << endl;
+		print_vector(dual_varVals_P1);
+		cout << "v variables (the last is v_0): " << endl;
+		print_vector(dual_varVals_P2);
 		cout << endl;
 	}
 
