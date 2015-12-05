@@ -38,6 +38,9 @@ const double epsilon_8_1 = 1.e-5L;
 const double epsilon_8_3 = 1.e-6L;
 const double epsilon_8_4 = 1.e-6L;
 
+//number of iteration of the problem
+static int iter;
+
 //number of variable
 int N;
 
@@ -123,7 +126,7 @@ inline bool test_problem_infeasible(CEnv env, Prob lp, bool verbose) {
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
 	int stat = CPXgetstat(env, lp);
 	if (verbose)
-		cout << "Status problem " << stat << endl;
+		cout << endl << "Status problem " << stat << endl;
 	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
 		return false;
 	} else
@@ -383,7 +386,7 @@ void print_vect_c() {
  */
 void print_vect_b() {
 
-	cout << "Vector b" << endl;
+	cout << endl << "Vector b" << endl;
 	for (int i = 0; i < num_constraint; i++)
 		cout << b[i] << " ";
 
@@ -500,7 +503,12 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob, bool verbose) {
 	}
 
 }
-
+/**
+ Method that add constraints in set R to the first problem.
+ @param  (CEnv env, Prob lp, std::set<std::vector<double> > R) environment of the problem,
+ problem ,set R and bool verbose
+ @return void
+ */
 void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R) {
 
 	//change sign matrix A

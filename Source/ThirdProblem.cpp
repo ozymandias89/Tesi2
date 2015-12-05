@@ -7,10 +7,11 @@
 
 #include "ThirdProblem.h"
 
-ThirdProblem::ThirdProblem(vector<double> y_til, vector<double> c, bool verbose) {
-	// TODO Auto-generated constructor stub
+ThirdProblem::ThirdProblem(vector<double> y_til, vector<double> c,
+		bool verbose) {
+	this->verbose = verbose;
 	this->y_tilde = y_til;
-	y_tilde_MIN_y_bar(c,verbose);
+	y_tilde_MIN_y_bar(c);
 
 }
 
@@ -27,20 +28,23 @@ void ThirdProblem::print_vector(vector<double> vector) {
 
 }
 
-void ThirdProblem::y_tilde_MIN_y_bar(vector<double> c, bool verbose) {
+void ThirdProblem::y_tilde_MIN_y_bar(vector<double> c) {
 
 	double difference;
 
+//	if (verbose){
+//		cout << endl;
+//		cout << "y_bar - y_til" << endl << endl;
+//	}
 	// --------------------------------------------------
 	// 1. c-a
 	// --------------------------------------------------
-
 	int j = 0;
 	for (unsigned int i = 0; i < c.size(); i++) {
 		difference = c[i] - y_tilde[j];
 		t.push_back(difference);
-		if (verbose)
-			cout << "a_" << i << "  =" << difference << endl;
+//		if (verbose)
+//			cout << "a_" << i << "  =" << difference << endl;
 		j++;
 	}
 
@@ -51,8 +55,8 @@ void ThirdProblem::y_tilde_MIN_y_bar(vector<double> c, bool verbose) {
 	difference = min_sol - y_tilde[j];
 
 	t.push_back(difference);
-	if (verbose)
-		cout << "beta  = " << difference << endl;
+//	if (verbose)
+//		cout << "beta  = " << difference << endl;
 
 	j++;
 
@@ -62,8 +66,8 @@ void ThirdProblem::y_tilde_MIN_y_bar(vector<double> c, bool verbose) {
 
 	for (unsigned int i = 0; i < dual_varVals_P1.size(); i++) {
 		difference = dual_varVals_P1[i] - y_tilde[j];
-		if (verbose)
-			cout << "u  =" << difference << endl;
+//		if (verbose)
+//			cout << "u  =" << difference << endl;
 		t.push_back(difference);
 		j++;
 	}
@@ -74,14 +78,15 @@ void ThirdProblem::y_tilde_MIN_y_bar(vector<double> c, bool verbose) {
 
 	for (unsigned int i = 0; i < dual_varVals_P2.size(); i++) {
 		difference = dual_varVals_P2[i] - y_tilde[j];
-		if (verbose)
-			cout << "v  =" << difference << endl;
+//		if (verbose)
+//			cout << "v  =" << difference << endl;
 		t.push_back(difference);
 		j++;
 	}
 
 	if (verbose) {
-		cout << "Vector t: " << endl;
+		cout << endl;
+		cout << "Vector t (y_bar - y_tilde): " << endl;
 		print_vector(t);
 	}
 
@@ -179,6 +184,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			j++;
 
 			//u
+
 			for (int i = 0; i < num_constraint; i++) {
 				cof += b[i] * t[j];
 				rhs += b[i] * y_tilde[j];
@@ -372,9 +378,9 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	if (test_problem_unbounded(env, lp))
-			throw std::runtime_error("Second problem are unbounded");
+		throw std::runtime_error("Third problem are unbounded");
 
-	bool infeasible = test_problem_infeasible(env, lp);
+	bool infeasible = test_problem_infeasible(env, lp, verbose);
 
 	if (!infeasible) {
 
@@ -382,7 +388,9 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 
 		vector<double> varibles;
 
-		cout << "VARIABLES THIRD PROBLEM: " << endl;
+		if (verbose)
+			cout << "VARIABLES THIRD PROBLEM: " << endl;
+
 		int cur_numcols = 1;
 
 		varibles.resize(cur_numcols);
@@ -401,7 +409,8 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 				&surplus, 0, cur_numcols - 1);
 
 		//  print index, name and value of lambda
-		cout << cur_colname[0] << " = " << varibles[0] << endl;
+		if (verbose)
+			cout << cur_colname[0] << " = " << varibles[0] << endl;
 
 		lambda = varibles[0];
 
@@ -416,11 +425,9 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 
 }
 
-void ThirdProblem::update_y_bar(CEnv env, Prob lp,vector<double>& c, bool verbose) {
+void ThirdProblem::update_y_bar(CEnv env, Prob lp, vector<double>& c) {
 
 	vector<double> r_mul_lamb;
-
-	cout << endl;
 
 	//-------------------------------------------------
 	// lambda * (y_bar-y_tilde)
@@ -452,8 +459,6 @@ void ThirdProblem::update_y_bar(CEnv env, Prob lp,vector<double>& c, bool verbos
 		j++;
 	}
 
-	cout << endl;
-
 	//v and v_0
 	for (unsigned int i = 0; i < dual_varVals_P2.size(); ++i) {
 		dual_varVals_P2[i] = y_tilde[j] + r_mul_lamb[j];
@@ -461,10 +466,14 @@ void ThirdProblem::update_y_bar(CEnv env, Prob lp,vector<double>& c, bool verbos
 	}
 
 	if (verbose) {
-		print_vect_c();
-		cout << " beta " << min_sol << endl;
+		cout << endl << "Update y bar:" << endl;
+		cout << "Vector c:" << endl;
+		for (unsigned int i = 0; i < c.size(); ++i)
+			cout << c[i] << " ";
+		cout << "beta " << min_sol << endl;
 		print_u_variables();
 		print_v_variables();
+		cout << endl;
 	}
 
 }

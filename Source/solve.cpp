@@ -42,6 +42,7 @@ void create_P1_prob(CEnv env, Prob lp, int index, bool verbose) {
 		cout << "insert inequality x_" << index << " <= " << rhs << endl;
 
 }
+
 /**
  Method that create P2 problem (make a branch of admissible region),
  @param  (CEnv env, Prob lp, index),
@@ -72,8 +73,8 @@ void create_P2_prob(CEnv env, Prob lp, int index, bool verbose) {
 /**
  Method that create P1 sub_problem (make a branch of admissible region),
  return solution if exist, otherwise return INFINITE value
- @param  (CEnv env, Prob lp, index),
- Environment of the problem, problem and index of fractional variable selected
+ @param  (CEnv env, Prob lp, index, bool verbose),
+ Environment of the problem, problem , index of fractional variable selected and bool verbose
  @return double*, pointer to vector[2] where the first element is
  the result of P1 sub_problem, the second is the result of sub_P2 problem
  */
@@ -283,6 +284,12 @@ double solve_P2_Problem(CEnv env, Prob lp, int index, bool verbose) {
 	return z;
 }
 
+/**
+ Method that solve the problem to integer
+ @param  (CEnv env, Prob lp, int index, bool verbose)
+ Environment of the problem, problem , index of fractional variable selected and verbose
+ @return void
+ */
 void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 
 	//change problem to integer
@@ -313,6 +320,7 @@ void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 	} else {
 		cout << endl;
 		cout << " Integer problem not resolvable! " << endl;
+		cout << " Iteration number: " << iter << endl;
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		// free allocate memory
 		CPXfreeprob(env, &lp);
@@ -323,6 +331,12 @@ void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_LP);
 }
 
+/**
+ Ausiliar method that remove constraint and update data structures
+ @param  (CEnv env, Prob lp, bool verbose),
+ Environment of the problem, problem and verbose
+ @return void
+ */
 void remove_constraint(CEnv env, Prob lp, int constraint, bool verbose) {
 
 	if (verbose) {
@@ -372,7 +386,7 @@ void remove_constraint(CEnv env, Prob lp, int constraint, bool verbose) {
 }
 
 /**
- Method that solve MIP problem, then remove redundant constraints from
+ Method that solve MIP problem, then remove redundant constraints from primary problem
  @param  (CEnv env, Prob lp, bool verbose),
  Environment of the problem, problem and verbose
  @return void
@@ -397,7 +411,7 @@ void step1(CEnv env, Prob lp, bool verbose) {
 		if (Z.count(i) != 0) {
 			ctype[i] = CPX_INTEGER;
 			if (verbose)
-			cout << i << " ";
+				cout << i << " ";
 		} else
 			ctype[i] = CPX_CONTINUOUS;
 	}
@@ -453,6 +467,7 @@ void step1(CEnv env, Prob lp, bool verbose) {
 	} else {
 		cout << endl;
 		cout << " STOP CONDITION STEP 1 " << endl;
+		cout << " Iteration number: " << iter << endl;
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		// free allocate memory
 		CPXfreeprob(env, &lp);
@@ -492,6 +507,7 @@ void solve(CEnv env, Prob lp, bool verbose) {
 	if (unbounded) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 3 " << endl;
+		cout << " Iteration number: " << iter << endl;
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		// free allocate memory
 		CPXfreeprob(env, &lp);
@@ -499,19 +515,18 @@ void solve(CEnv env, Prob lp, bool verbose) {
 		exit(0);
 	}
 
-	if (verbose)
-		cout << "PROBLEM MASTER:" << endl;
+	cout << endl << "PROBLEM MASTER:" << endl;
 
 	// --------------------------------------------------
 	// 4. print solution
 	// --------------------------------------------------
-	print_objval(env, lp, verbose);
+	print_objval(env, lp, true);
 
 	// --------------------------------------------------
 	// 5. set number and value of variable
 	//    (cur_numcols,varVals) and print these
 	// --------------------------------------------------
-	set_and_print_var_P(env, lp, verbose);
+	set_and_print_var_P(env, lp, true);
 
 	// --------------------------------------------------
 	// 6. chose the best fractional variable
@@ -560,6 +575,7 @@ void solve(CEnv env, Prob lp, bool verbose) {
 		cout
 				<< "The last solution is the best integer solution. STOP CONDITION STEP 4 "
 				<< endl;
+		cout << " Iteration number: " << iter << endl;
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 		// free allocate memory
 		CPXfreeprob(env, &lp);
@@ -569,6 +585,11 @@ void solve(CEnv env, Prob lp, bool verbose) {
 
 }
 
+/**
+ Print u variable primal problem
+ @param none
+ @return void
+ */
 void print_u_variables() {
 	cout << "u variables (the last is u_0): " << endl;
 	for (std::vector<double>::const_iterator i = dual_varVals_P1.begin();
@@ -578,6 +599,11 @@ void print_u_variables() {
 	cout << endl;
 }
 
+/**
+ Print v variable primal problem
+ @param none
+ @return void
+ */
 void print_v_variables() {
 
 	cout << "v variables (the last is v_0): " << endl;
@@ -587,4 +613,3 @@ void print_v_variables() {
 
 	cout << endl;
 }
-

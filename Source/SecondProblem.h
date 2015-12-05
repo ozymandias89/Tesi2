@@ -15,7 +15,7 @@ using namespace std;
 
 class SecondProblem {
 public:
-	SecondProblem();
+	SecondProblem(bool verbose = false);
 	virtual ~SecondProblem();
 
 	// PREDICATES:
@@ -32,31 +32,30 @@ public:
 	 @param  bool verbose
 	 @return none
 	 */
-	void evaluate_rT(bool verbose=false);
+	void evaluate_rT();
 
-	void set_solution(CEnv env, Prob lp,bool verbose);
+	void set_solution(CEnv env, Prob lp);
 
 	/**
 	 Method that solve the second problem (13-19) + 21)
 	 @param  CEnv env, Prob lp, bool verbose
 	 @return none
 	 */
-	void solve(CEnv env, Prob lp, bool verbose=false);
+	void solve(CEnv env, Prob lp);
 
 	/**
 	 Method that creates tight C'y >= d subsystem and adds to dual problem
 	 @param  CEnv env, Prob lp, bool verbose
 	 @return void
 	 */
-	void step8_1(CEnv env, Prob lp, bool verbose=false);
+	void step8_1(CEnv env, Prob lp);
 
 	/**
 	 Method that add constraint r_T * y = r_T * y
 	 @param  CEnv env, Prob lp, bool verbose
 	 @return void
 	 */
-	void step8_2(CEnv env, Prob lp, bool verbose=false);
-
+	void step8_2(CEnv env, Prob lp);
 
 	/**
 	 Test if y_tilde == y_barr
@@ -119,7 +118,7 @@ public:
 	void print_y_tilde();
 
 	// ATTRIBUTES:
-	set< vector<double> > R;
+	set<vector<double> > R;
 	set<int> satisfy_constraint_list;
 	vector<double> cost;
 	vector<double> u;
@@ -130,7 +129,8 @@ public:
 	double beta;
 	vector<double> rt;
 	vector<double> y_tilde;
-
+	bool verbose;
+	bool violated_constraint;
 
 };
 

@@ -7,9 +7,10 @@
 
 #include "SecondProblem.h"
 
-SecondProblem::SecondProblem() {
-	// TODO Auto-generated constructor stub
-	 this->cost=c;
+SecondProblem::SecondProblem(bool verbose) {
+	this->violated_constraint = false;
+	this->verbose = verbose;
+	this->cost = c;
 }
 
 SecondProblem::~SecondProblem() {
@@ -43,7 +44,8 @@ void SecondProblem::print_r() {
 void SecondProblem::print_c() {
 	cout << endl;
 	cout << "vector c " << endl;
-	for (std::vector<double>::const_iterator j = cost.begin(); j != cost.end(); ++j)
+	for (std::vector<double>::const_iterator j = cost.begin(); j != cost.end();
+			++j)
 		cout << *j << " ";
 	cout << endl << endl;
 }
@@ -88,8 +90,10 @@ void SecondProblem::set_up_variable(CEnv env, Prob lp) {
 	// second problem order of variable: (u_0 u a b v_0 v)
 	// ----------------------------------------------------
 
-	cout << endl;
-	cout << "Initialization dual problem... " << endl;
+	if (verbose) {
+		cout << endl;
+		cout << "Initialization dual problem... " << endl;
+	}
 	// variables
 	static const char* varType = NULL;
 	double obj = 0;
@@ -334,9 +338,9 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 		// --------------------------------------------------
 		//  (gamma+1) * v0
 		// --------------------------------------------------
-			idx.push_back(v_0);
-			coef.push_back(gam + 1);
-			nzcnt++;
+		idx.push_back(v_0);
+		coef.push_back(gam + 1);
+		nzcnt++;
 
 		// --------------------------------------------------
 		//  -b
@@ -377,7 +381,6 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 			}
 			r += b[i] * min_sol + dual_varVals_P1[i] + dual_varVals_P2[i];
 
-
 			//b[i]*beta
 			if (b[i] != 0) {
 				idx.push_back(num_constraint + 1 + N);
@@ -410,7 +413,7 @@ void SecondProblem::setupSP(CEnv env, Prob lp) {
 
 }
 
-void SecondProblem::evaluate_rT(bool verbose) {
+void SecondProblem::evaluate_rT() {
 
 	double sum = 0;
 
@@ -466,7 +469,7 @@ void SecondProblem::evaluate_rT(bool verbose) {
 
 }
 
-void SecondProblem::set_solution(CEnv env, Prob lp, bool verbose) {
+void SecondProblem::set_solution(CEnv env, Prob lp) {
 
 	vector<double> varibles;
 
@@ -524,6 +527,7 @@ void SecondProblem::set_solution(CEnv env, Prob lp, bool verbose) {
 	if (verbose) {
 		print_y_bar();
 		print_y_tilde();
+		cout << endl << "VARIABLES SECOND PROBLEM: " << endl;
 		print_u0();
 		print_u();
 		print_a();
@@ -540,17 +544,17 @@ void SecondProblem::set_solution(CEnv env, Prob lp, bool verbose) {
 
 }
 
-void SecondProblem::solve(CEnv env, Prob lp, bool verbose) {
+void SecondProblem::solve(CEnv env, Prob lp) {
 
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	if (test_problem_unbounded(env, lp))
 		throw std::runtime_error("Second problem are unbounded");
 
-	bool infeasible = test_problem_infeasible(env, lp);
+	bool infeasible = test_problem_infeasible(env, lp, verbose);
 
 	if (!infeasible) {
-		set_solution(env, lp, verbose);
+		set_solution(env, lp);
 	} else {
 		cerr << "Second problem has conflict!!!!!" << endl;
 		exit(1);
@@ -558,8 +562,9 @@ void SecondProblem::solve(CEnv env, Prob lp, bool verbose) {
 
 }
 
-void SecondProblem::step8_1(CEnv env, Prob lp, bool verbose) {
+void SecondProblem::step8_1(CEnv env, Prob lp) {
 
+	this->violated_constraint = false;
 	std::vector<int> idx;
 	std::vector<double> coef;
 	int count_constraint = 0;
@@ -575,181 +580,198 @@ void SecondProblem::step8_1(CEnv env, Prob lp, bool verbose) {
 	//  A_T * u
 	double sum = 0;
 	for (int j = 0; j < N; j++) {
-		sum = 0;
-		for (int i = 0; i < num_constraint; i++) {
+		if (!(this->violated_constraint)) {
+			sum = 0;
+			for (int i = 0; i < num_constraint; i++) {
 
-			if (A[i][j] != 0) {
-				sum += A[i][j] * dual_varVals_P1[i];
+				if (A[i][j] != 0) {
+					sum += A[i][j] * dual_varVals_P1[i];
+
+				}
 
 			}
 
+			//  -e_k * u0
+			if (j == k) {
+				sum -= dual_varVals_P1[num_constraint];
+			}
+
+			//  +a_i
+			sum += cost[j];
+
+			//tolerance error
+			if (sum < epsilon_8_1 && sum > -epsilon_8_1)
+				sum = 0.0;
+
+			// --------------------------------------------------
+			//  print respect constraint
+			// --------------------------------------------------
+
+			if (sum == 0) {
+
+				// --------------------------------------------------
+				// add new constraint A_T * u - e_k * u_0 + a = 0
+				// --------------------------------------------------
+				nzcnt = 0;
+
+				//  -A_T * u
+				int iter = 0;
+				int u = 1;
+
+				while (iter < num_constraint) {
+
+					if (A[iter][j] != 0) {
+						idx.push_back(u);
+						coef.push_back(A[iter][j]);
+						nzcnt++;
+					}
+					iter++;
+					u++;
+				}
+
+				//  -e_k * u0
+				if (j == k) {
+					idx.push_back(0);
+					coef.push_back(-1);
+					nzcnt++;
+				}
+
+				//  +a_i
+				idx.push_back(num_constraint + 1 + j);
+				coef.push_back(1);
+				nzcnt++;
+
+				// --------------------------------------------------
+				// add new satisfy constraint if isn't in set
+				// --------------------------------------------------
+				if (satisfy_constraint_list.count(count_constraint) == 0) {
+					satisfy_constraint_list.insert(count_constraint);
+
+					CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs,
+							&sense, &matbeg, &idx[0], &coef[0], 0, 0);
+					if (verbose)
+						cout << "The constraint number " << count_constraint
+								<< " add " << endl << endl;
+				}
+				idx.clear();
+				coef.clear();
+			} else {
+				if (satisfy_constraint_list.count(count_constraint) != 0) {
+					this->violated_constraint = true;
+					if (verbose) {
+						cout << "The constraint number " << count_constraint
+								<< " doesn't respects the equation " << "sum = "
+								<< sum << endl << endl;
+						cout << "Violated constraint that before was satisfied!"
+								<< endl;
+					}
+//				throw std::runtime_error(
+//					"Violated constraint that before was satisfied!");
+				}
+			}
+			count_constraint++;
+		}
+	}
+
+	if (!(this->violated_constraint)) {
+		// --------------------------------------------------
+		// Estimation b_T * u + u_0 * gamma - b
+		// --------------------------------------------------
+
+		//  b_T * u
+		sum = 0;
+		for (int i = 0; i < num_constraint; i++) {
+
+			if (b[i] != 0) {
+				sum += b[i] * dual_varVals_P1[i];
+
+			}
 		}
 
-		//  -e_k * u0
-		if (j == k) {
-			sum -= dual_varVals_P1[num_constraint];
-		}
+		//  u_0 * gamma
+		sum += dual_varVals_P1[num_constraint] * gam;
 
-		//  +a_i
-		sum += cost[j];
-
-		//tolerance error
-		if (sum < epsilon_8_1 && sum > -epsilon_8_1)
-			sum = 0.0;
+		// --------------------------------------------------
+		//  -b
+		// --------------------------------------------------
+		sum -= min_sol;
 
 		// --------------------------------------------------
 		//  print respect constraint
 		// --------------------------------------------------
 
+		//tolerance error
+		if (sum < epsilon_8_1 && sum > -epsilon_8_1)
+			sum = 0.0;
+
 		if (sum == 0) {
 
 			// --------------------------------------------------
-			// add new constraint A_T * u - e_k * u_0 + a = 0
+			// add new constraint b_T * u + u_0 * gamma - b = 0
 			// --------------------------------------------------
-			nzcnt = 0;
 
-			//  -A_T * u
-			int iter = 0;
+			nzcnt = 0;
+			char sense = 'E';
+			int matbeg = 0;
+			double rhs = 0;
+			int nzcnt = 0;
 			int u = 1;
 
-			while (iter < num_constraint) {
+			for (int i = 0; i < num_constraint; i++) {
 
-				if (A[iter][j] != 0) {
+				if (b[i] != 0) {
 					idx.push_back(u);
-					coef.push_back(A[iter][j]);
+					coef.push_back(b[i]);
 					nzcnt++;
 				}
-				iter++;
 				u++;
+
 			}
 
-			//  -e_k * u0
-			if (j == k) {
+			if (gam != 0) {
 				idx.push_back(0);
-				coef.push_back(-1);
+				coef.push_back(gam);
 				nzcnt++;
 			}
 
-			//  +a_i
-			idx.push_back(num_constraint + 1 + j);
-			coef.push_back(1);
+			//  -b
+			idx.push_back(num_constraint + 1 + N);
+			coef.push_back(-1);
 			nzcnt++;
 
 			// --------------------------------------------------
 			// add new satisfy constraint if isn't in set
 			// --------------------------------------------------
-			if (satisfy_constraint_list.count(count_constraint) == 0){
+			if (satisfy_constraint_list.count(count_constraint) == 0) {
 				satisfy_constraint_list.insert(count_constraint);
 
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-					&matbeg, &idx[0], &coef[0], 0, 0);
-			cout << "The constraint number " << count_constraint << " add " << endl << endl;
+				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+						&matbeg, &idx[0], &coef[0], 0, 0);
+				if (verbose)
+					cout << "The constraint number " << count_constraint
+							<< " add " << endl << endl;
 			}
 			idx.clear();
 			coef.clear();
+
 		} else {
 			if (satisfy_constraint_list.count(count_constraint) != 0) {
-				cout << "The constraint number " << count_constraint
-						<< " doesn't respects the equation " << "sum = " << sum
-						<< endl << endl;
-				cout << "Violated constraint that before was satisfied!" << endl;
-				throw std::runtime_error(
-					"Violated constraint that before was satisfied!");
+				this->violated_constraint = true;
+				if (verbose) {
+					cout << "The constraint number " << count_constraint
+							<< " doesn't respects the equation " << "sum = "
+							<< sum << endl << endl;
+					cout << "Violated constraint that before was satisfied!"
+							<< endl;
+				}
+//				throw std::runtime_error(
+//						"Violated constraint that before was satisfied!");
 			}
 		}
+
 		count_constraint++;
 	}
 
-	// --------------------------------------------------
-	// Estimation b_T * u + u_0 * gamma - b
-	// --------------------------------------------------
-
-	//  b_T * u
-	sum = 0;
-	for (int i = 0; i < num_constraint; i++) {
-
-		if (b[i] != 0) {
-			sum += b[i] * dual_varVals_P1[i];
-
-		}
-	}
-
-	//  u_0 * gamma
-	sum += dual_varVals_P1[num_constraint] * gam;
-
-	// --------------------------------------------------
-	//  -b
-	// --------------------------------------------------
-	sum -= min_sol;
-
-	// --------------------------------------------------
-	//  print respect constraint
-	// --------------------------------------------------
-
-	//tolerance error
-	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
-		sum = 0.0;
-
-	if (sum == 0) {
-
-		// --------------------------------------------------
-		// add new constraint b_T * u + u_0 * gamma - b = 0
-		// --------------------------------------------------
-
-		nzcnt = 0;
-		char sense = 'E';
-		int matbeg = 0;
-		double rhs = 0;
-		int nzcnt = 0;
-		int u = 1;
-
-		for (int i = 0; i < num_constraint; i++) {
-
-			if (b[i] != 0) {
-				idx.push_back(u);
-				coef.push_back(b[i]);
-				nzcnt++;
-			}
-			u++;
-
-		}
-
-		if (gam != 0) {
-			idx.push_back(0);
-			coef.push_back(gam);
-			nzcnt++;
-		}
-
-		//  -b
-		idx.push_back(num_constraint + 1 + N);
-		coef.push_back(-1);
-		nzcnt++;
-
-		// --------------------------------------------------
-		// add new satisfy constraint if isn't in set
-		// --------------------------------------------------
-		if (satisfy_constraint_list.count(count_constraint) == 0){
-			satisfy_constraint_list.insert(count_constraint);
-
-		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-				&matbeg, &idx[0], &coef[0], 0, 0);
-		cout << "The constraint number " << count_constraint << " add " << endl << endl;
-		}
-		idx.clear();
-		coef.clear();
-
-	} else {
-		if (satisfy_constraint_list.count(count_constraint) != 0) {
-			cout << "The constraint number " << count_constraint
-					<< " doesn't respects the equation " << "sum = " << sum
-					<< endl << endl;
-			cout << "Violated constraint that before was satisfied!" << endl;
-				throw std::runtime_error(
-						"Violated constraint that before was satisfied!");
-		}
-	}
-
-	count_constraint++;
 	// --------------------------------------------------
 	// Estimation A_T * v - e_k * u_v + a = 0
 	// --------------------------------------------------
@@ -758,264 +780,299 @@ void SecondProblem::step8_1(CEnv env, Prob lp, bool verbose) {
 	int v_0 = num_constraint + N + 2;
 	sum = 0;
 	for (int j = 0; j < N; j++) {
-		sum = 0;
-		for (int i = 0; i < num_constraint; i++) {
+		if (!(this->violated_constraint)) {
+			sum = 0;
+			for (int i = 0; i < num_constraint; i++) {
 
-			if (A[i][j] != 0) {
-				sum += A[i][j] * dual_varVals_P2[i];
-			}
-
-		}
-
-		//  -e_k * v0
-
-		if (j == k) {
-			sum -= dual_varVals_P2[num_constraint];
-		}
-
-		//  +a_i
-
-		sum += cost[j];
-
-		//tolerance error
-		if (sum < epsilon_8_1 && sum > -epsilon_8_1)
-			sum = 0.0;
-
-		// --------------------------------------------------
-		//  print respect constraint
-		// --------------------------------------------------
-
-		if (sum == 0) {
-			// --------------------------------------------------
-			// add new constraint A_T * v - e_k * v_0 + a = 0
-			// --------------------------------------------------
-
-			nzcnt = 0;
-			int iter = 0;
-			int v = v_0;
-			v++;
-
-			while (iter < num_constraint) {
-
-				if (A[iter][j] != 0) {
-					idx.push_back(v);
-					coef.push_back(A[iter][j]);
-					nzcnt++;
+				if (A[i][j] != 0) {
+					sum += A[i][j] * dual_varVals_P2[i];
 				}
-				iter++;
-				v++;
+
 			}
 
 			//  -e_k * v0
 
 			if (j == k) {
-				idx.push_back(v_0);
-				coef.push_back(-1);
-				nzcnt++;
+				sum -= dual_varVals_P2[num_constraint];
 			}
 
 			//  +a_i
 
-			idx.push_back(num_constraint + 1 + j);
-			coef.push_back(1);
+			sum += cost[j];
+
+			//tolerance error
+			if (sum < epsilon_8_1 && sum > -epsilon_8_1)
+				sum = 0.0;
+
+			// --------------------------------------------------
+			//  print respect constraint
+			// --------------------------------------------------
+
+			if (sum == 0) {
+				// --------------------------------------------------
+				// add new constraint A_T * v - e_k * v_0 + a = 0
+				// --------------------------------------------------
+
+				nzcnt = 0;
+				int iter = 0;
+				int v = v_0;
+				v++;
+
+				while (iter < num_constraint) {
+
+					if (A[iter][j] != 0) {
+						idx.push_back(v);
+						coef.push_back(A[iter][j]);
+						nzcnt++;
+					}
+					iter++;
+					v++;
+				}
+
+				//  -e_k * v0
+
+				if (j == k) {
+					idx.push_back(v_0);
+					coef.push_back(-1);
+					nzcnt++;
+				}
+
+				//  +a_i
+
+				idx.push_back(num_constraint + 1 + j);
+				coef.push_back(1);
+				nzcnt++;
+
+				// --------------------------------------------------
+				// add new satisfy constraint if isn't in set
+				// --------------------------------------------------
+				if (satisfy_constraint_list.count(count_constraint) == 0) {
+					satisfy_constraint_list.insert(count_constraint);
+
+					CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs,
+							&sense, &matbeg, &idx[0], &coef[0], 0, 0);
+					if (verbose)
+						cout << "The constraint number " << count_constraint
+								<< " add " << endl << endl;
+				}
+				idx.clear();
+				coef.clear();
+
+			} else {
+
+				if (satisfy_constraint_list.count(count_constraint) != 0) {
+					this->violated_constraint = true;
+					if (verbose) {
+						cout << "The constraint number " << count_constraint
+								<< " doesn't respects the equation " << "sum = "
+								<< sum << endl << endl;
+
+						cout << "Violated constraint that before was satisfied!"
+								<< endl;
+					}
+//				throw std::runtime_error(
+//						"Violated constraint that before was satisfied!");
+				}
+			}
+			count_constraint++;
+		}
+	}
+
+	if (!(this->violated_constraint)) {
+		// --------------------------------------------------
+		// Estimation b_T * v + v_0 * (gamma+1) - b = 0
+		// --------------------------------------------------
+
+		//  b_T * v
+		sum = 0;
+		for (int i = 0; i < num_constraint; i++) {
+
+			if (b[i] != 0) {
+				sum += b[i] * dual_varVals_P2[i];
+			}
+		}
+
+		//  v_0 * (gamma + 1)
+
+		sum += dual_varVals_P2[num_constraint] * (gam + 1);
+
+		//  -b
+		sum -= min_sol;
+
+		// --------------------------------------------------
+		//  print respect constraint
+		// --------------------------------------------------
+		//tolerance error
+		if (sum < epsilon_8_1 && sum > -epsilon_8_1)
+			sum = 0.0;
+
+		if (sum == 0) {
+
+			// --------------------------------------------------
+			// add new constraint b_T * v + v_0 * (gamma+1) - b = 0
+			// --------------------------------------------------
+
+			nzcnt = 0;
+			int v = v_0;
+			v++;
+
+			//  b_T * v
+			for (int i = 0; i < num_constraint; i++) {
+
+				if (b[i] != 0) {
+					idx.push_back(v);
+					coef.push_back(b[i]);
+					nzcnt++;
+				}
+				v++;
+
+			}
+
+			//  (gamma+1) * v0
+			idx.push_back(v_0);
+			coef.push_back(gam + 1);
+			nzcnt++;
+
+			//  -b
+			idx.push_back(num_constraint + N + 1);
+			coef.push_back(-1);
 			nzcnt++;
 
 			// --------------------------------------------------
 			// add new satisfy constraint if isn't in set
 			// --------------------------------------------------
-			if (satisfy_constraint_list.count(count_constraint) == 0){
+			if (satisfy_constraint_list.count(count_constraint) == 0) {
 				satisfy_constraint_list.insert(count_constraint);
 
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-					&matbeg, &idx[0], &coef[0], 0, 0);
-			cout << "The constraint number " << count_constraint << " add " << endl << endl;
+				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+						&matbeg, &idx[0], &coef[0], 0, 0);
+				if (verbose)
+					cout << "The constraint number " << count_constraint
+							<< " add " << endl << endl;
 			}
 			idx.clear();
 			coef.clear();
-
 		} else {
-
 			if (satisfy_constraint_list.count(count_constraint) != 0) {
-				cout << "The constraint number " << count_constraint
-						<< " doesn't respects the equation " << "sum = " << sum
-						<< endl << endl;
+				this->violated_constraint = true;
+				if (verbose) {
+					cout << "The constraint number " << count_constraint
+							<< " doesn't respects the equation " << "sum = "
+							<< sum << endl << endl;
+					cout << "Violated constraint that before was satisfied!"
+							<< endl;
+				}
 
-				cout << "Violated constraint that before was satisfied!" << endl;
-				throw std::runtime_error(
-						"Violated constraint that before was satisfied!");
+//				throw std::runtime_error(
+//						"Violated constraint that before was satisfied!");
 			}
 		}
+
 		count_constraint++;
 	}
 
-	// --------------------------------------------------
-	// Estimation b_T * v + v_0 * (gamma+1) - b = 0
-	// --------------------------------------------------
-
-	//  b_T * v
-	sum = 0;
-	for (int i = 0; i < num_constraint; i++) {
-
-		if (b[i] != 0) {
-			sum += b[i] * dual_varVals_P2[i];
-		}
-	}
-
-	//  v_0 * (gamma + 1)
-
-	sum += dual_varVals_P2[num_constraint] * (gam + 1);
-
-	//  -b
-	sum -= min_sol;
-
-	// --------------------------------------------------
-	//  print respect constraint
-	// --------------------------------------------------
-	//tolerance error
-	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
-		sum = 0.0;
-
-	if (sum == 0) {
-
+	if (!(this->violated_constraint)) {
 		// --------------------------------------------------
-		// add new constraint b_T * v + v_0 * (gamma+1) - b = 0
+		// Estimation -u_0>=0
 		// --------------------------------------------------
+		sum = 0;
+		sum -= dual_varVals_P1.back();
 
-		nzcnt = 0;
-		int v = v_0;
-		v++;
+		//tolerance error
+		if (sum < epsilon_8_1 && sum > -epsilon_8_1)
+			sum = 0.0;
 
-		//  b_T * v
-		for (int i = 0; i < num_constraint; i++) {
+		if (sum == 0) {
+			nzcnt = 1;
+			idx.push_back(0);
+			coef.push_back(-1.0);
 
-			if (b[i] != 0) {
-				idx.push_back(v);
-				coef.push_back(b[i]);
-				nzcnt++;
+			// --------------------------------------------------
+			// add new satisfy constraint if isn't in set
+			// --------------------------------------------------
+			if (satisfy_constraint_list.count(count_constraint) == 0) {
+				satisfy_constraint_list.insert(count_constraint);
+
+				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+						&matbeg, &idx[0], &coef[0], 0, 0);
+				if (verbose)
+					cout << "The constraint number " << count_constraint
+							<< " add " << endl << endl;
 			}
-			v++;
-
+			idx.clear();
+			coef.clear();
+		} else {
+			if (satisfy_constraint_list.count(count_constraint) != 0) {
+				this->violated_constraint = true;
+				if (verbose) {
+					cout << "The constraint number " << count_constraint
+							<< " doesn't respects the equation " << "sum = "
+							<< sum << endl << endl;
+					cout << "Violated constraint that before was satisfied!"
+							<< endl;
+				}
+//      			throw std::runtime_error(
+//						"Violated constraint that before was satisfied!");
+			}
 		}
 
-		//  (gamma+1) * v0
+		count_constraint++;
+	}
+
+	if (!(this->violated_constraint)) {
+		// --------------------------------------------------
+		// Estimation v_0>=0
+		// --------------------------------------------------
+		sum = 0;
+		sum += dual_varVals_P2.back();
+
+		//tolerance error
+		if (sum < epsilon_8_1 && sum > -epsilon_8_1)
+			sum = 0.0;
+
+		if (sum == 0) {
+			nzcnt = 1;
 			idx.push_back(v_0);
-			coef.push_back(gam + 1);
-			nzcnt++;
+			coef.push_back(1.0);
 
-		//  -b
-		idx.push_back(num_constraint + N + 1);
-		coef.push_back(-1);
-		nzcnt++;
+			// --------------------------------------------------
+			// add new satisfy constraint if isn't in set
+			// --------------------------------------------------
+			if (satisfy_constraint_list.count(count_constraint) == 0) {
+				satisfy_constraint_list.insert(count_constraint);
 
-		// --------------------------------------------------
-		// add new satisfy constraint if isn't in set
-		// --------------------------------------------------
-		if (satisfy_constraint_list.count(count_constraint) == 0){
-			satisfy_constraint_list.insert(count_constraint);
-
-		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-				&matbeg, &idx[0], &coef[0], 0, 0);
-		cout << "The constraint number " << count_constraint << " add " << endl << endl;
-		}
-		idx.clear();
-		coef.clear();
-	} else {
-		if (satisfy_constraint_list.count(count_constraint) != 0) {
-			cout << "The constraint number " << count_constraint
-					<< " doesn't respects the equation " << "sum = " << sum
-					<< endl << endl;
-			cout << "Violated constraint that before was satisfied!" << endl;
-				throw std::runtime_error(
-						"Violated constraint that before was satisfied!");
-		}
-	}
-
-	count_constraint++;
-	// --------------------------------------------------
-	// Estimation -u_0>=0
-	// --------------------------------------------------
-	sum = 0;
-	sum -= dual_varVals_P1.back();
-
-	//tolerance error
-	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
-		sum = 0.0;
-
-	if (sum == 0) {
-		nzcnt = 1;
-		idx.push_back(0);
-		coef.push_back(-1.0);
-
-		// --------------------------------------------------
-		// add new satisfy constraint if isn't in set
-		// --------------------------------------------------
-		if (satisfy_constraint_list.count(count_constraint) == 0) {
-			satisfy_constraint_list.insert(count_constraint);
-
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-					&matbeg, &idx[0], &coef[0], 0, 0);
-			cout << "The constraint number " << count_constraint << " add "
-					<< endl << endl;
-		}
-		idx.clear();
-		coef.clear();
-	} else {
-		if (satisfy_constraint_list.count(count_constraint) != 0) {
-			cout << "The constraint number " << count_constraint
-					<< " doesn't respects the equation " << "sum = " << sum
-					<< endl << endl;
-			cout << "Violated constraint that before was satisfied!" << endl;
-      			throw std::runtime_error(
-						"Violated constraint that before was satisfied!");
-		}
-	}
-
-	count_constraint++;
-
-	// --------------------------------------------------
-	// Estimation v_0>=0
-	// --------------------------------------------------
-	sum = 0;
-	sum += dual_varVals_P2.back();
-
-	//tolerance error
-	if (sum < epsilon_8_1 && sum > -epsilon_8_1)
-		sum = 0.0;
-
-	if (sum == 0) {
-		nzcnt = 1;
-		idx.push_back(v_0);
-		coef.push_back(1.0);
-
-		// --------------------------------------------------
-		// add new satisfy constraint if isn't in set
-		// --------------------------------------------------
-		if (satisfy_constraint_list.count(count_constraint) == 0){
-			satisfy_constraint_list.insert(count_constraint);
-
-		CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-				&matbeg, &idx[0], &coef[0], 0, 0);
-		cout << "The constraint number " << count_constraint << " add " << endl << endl;
-		}
-		idx.clear();
-		coef.clear();
-	} else {
-		if (satisfy_constraint_list.count(count_constraint) != 0) {
-			cout << "The constraint number " << count_constraint
-					<< " doesn't respects the equation " << "sum = " << sum
-					<< endl << endl;
-			cout << "Violated constraint that before was satisfied!" << endl;
-				throw std::runtime_error(
-						"Violated constraint that before was satisfied!");
+				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
+						&matbeg, &idx[0], &coef[0], 0, 0);
+				if (verbose)
+					cout << "The constraint number " << count_constraint
+							<< " add " << endl << endl;
+			}
+			idx.clear();
+			coef.clear();
+		} else {
+			if (satisfy_constraint_list.count(count_constraint) != 0) {
+				this->violated_constraint = true;
+				if (verbose) {
+					cout << "The constraint number " << count_constraint
+							<< " doesn't respects the equation " << "sum = "
+							<< sum << endl << endl;
+					cout << "Violated constraint that before was satisfied!"
+							<< endl;
+				}
+//				throw std::runtime_error(
+//						"Violated constraint that before was satisfied!");
+			}
 		}
 	}
 }
 
-void SecondProblem::step8_2(CEnv env, Prob lp, bool verbose) {
+void SecondProblem::step8_2(CEnv env, Prob lp) {
 
 	std::vector<int> idx;
 	std::vector<double> coef;
 
+	if (verbose)
+		cout << "r_T" << "  " << "y_bar" << endl;
 	// --------------------------------------------------
 	//evaluate right side r * y
 	// --------------------------------------------------
@@ -1026,20 +1083,20 @@ void SecondProblem::step8_2(CEnv env, Prob lp, bool verbose) {
 	while (i < N) {
 		r += rt[i] * cost[i];
 		if (verbose)
-					cout << rt[i] << "  " << cost[i] << endl;
+			cout << rt[i] << "  " << cost[i] << endl;
 		i++;
 	}
 
 	r += rt[i] * min_sol;
 	if (verbose)
-	cout << rt[i] << "  " << min_sol << endl;
+		cout << rt[i] << "  " << min_sol << endl;
 	i++;
 
 	int j = 0;
 	while (i < N + 1 + num_constraint) {
 		r += rt[i] * dual_varVals_P1[j];
 		if (verbose)
-		cout << rt[i] << "  " << dual_varVals_P1[j] << endl;
+			cout << rt[i] << "  " << dual_varVals_P1[j] << endl;
 
 		i++;
 		j++;
@@ -1047,7 +1104,7 @@ void SecondProblem::step8_2(CEnv env, Prob lp, bool verbose) {
 
 	r += rt[i] * dual_varVals_P1[j];
 	if (verbose)
-	cout << rt[i] << "  " << dual_varVals_P1[j] << endl;
+		cout << rt[i] << "  " << dual_varVals_P1[j] << endl;
 
 	i++;
 
@@ -1055,7 +1112,7 @@ void SecondProblem::step8_2(CEnv env, Prob lp, bool verbose) {
 	while (i < N + 2 + num_constraint + num_constraint) {
 		r += rt[i] * dual_varVals_P2[j];
 		if (verbose)
-		cout << rt[i] << "  " << dual_varVals_P2[j] << endl;
+			cout << rt[i] << "  " << dual_varVals_P2[j] << endl;
 
 		i++;
 		j++;
@@ -1063,8 +1120,7 @@ void SecondProblem::step8_2(CEnv env, Prob lp, bool verbose) {
 
 	r += rt[i] * dual_varVals_P2[j];
 	if (verbose)
-	cout << rt[i] << "  " << dual_varVals_P2[j] << endl;
-
+		cout << rt[i] << "  " << dual_varVals_P2[j] << endl;
 
 	// --------------------------------------------------
 	// add constraint r_T * y = r_T * y
@@ -1127,7 +1183,6 @@ void SecondProblem::step8_2(CEnv env, Prob lp, bool verbose) {
 
 	idx.clear();
 	coef.clear();
-
 
 }
 
@@ -1232,7 +1287,8 @@ bool SecondProblem::y_tilde_EQ_y_bar() {
 		return equal;
 	}
 
-	cout << endl;
+	if (verbose)
+		cout << endl;
 	return equal;
 
 }
