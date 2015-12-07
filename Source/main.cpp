@@ -187,6 +187,9 @@ int main(int argc, char const *argv[]) {
 
 		} while (iteration - iter != 0);
 
+		CPXfreeprob(env, &lp);
+		CPXcloseCPLEX(&env);
+
 	} catch (std::exception& e) {
 		std::cout << ">>>EXCEPTION: " << e.what() << std::endl;
 	}
