@@ -82,6 +82,9 @@ int main(int argc, char const *argv[]) {
 
 		setupLP(env, lp);
 
+		CPXsetdblparam (env, CPXPARAM_Simplex_Tolerances_Feasibility,   1e-5);
+		CPXsetdblparam (env, CPXPARAM_Simplex_Tolerances_Optimality,   1e-5);
+
 		// --------------------------------------------------
 		// 2. program (first part)
 		// --------------------------------------------------
@@ -115,8 +118,8 @@ int main(int argc, char const *argv[]) {
 			// 6. Cycle step 8
 			// --------------------------------------------------
 			bool flag;
-//			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Feasibility,   1e-5);
-//			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Optimality,   1e-5);
+			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Feasibility,   1e-5);
+			CPXsetdblparam (env_dual, CPXPARAM_Simplex_Tolerances_Optimality,   1e-5);
 
 			do {
 				sec_prob->step8_1(env_dual, lp_dual);
@@ -147,7 +150,8 @@ int main(int argc, char const *argv[]) {
 					if (verbose)
 						print_vect_b();
 					third_prob->setup(env_third, lp_third);
-
+					CPXsetdblparam (env_third, CPXPARAM_Simplex_Tolerances_Feasibility,   1e-5);
+					CPXsetdblparam (env_third, CPXPARAM_Simplex_Tolerances_Optimality,   1e-5);
 					CHECKED_CPX_CALL(CPXwriteprob, env_third, lp_third,
 							"../data/third_problem.lp", 0);
 					third_prob->solve(env_third, lp_third);

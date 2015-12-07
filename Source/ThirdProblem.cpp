@@ -414,6 +414,11 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 
 		lambda = varibles[0];
 
+		if (lambda==1){
+			cerr << "lambda =1. STOP"<< endl;
+			exit(0);
+		}
+
 		// free
 		free(cur_colname);
 		free(cur_colnamestore);
