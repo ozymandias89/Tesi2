@@ -375,12 +375,12 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 void ThirdProblem::solve(CEnv env, Prob lp) {
 
-	CHECKED_CPX_CALL(CPXlpopt, env, lp);
-
 	if (test_problem_unbounded(env, lp))
 		throw std::runtime_error("Third problem are unbounded");
 
 	bool infeasible = test_problem_infeasible(env, lp, verbose);
+
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	if (!infeasible) {
 
@@ -413,6 +413,11 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 			cout << cur_colname[0] << " = " << varibles[0] << endl;
 
 		lambda = varibles[0];
+
+		if (lambda==1){
+			cerr << "Lambda = 1 STOP" << endl;
+			exit(1);
+		}
 
 		// free
 		free(cur_colname);

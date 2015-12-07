@@ -87,8 +87,8 @@ double min_sol;
 
 /**
  change sign matrix A
- @param  none
- @return void
+ \param  none
+ \return void
  */
 inline void change_sign_A() {
 	for (unsigned int i = 0; i < A.size(); i++) {
@@ -101,8 +101,8 @@ inline void change_sign_A() {
 
 /**
  Method that test if the problem are unbounded
- @param  CEnv env, Prob lp
- @return bool
+ \param  CEnv env, Prob lp
+ \return bool
  */
 inline bool test_problem_unbounded(CEnv env, Prob lp) {
 	std::vector<double> z;
@@ -119,8 +119,8 @@ inline bool test_problem_unbounded(CEnv env, Prob lp) {
 
 /**
  Method that test if the problem are infeasible
- @param  CEnv env, Prob lp, bool verbose
- @return bool
+ \param  CEnv env, Prob lp, bool verbose
+ \return bool
  */
 inline bool test_problem_infeasible(CEnv env, Prob lp, bool verbose) {
 	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
@@ -136,8 +136,8 @@ inline bool test_problem_infeasible(CEnv env, Prob lp, bool verbose) {
 
 /**
  Method that load from file the problem (for example of format file see folder data)
- @param  (ifstream &) , object ifstream
- @return void
+ \param  (ifstream &) , object ifstream
+ \return void
  */
 void load_problem(ifstream &myfile) {
 
@@ -251,8 +251,8 @@ void load_problem(ifstream &myfile) {
 
 /**
  Method that set the primary problem
- @param  (CEnv env, Prob lp)
- @return void
+ \param  (CEnv env, Prob lp)
+ \return void
  */
 void setupLP(CEnv env, Prob lp) {
 
@@ -307,8 +307,8 @@ void setupLP(CEnv env, Prob lp) {
 
 /**
  Method that chooses the best x fractional variable
- @param  (vector<double>)
- @return int, return index of higher variable functional (-1 if no variable is fractional)
+ \param  (vector<double>)
+ \return int, return index of higher variable functional (-1 if no variable is fractional)
  */
 int select_fractionar_var(std::vector<double> varVals) {
 	/*
@@ -346,8 +346,8 @@ int select_fractionar_var(std::vector<double> varVals) {
 
 /**
  Method that print matrix A
- @param  none
- @return void
+ \param  none
+ \return void
  */
 void print_matrix() {
 
@@ -366,8 +366,8 @@ void print_matrix() {
 
 /**
  Method that print vector_c
- @param  none
- @return void
+ \param  none
+ \return void
  */
 void print_vect_c() {
 
@@ -381,8 +381,8 @@ void print_vect_c() {
 
 /**
  Method that print vector_b
- @param  none
- @return void
+ \param  none
+ \return void
  */
 void print_vect_b() {
 
@@ -394,8 +394,8 @@ void print_vect_b() {
 }
 /**
  Method that print object function
- @param  (CEnv env, Prob lp, bool verbose), environment of the problem and problem and verbose
- @return void
+ \param  (CEnv env, Prob lp, bool verbose), environment of the problem and problem and verbose
+ \return void
  */
 void print_objval(CEnv env, Prob lp, bool verbose) {
 	if (verbose)
@@ -425,8 +425,8 @@ void print_y_bar() {
 
 /**
  Method that set and print primal variable
- @param  (CEnv env, Prob lp, bool verbose), environmant of the problem, problem and verbose
- @return void
+ \param  (CEnv env, Prob lp, bool verbose), environmant of the problem, problem and verbose
+ \return void
  */
 void set_and_print_var_P(CEnv env, Prob lp, bool verbose) {
 
@@ -464,9 +464,9 @@ void set_and_print_var_P(CEnv env, Prob lp, bool verbose) {
 
 /**
  Method that set and print dual variables
- @param  (CEnv env, Prob lp, bool prob,  bool verbose), environment of the problem,
+ \param  (CEnv env, Prob lp, bool prob,  bool verbose), environment of the problem,
  problem , flag(true P1 problem, false P2 problem) and bool verbose
- @return void
+ \return void
  */
 void set_and_print_var_D(CEnv env, Prob lp, bool prob, bool verbose) {
 
@@ -505,9 +505,9 @@ void set_and_print_var_D(CEnv env, Prob lp, bool prob, bool verbose) {
 }
 /**
  Method that add constraints in set R to the first problem.
- @param  (CEnv env, Prob lp, std::set<std::vector<double> > R) environment of the problem,
+ \param  (CEnv env, Prob lp, std::set<std::vector<double> > R) environment of the problem,
  problem ,set R and bool verbose
- @return void
+ \return void
  */
 void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R) {
 

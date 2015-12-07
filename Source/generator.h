@@ -5,6 +5,11 @@
 #include <fstream>
 using namespace std;
 
+/**
+ generator instance with canonical matrix
+ \param  const int number_of_row, const int limit_number_generate
+ \return string file created
+ */
 string generate_canonical_matrix(const int number_of_row,
 		const int limit_number_generate) {
 

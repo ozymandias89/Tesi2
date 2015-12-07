@@ -21,36 +21,36 @@ public:
 
 	/**
 	 Print vector
-	 @param  (vector<double> vector)
-	 @return void
+	 \param  (vector<double> vector)
+	 \return void
 	 */
 	void print_vector(vector<double> vector);
 
 	/**
 	 Calculate y bar minimum y tilde
-	 @param  (vector<double> vector)
-	 @return void
+	 \param  (vector<double> vector)
+	 \return void
 	 */
 	void y_bar_MIN_y_tilde(vector<double> c);
 
 	/**
 	 Method that set the third problem
-	 @param  (CEnv env, Prob lp)
-	 @return void
+	 \param  (CEnv env, Prob lp)
+	 \return void
 	 */
 	void setup(CEnv env, Prob lp);
 
 	/**
 	 solve third problem and calculate lambda
-	 @param  (CEnv env, Prob lp, vector<double>& c)
-	 @return void
+	 \param  (CEnv env, Prob lp, vector<double>& c)
+	 \return void
 	 */
 	void solve(CEnv env, Prob lp);
 
 	/**
 	 update y_bar step 8.4
-	 @param  (CEnv env, Prob lp, vector<double>& c)
-	 @return void
+	 \param  (CEnv env, Prob lp, vector<double>& c)
+	 \return void
 	 */
 	void update_y_bar(CEnv env, Prob lp, vector<double>& c);
 
