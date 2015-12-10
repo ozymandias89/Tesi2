@@ -5,8 +5,7 @@
 #include <fstream>
 using namespace std;
 
-string generate_canonical_matrix(const int number_of_row,
-		const int limit_number_generate) {
+string generate_canonical_matrix(const int m, const int limit_number_generate) {
 
 	srand(time(NULL));
 	int number = rand() % 100 + 10;
@@ -21,22 +20,24 @@ string generate_canonical_matrix(const int number_of_row,
 	ofstream myfile(namefile.c_str());
 	if (myfile.is_open()) {
 
-		for (int i = 0; i < number_of_row * 2; ++i)
+		//cost coefficients
+		for (int i = 0; i < m * 2; ++i)
 			myfile << rand() % limit_number_generate << " ";
 
 		myfile << endl << endl;
 
-		for (int i = 0; i < number_of_row; ++i)
-			myfile << rand() % limit_number_generate << " ";
+		//b coefficients
+		for (int i = 0; i < m; ++i)
+			myfile << rand() % 31 << " ";
 
 		myfile << endl << endl;
 
-		for (int i = 0; i < number_of_row; ++i) {
-			for (int j = 0; j < number_of_row * 2; ++j) {
-				if (j < number_of_row) {
+		for (int i = 0; i < m; ++i) {
+			for (int j = 0; j < m * 2; ++j) {
+				if (j < m) {
 					(j == i) ? myfile << 1 << " " : myfile << 0 << " ";
 				} else
-					myfile << rand() % limit_number_generate << " ";
+					myfile << rand() % 41 +(-20) << " ";
 
 			}
 			myfile << endl;

@@ -435,6 +435,7 @@ void step1(CEnv env, Prob lp, bool verbose) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 1 " << endl;
 		cout << " Iteration number: " << iter << endl;
+		cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints;
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		// free allocate memory
 		CPXfreeprob(env, &lp);
@@ -469,6 +470,7 @@ void solve(CEnv env, Prob lp, bool verbose) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 3 " << endl;
 		cout << " Iteration number: " << iter << endl;
+		cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints << endl;
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		// free allocate memory
 		CPXfreeprob(env, &lp);
@@ -537,6 +539,7 @@ void solve(CEnv env, Prob lp, bool verbose) {
 				<< "The last solution is the best integer solution. STOP CONDITION STEP 4 "
 				<< endl;
 		cout << " Iteration number: " << iter << endl;
+		cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints << endl;
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 		// free allocate memory
 		CPXfreeprob(env, &lp);

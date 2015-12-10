@@ -276,21 +276,6 @@ void setupLP(CEnv env, Prob lp) {
  @return int, return index of higher variable functional (-1 if no variable is fractional)
  */
 int select_fractionar_var(std::vector<double> varVals) {
-	/*
-	 // Selects first fractionary variable
-	 int index = -1,
-	 i = 0;
-
-	 while (index == -1 && i < Num_original_variables) {
-	 double value = varVals[i];
-
-	 if (fabs(value - round(value)) >= 10e-6) {
-	 index = i;
-	 }
-
-	 i++;
-	 }
-	 */
 
 	// Selects variable with maximal fractionary value
 	int index = -1;

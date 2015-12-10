@@ -33,6 +33,10 @@ void ThirdProblem::y_bar_MIN_y_tilde(vector<double> c) {
 	int j = 0;
 	for (unsigned int i = 0; i < c.size(); i++) {
 		difference = c[i] - y_tilde[j];
+		//tolerance error
+		if (difference < epsilon_8_4 && difference > -epsilon_8_4)
+			difference = 0.0;
+
 		t.push_back(difference);
 //		if (verbose)
 //			cout << "a_" << i << "  =" << difference << endl;
@@ -44,6 +48,9 @@ void ThirdProblem::y_bar_MIN_y_tilde(vector<double> c) {
 	// --------------------------------------------------
 
 	difference = min_sol - y_tilde[j];
+	//tolerance error
+	if (difference < epsilon_8_4 && difference > -epsilon_8_4)
+		difference = 0.0;
 
 	t.push_back(difference);
 //	if (verbose)
@@ -57,6 +64,9 @@ void ThirdProblem::y_bar_MIN_y_tilde(vector<double> c) {
 
 	for (unsigned int i = 0; i < dual_varVals_P1.size(); i++) {
 		difference = dual_varVals_P1[i] - y_tilde[j];
+		//tolerance error
+		if (difference < epsilon_8_4 && difference > -epsilon_8_4)
+			difference = 0.0;
 //		if (verbose)
 //			cout << "u  =" << difference << endl;
 		t.push_back(difference);
@@ -69,6 +79,9 @@ void ThirdProblem::y_bar_MIN_y_tilde(vector<double> c) {
 
 	for (unsigned int i = 0; i < dual_varVals_P2.size(); i++) {
 		difference = dual_varVals_P2[i] - y_tilde[j];
+		//tolerance error
+		if (difference < epsilon_8_4 && difference > -epsilon_8_4)
+			difference = 0.0;
 //		if (verbose)
 //			cout << "v  =" << difference << endl;
 		t.push_back(difference);
@@ -163,7 +176,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				coef.push_back(cof);
 
 				//add constraints
-				//if (cof!=0)
+				if (cof!=0)
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 						&matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -208,7 +221,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			coef.push_back(cof);
 
 			//add constraints
-//			if (cof!=0)
+			if (cof!=0)
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -259,7 +272,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				coef.push_back(cof);
 
 				//add constraints
-//				if (cof != 0)
+				if (cof != 0)
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 						&matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -307,7 +320,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 			coef.push_back(cof);
 
 			//add constraints
-			//		if (cof != 0)
+			if (cof != 0)
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -336,6 +349,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 
 			coef.push_back(cof);
 
+			if (cof != 0)
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -362,6 +376,7 @@ void ThirdProblem::setup(CEnv env, Prob lp) {
 				cof = 0.0;
 			coef.push_back(cof);
 
+			if (cof != 0)
 			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
 					&matbeg, &idx[0], &coef[0], 0, 0);
 
@@ -378,8 +393,12 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	int stat = CPXgetstat(env, lp);
+
 	if (stat == CPX_STAT_UNBOUNDED)
 		throw std::runtime_error("Third problem are unbounded");
+
+	if (stat == CPX_STAT_INForUNBD)
+		throw std::runtime_error("Third problem are unbounded or infeasible");
 
 	//bool infeasible = test_problem_infeasible(env, lp, verbose);
 
