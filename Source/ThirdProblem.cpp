@@ -377,12 +377,13 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
-	if (test_problem_unbounded(env, lp))
+	int stat = CPXgetstat(env, lp);
+	if (stat == CPX_STAT_UNBOUNDED)
 		throw std::runtime_error("Third problem are unbounded");
 
-	bool infeasible = test_problem_infeasible(env, lp, verbose);
+	//bool infeasible = test_problem_infeasible(env, lp, verbose);
 
-	if (!infeasible) {
+	if (stat != CPX_STAT_INFEASIBLE) {
 
 //		print_objval(env, lp);
 
@@ -414,7 +415,7 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 
 		lambda = varibles[0];
 
-		if (lambda==1){
+		if (fabs(lambda-1) < epsilon_8_1){
 			cerr << "lambda =1. STOP"<< endl;
 			exit(0);
 		}

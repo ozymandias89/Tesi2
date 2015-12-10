@@ -100,41 +100,6 @@ inline void change_sign_A() {
 }
 
 /**
- Method that test if the problem are unbounded
- @param  CEnv env, Prob lp
- @return bool
- */
-inline bool test_problem_unbounded(CEnv env, Prob lp) {
-	std::vector<double> z;
-	int cur_numcols = CPXgetnumcols(env, lp);
-	z.resize(cur_numcols);
-	int stat = CPXgetray(env, lp, &z[0]);
-	if (stat == CPXERR_NOT_UNBOUNDED) {
-
-		return false;
-	} else
-		return true;
-
-}
-
-/**
- Method that test if the problem are infeasible
- @param  CEnv env, Prob lp, bool verbose
- @return bool
- */
-inline bool test_problem_infeasible(CEnv env, Prob lp, bool verbose) {
-	CHECKED_CPX_CALL(CPXrefineconflict, env, lp, NULL, NULL);
-	int stat = CPXgetstat(env, lp);
-	if (verbose)
-		cout << endl << "Status problem " << stat << endl;
-	if (stat == CPX_STAT_CONFLICT_FEASIBLE) {
-		return false;
-	} else
-		return true;
-
-}
-
-/**
  Method that load from file the problem (for example of format file see folder data)
  @param  (ifstream &) , object ifstream
  @return void

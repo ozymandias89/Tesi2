@@ -65,12 +65,14 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index, bool verbose) {
 	z[1] = CPX_INFBOUND;
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
-	bool infeasible = test_problem_infeasible(env, lp, verbose);
+	int stat = CPXgetstat(env, lp);
+	if (verbose)
+		cout << endl << "Status problem " << stat << endl;
 
 	int cur_numrows = CPXgetnumrows(env, lp);
 
 // print and set solution and create and resolve P_2 problem"
-	if (!infeasible) {
+	if (stat != CPX_STAT_INFEASIBLE ) {
 		if (verbose)
 			cout << "FEASIBLE " << endl;
 		gam = floor(varVals[index]);
@@ -165,11 +167,15 @@ double solve_P2_Problem(CEnv env, Prob lp, int index, bool verbose) {
 
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
-	bool infeasible = test_problem_infeasible(env, lp, verbose);
+	//bool infeasible = test_problem_infeasible(env, lp, verbose);
+
+	int stat = CPXgetstat(env, lp);
+		if (verbose)
+			cout << endl << "Status problem " << stat << endl;
 
 	int cur_numrows = CPXgetnumrows(env, lp);
 
-	if (!infeasible) {
+	if (stat != CPX_STAT_INFEASIBLE ) {
 		if (verbose)
 			cout << "FEASIBLE " << endl;
 		print_objval(env, lp, verbose);
@@ -274,12 +280,14 @@ void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 	CHECKED_CPX_CALL(CPXcopyctype, env, lp, ctype);
 
 	//check feasible
-	bool infeasible = test_problem_infeasible(env, lp, verbose);
+	//bool infeasible = test_problem_infeasible(env, lp, verbose);
 
-	if (!infeasible) {
+	CHECKED_CPX_CALL(CPXmipopt, env, lp);
+	int stat = CPXgetstat(env, lp);
+
+	if (stat != CPXMIP_INFEASIBLE) {
 		if (verbose) {
 			cout << "Problem solved to integer: " << endl;
-			CHECKED_CPX_CALL(CPXmipopt, env, lp);
 			print_objval(env, lp, verbose);
 			set_and_print_var_P(env, lp, verbose);
 		}
@@ -376,13 +384,17 @@ void step1(CEnv env, Prob lp, bool verbose) {
 	//	const_cast<char *>(ctype);
 	CHECKED_CPX_CALL(CPXcopyctype, env, lp, ctype);
 
-	//check feasible
-	bool infeasible = test_problem_infeasible(env, lp, verbose);
+	CHECKED_CPX_CALL(CPXmipopt, env, lp);
+	int stat = CPXgetstat(env, lp);
 
+	if (verbose)
+		cout << endl << "Status problem " << stat << endl;
+
+	//check feasible
 	//----------------------------------------------------------------
 	// Remove redundant constraint (if exist) else STOP CONDITION 1
 	//----------------------------------------------------------------
-	if (!infeasible) {
+	if (stat != CPXMIP_INFEASIBLE) {
 		bool flag_redundant;
 		do {
 			flag_redundant = false;
@@ -447,12 +459,13 @@ void solve(CEnv env, Prob lp, bool verbose) {
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
 	//this problem are unbounded?
-	bool unbounded = test_problem_unbounded(env, lp);
+	//bool unbounded = test_problem_unbounded(env, lp);
+	int stat = CPXgetstat(env, lp);
 
 	// --------------------------------------------------
 	// 3. STOP CONDITION
 	// --------------------------------------------------
-	if (unbounded) {
+	if (stat==CPX_STAT_UNBOUNDED) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 3 " << endl;
 		cout << " Iteration number: " << iter << endl;
