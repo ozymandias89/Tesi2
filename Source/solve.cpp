@@ -289,6 +289,15 @@ void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 		if (verbose) {
 			cout << "Problem solved to integer: " << endl;
 			print_objval(env, lp, verbose);
+			double risult;
+			CHECKED_CPX_CALL(CPXgetobjval, env, lp, &risult);
+			if (integer == -CPX_INFBOUND)
+				integer = risult;
+			else if (integer != risult) {
+				cerr << "We have lose one integer solution: " << endl;
+				cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints << endl;
+				exit(1);
+			}
 			set_and_print_var_P(env, lp, verbose);
 		}
 

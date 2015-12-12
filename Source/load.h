@@ -41,6 +41,9 @@ const double epsilon_8_4 = 1.e-6L;
 //number of iteration of the problem
 static int iter;
 
+//integer solution
+static double integer=-CPX_INFBOUND;
+
 //number of variable
 int N;
 
