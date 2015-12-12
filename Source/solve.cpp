@@ -293,7 +293,7 @@ void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 			CHECKED_CPX_CALL(CPXgetobjval, env, lp, &risult);
 			if (integer == -CPX_INFBOUND)
 				integer = risult;
-			else if (integer != risult) {
+			else if (fabs(integer - risult) > 10e+06 ) {
 				cerr << "We have lose one integer solution: " << endl;
 				cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints << endl;
 				exit(1);
