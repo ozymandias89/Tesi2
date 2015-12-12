@@ -435,8 +435,7 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 		lambda = varibles[0];
 
 		if (fabs(lambda-1) < epsilon_8_1){
-			cerr << "lambda =1. STOP"<< endl;
-			exit(0);
+			throw std::runtime_error("lambda =1. STOP");
 		}
 
 		// free
@@ -444,8 +443,7 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 		free(cur_colnamestore);
 
 	} else {
-		cerr << "Third  problem has conflict or unbounded!!!!!" << endl;
-		exit(1);
+		throw std::runtime_error("Third  problem has conflict or unbounded!!!!!");
 	}
 
 }

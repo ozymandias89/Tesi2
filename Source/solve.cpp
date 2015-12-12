@@ -393,6 +393,7 @@ void step1(CEnv env, Prob lp, bool verbose) {
 	//	const_cast<char *>(ctype);
 	CHECKED_CPX_CALL(CPXcopyctype, env, lp, ctype);
 
+
 	CHECKED_CPX_CALL(CPXmipopt, env, lp);
 	int stat = CPXgetstat(env, lp);
 

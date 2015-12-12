@@ -22,6 +22,7 @@
 #include "generator.h"
 #include "solve.cpp"
 #include <sstream>
+#include <time.h>
 #include "SecondProblem.cpp"
 #include "ThirdProblem.cpp"
 
@@ -72,13 +73,18 @@ int main(int argc, char const *argv[]) {
 	// --------------------------------------------------
 
 	iter = 0;
-	try {
 
-		// --------------------------------------------------
-		// 1. Initialization problems
-		// --------------------------------------------------
-		DECL_ENV(env);
-		DECL_PROB(env, lp, "resolve problem RL");
+	//clock start
+	clock_t t1;
+	t1 = clock();
+
+	// --------------------------------------------------
+	// 1. Initialization problems
+	// --------------------------------------------------
+	DECL_ENV(env);
+	DECL_PROB(env, lp, "resolve problem RL");
+
+	try {
 
 		setupLP(env, lp);
 
@@ -124,6 +130,14 @@ int main(int argc, char const *argv[]) {
 					1e-5);
 
 			do {
+
+				clock_t t2;
+				t2 = clock();
+				double elapsed_secs = double(t2 - t1) / CLOCKS_PER_SEC;
+				if (elapsed_secs > 120.0) {
+					throw std::runtime_error("Timeout!");
+				}
+
 				sec_prob->step8_1(env_dual, lp_dual);
 
 				sec_prob->step8_2(env_dual, lp_dual);
@@ -196,6 +210,7 @@ int main(int argc, char const *argv[]) {
 		CPXcloseCPLEX(&env);
 
 	} catch (std::exception& e) {
+		cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints << endl;
 		std::cout << ">>>EXCEPTION: " << e.what() << std::endl;
 	}
 
