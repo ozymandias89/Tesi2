@@ -434,9 +434,14 @@ void ThirdProblem::solve(CEnv env, Prob lp) {
 
 		lambda = varibles[0];
 
-		if (fabs(lambda-1) < epsilon_8_1){
-			throw std::runtime_error("lambda =1. STOP");
-		}
+		//  if problem generate lambda = 1 in continuous STOP
+		if (fabs(lambda - 1) < epsilon_8_1) {
+			(count_lambda == 5) ?
+					throw std::runtime_error("lambda =1. STOP") :
+					count_lambda++;
+		}else
+			(count_lambda<1) ? count_lambda=0 : count_lambda--;
+
 
 		// free
 		free(cur_colname);

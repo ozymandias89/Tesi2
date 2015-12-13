@@ -556,8 +556,7 @@ void SecondProblem::solve(CEnv env, Prob lp) {
 	if (stat!=CPX_STAT_INFEASIBLE) {
 		set_solution(env, lp);
 	} else {
-		cerr << "Second problem has conflict!!!!!" << endl;
-		exit(1);
+		throw std::runtime_error("Second problem has conflict!!!!!");
 	}
 
 }
