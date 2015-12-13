@@ -553,7 +553,7 @@ void SecondProblem::solve(CEnv env, Prob lp) {
 	if (stat==CPX_STAT_UNBOUNDED)
 		throw std::runtime_error("Second problem are unbounded");
 
-	if (stat!=CPX_STAT_INFEASIBLE) {
+	if (stat != CPX_STAT_INFEASIBLE) {
 		set_solution(env, lp);
 	} else {
 		throw std::runtime_error("Second problem has conflict!!!!!");
