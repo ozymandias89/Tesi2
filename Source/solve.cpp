@@ -188,7 +188,7 @@ double solve_P2_Problem(CEnv env, Prob lp, int index, bool verbose) {
 
 	} else {
 		if (verbose)
-			cout << "No solution for P2 problem exists " << endl;
+			cout << "No solution for P2 problem exists.. " << endl;
 
 		// add Slack variables
 		static const char* varType = NULL;
@@ -365,36 +365,12 @@ void remove_constraint(CEnv env, Prob lp, int constraint, bool verbose) {
 
 void step1(CEnv env, Prob lp, bool verbose) {
 
-	//------------------------------------------------
-	// TEST if original problem is feasible
-	//------------------------------------------------
-
-	//change problem to integer
-	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_MILP);
-
 	if (verbose) {
 		cout << endl;
 		cout << "STEP 1:" << endl;
-		cout << "index of variables set to integer in set Z is: ";
-	}
-	//set to integer variables in Z set
-	char ctype[N];
-	for (int i = 0; i < N; i++) {
-		if (Z.count(i) != 0) {
-			ctype[i] = CPX_INTEGER;
-			if (verbose)
-				cout << i << " ";
-		} else
-			ctype[i] = CPX_CONTINUOUS;
 	}
 
-	if (verbose)
-		cout << endl;
-	//	const_cast<char *>(ctype);
-	CHECKED_CPX_CALL(CPXcopyctype, env, lp, ctype);
-
-
-	CHECKED_CPX_CALL(CPXmipopt, env, lp);
+	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 	int stat = CPXgetstat(env, lp);
 
 	if (verbose)
@@ -404,7 +380,7 @@ void step1(CEnv env, Prob lp, bool verbose) {
 	//----------------------------------------------------------------
 	// Remove redundant constraint (if exist) else STOP CONDITION 1
 	//----------------------------------------------------------------
-	if (stat != CPXMIP_INFEASIBLE) {
+	if (stat != CPX_STAT_INFEASIBLE) {
 		bool flag_redundant;
 		do {
 			flag_redundant = false;
@@ -453,7 +429,6 @@ void step1(CEnv env, Prob lp, bool verbose) {
 		exit(0);
 	}
 
-	CHECKED_CPX_CALL(CPXchgprobtype, env, lp, CPXPROB_LP);
 }
 
 void solve(CEnv env, Prob lp, bool verbose) {
@@ -469,8 +444,6 @@ void solve(CEnv env, Prob lp, bool verbose) {
 	// --------------------------------------------------
 	CHECKED_CPX_CALL(CPXlpopt, env, lp);
 
-	//this problem are unbounded?
-	//bool unbounded = test_problem_unbounded(env, lp);
 	int stat = CPXgetstat(env, lp);
 
 	// --------------------------------------------------

@@ -74,9 +74,6 @@ std::vector<std::vector<double> > A;
 //known terms
 std::vector<double> b;
 
-//set Z
-std::set<int> Z;
-
 //primary variables
 std::vector<double> varVals;
 
@@ -211,12 +208,6 @@ void load_problem(ifstream &myfile) {
 
 		}
 	}
-
-	//set integer variables
-	srand(1);
-	int N_int_var = rand() % N + 1;
-	for (int i = 0; i < N_int_var; i++)
-		Z.insert(rand() % N);
 
 }
 

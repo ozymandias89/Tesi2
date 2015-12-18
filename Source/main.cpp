@@ -97,7 +97,7 @@ int main(int argc, char const *argv[]) {
 		do {
 			solve_integer_problem(env, lp, true);
 
-			solve(env, lp, verbose);
+			solve(env, lp, true);
 
 			// --------------------------------------------------------------------
 			// 3. if P_1 and P_2 have solution initialization of the second problem
