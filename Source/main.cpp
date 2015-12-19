@@ -95,7 +95,7 @@ int main(int argc, char const *argv[]) {
 		// 2. program (first part)
 		// --------------------------------------------------
 		do {
-			solve_integer_problem(env, lp, true);
+			//solve_integer_problem(env, lp, true);
 
 			solve(env, lp, verbose);
 

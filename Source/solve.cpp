@@ -72,7 +72,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index, bool verbose) {
 	int cur_numrows = CPXgetnumrows(env, lp);
 
 // print and set solution and create and resolve P_2 problem"
-	if (stat != CPX_STAT_INFEASIBLE ) {
+	if (stat != CPX_STAT_INFEASIBLE) {
 		if (verbose)
 			cout << "FEASIBLE " << endl;
 		gam = floor(varVals[index]);
@@ -170,12 +170,12 @@ double solve_P2_Problem(CEnv env, Prob lp, int index, bool verbose) {
 	//bool infeasible = test_problem_infeasible(env, lp, verbose);
 
 	int stat = CPXgetstat(env, lp);
-		if (verbose)
-			cout << endl << "Status problem " << stat << endl;
+	if (verbose)
+		cout << endl << "Status problem " << stat << endl;
 
 	int cur_numrows = CPXgetnumrows(env, lp);
 
-	if (stat != CPX_STAT_INFEASIBLE ) {
+	if (stat != CPX_STAT_INFEASIBLE) {
 		if (verbose)
 			cout << "FEASIBLE " << endl;
 		print_objval(env, lp, verbose);
@@ -279,9 +279,6 @@ void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 	//const_cast<char *>(ctype);
 	CHECKED_CPX_CALL(CPXcopyctype, env, lp, ctype);
 
-	//check feasible
-	//bool infeasible = test_problem_infeasible(env, lp, verbose);
-
 	CHECKED_CPX_CALL(CPXmipopt, env, lp);
 	int stat = CPXgetstat(env, lp);
 
@@ -293,9 +290,11 @@ void solve_integer_problem(CEnv env, Prob lp, bool verbose) {
 			CHECKED_CPX_CALL(CPXgetobjval, env, lp, &risult);
 			if (integer == -CPX_INFBOUND)
 				integer = risult;
-			else if (fabs(integer - risult) > 10e+06 ) {
+			else if (fabs(integer - risult) > 10e+06) {
 				cerr << "We have lose one integer solution: " << endl;
-				cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints << endl;
+				cout << "Number of constraints added: "
+						<< CPXgetnumrows(env, lp) - Num_original_constraints
+						<< endl;
 				exit(1);
 			}
 			set_and_print_var_P(env, lp, verbose);
@@ -421,7 +420,8 @@ void step1(CEnv env, Prob lp, bool verbose) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 1 " << endl;
 		cout << " Iteration number: " << iter << endl;
-		cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints;
+		cout << "Number of constraints added: "
+				<< CPXgetnumrows(env, lp) - Num_original_constraints;
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		// free allocate memory
 		CPXfreeprob(env, &lp);
@@ -449,11 +449,12 @@ void solve(CEnv env, Prob lp, bool verbose) {
 	// --------------------------------------------------
 	// 3. STOP CONDITION
 	// --------------------------------------------------
-	if (stat==CPX_STAT_UNBOUNDED) {
+	if (stat == CPX_STAT_UNBOUNDED) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 3 " << endl;
 		cout << " Iteration number: " << iter << endl;
-		cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints << endl;
+		cout << "Number of constraints added: "
+				<< CPXgetnumrows(env, lp) - Num_original_constraints << endl;
 		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 		// free allocate memory
 		CPXfreeprob(env, &lp);
@@ -522,7 +523,8 @@ void solve(CEnv env, Prob lp, bool verbose) {
 				<< "The last solution is the best integer solution. STOP CONDITION STEP 4 "
 				<< endl;
 		cout << " Iteration number: " << iter << endl;
-		cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints << endl;
+		cout << "Number of constraints added: "
+				<< CPXgetnumrows(env, lp) - Num_original_constraints << endl;
 		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
 		// free allocate memory
 		CPXfreeprob(env, &lp);
