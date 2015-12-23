@@ -563,7 +563,6 @@ void SecondProblem::solve(CEnv env, Prob lp) {
 
 void SecondProblem::step8_1(CEnv env, Prob lp) {
 
-	this->violated_constraint = false;
 	std::vector<int> idx;
 	std::vector<double> coef;
 	int count_constraint = 0;
@@ -579,7 +578,6 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	//  A_T * u
 	double sum = 0;
 	for (int j = 0; j < N; j++) {
-		if (!(this->violated_constraint)) {
 			sum = 0;
 			for (int i = 0; i < num_constraint; i++) {
 
@@ -643,7 +641,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 				// --------------------------------------------------
 				// add new satisfy constraint if isn't in set
 				// --------------------------------------------------
-				if (satisfy_constraint_list.count(count_constraint) == 0) {
+
 					satisfy_constraint_list.insert(count_constraint);
 
 					CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs,
@@ -654,25 +652,11 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 				}
 				idx.clear();
 				coef.clear();
-			} else {
-				if (satisfy_constraint_list.count(count_constraint) != 0) {
-					this->violated_constraint = true;
-					if (verbose) {
-						cout << "The constraint number " << count_constraint
-								<< " doesn't respects the equation " << "sum = "
-								<< sum << endl << endl;
-						cout << "Violated constraint that before was satisfied!"
-								<< endl;
-					}
-//				throw std::runtime_error(
-//					"Violated constraint that before was satisfied!");
-				}
-			}
+
 			count_constraint++;
-		}
+
 	}
 
-	if (!(this->violated_constraint)) {
 		// --------------------------------------------------
 		// Estimation b_T * u + u_0 * gamma - b
 		// --------------------------------------------------
@@ -741,7 +725,6 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			// --------------------------------------------------
 			// add new satisfy constraint if isn't in set
 			// --------------------------------------------------
-			if (satisfy_constraint_list.count(count_constraint) == 0) {
 				satisfy_constraint_list.insert(count_constraint);
 
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
@@ -753,23 +736,8 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			idx.clear();
 			coef.clear();
 
-		} else {
-			if (satisfy_constraint_list.count(count_constraint) != 0) {
-				this->violated_constraint = true;
-				if (verbose) {
-					cout << "The constraint number " << count_constraint
-							<< " doesn't respects the equation " << "sum = "
-							<< sum << endl << endl;
-					cout << "Violated constraint that before was satisfied!"
-							<< endl;
-				}
-//				throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
-			}
-		}
-
 		count_constraint++;
-	}
+
 
 	// --------------------------------------------------
 	// Estimation A_T * v - e_k * u_v + a = 0
@@ -779,7 +747,6 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 	int v_0 = num_constraint + N + 2;
 	sum = 0;
 	for (int j = 0; j < N; j++) {
-		if (!(this->violated_constraint)) {
 			sum = 0;
 			for (int i = 0; i < num_constraint; i++) {
 
@@ -845,7 +812,6 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 				// --------------------------------------------------
 				// add new satisfy constraint if isn't in set
 				// --------------------------------------------------
-				if (satisfy_constraint_list.count(count_constraint) == 0) {
 					satisfy_constraint_list.insert(count_constraint);
 
 					CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs,
@@ -853,31 +819,14 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 					if (verbose)
 						cout << "The constraint number " << count_constraint
 								<< " add " << endl << endl;
-				}
+			}
 				idx.clear();
 				coef.clear();
 
-			} else {
-
-				if (satisfy_constraint_list.count(count_constraint) != 0) {
-					this->violated_constraint = true;
-					if (verbose) {
-						cout << "The constraint number " << count_constraint
-								<< " doesn't respects the equation " << "sum = "
-								<< sum << endl << endl;
-
-						cout << "Violated constraint that before was satisfied!"
-								<< endl;
-					}
-//				throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
-				}
-			}
 			count_constraint++;
-		}
+
 	}
 
-	if (!(this->violated_constraint)) {
 		// --------------------------------------------------
 		// Estimation b_T * v + v_0 * (gamma+1) - b = 0
 		// --------------------------------------------------
@@ -940,7 +889,7 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			// --------------------------------------------------
 			// add new satisfy constraint if isn't in set
 			// --------------------------------------------------
-			if (satisfy_constraint_list.count(count_constraint) == 0) {
+
 				satisfy_constraint_list.insert(count_constraint);
 
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
@@ -948,29 +897,14 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 				if (verbose)
 					cout << "The constraint number " << count_constraint
 							<< " add " << endl << endl;
-			}
+
+		}
 			idx.clear();
 			coef.clear();
-		} else {
-			if (satisfy_constraint_list.count(count_constraint) != 0) {
-				this->violated_constraint = true;
-				if (verbose) {
-					cout << "The constraint number " << count_constraint
-							<< " doesn't respects the equation " << "sum = "
-							<< sum << endl << endl;
-					cout << "Violated constraint that before was satisfied!"
-							<< endl;
-				}
-
-//				throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
-			}
-		}
 
 		count_constraint++;
-	}
 
-	if (!(this->violated_constraint)) {
+
 		// --------------------------------------------------
 		// Estimation -u_0>=0
 		// --------------------------------------------------
@@ -989,7 +923,6 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			// --------------------------------------------------
 			// add new satisfy constraint if isn't in set
 			// --------------------------------------------------
-			if (satisfy_constraint_list.count(count_constraint) == 0) {
 				satisfy_constraint_list.insert(count_constraint);
 
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
@@ -997,28 +930,12 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 				if (verbose)
 					cout << "The constraint number " << count_constraint
 							<< " add " << endl << endl;
-			}
+		}
 			idx.clear();
 			coef.clear();
-		} else {
-			if (satisfy_constraint_list.count(count_constraint) != 0) {
-				this->violated_constraint = true;
-				if (verbose) {
-					cout << "The constraint number " << count_constraint
-							<< " doesn't respects the equation " << "sum = "
-							<< sum << endl << endl;
-					cout << "Violated constraint that before was satisfied!"
-							<< endl;
-				}
-//      			throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
-			}
-		}
 
 		count_constraint++;
-	}
 
-	if (!(this->violated_constraint)) {
 		// --------------------------------------------------
 		// Estimation v_0>=0
 		// --------------------------------------------------
@@ -1037,7 +954,6 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 			// --------------------------------------------------
 			// add new satisfy constraint if isn't in set
 			// --------------------------------------------------
-			if (satisfy_constraint_list.count(count_constraint) == 0) {
 				satisfy_constraint_list.insert(count_constraint);
 
 				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
@@ -1045,24 +961,11 @@ void SecondProblem::step8_1(CEnv env, Prob lp) {
 				if (verbose)
 					cout << "The constraint number " << count_constraint
 							<< " add " << endl << endl;
-			}
+
 			idx.clear();
 			coef.clear();
-		} else {
-			if (satisfy_constraint_list.count(count_constraint) != 0) {
-				this->violated_constraint = true;
-				if (verbose) {
-					cout << "The constraint number " << count_constraint
-							<< " doesn't respects the equation " << "sum = "
-							<< sum << endl << endl;
-					cout << "Violated constraint that before was satisfied!"
-							<< endl;
-				}
-//				throw std::runtime_error(
-//						"Violated constraint that before was satisfied!");
-			}
 		}
-	}
+
 }
 
 void SecondProblem::step8_2(CEnv env, Prob lp) {

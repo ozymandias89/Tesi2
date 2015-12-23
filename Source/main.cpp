@@ -130,6 +130,10 @@ int main(int argc, char const *argv[]) {
 			CPXsetdblparam(env_dual, CPXPARAM_Simplex_Tolerances_Optimality,
 					1e-5);
 
+			sec_prob->step8_1(env_dual, lp_dual);
+
+			exit(0);
+
 			do {
 
 				clock_t t2;
