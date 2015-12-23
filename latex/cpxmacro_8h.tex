@@ -1,0 +1,121 @@
+\hypertarget{cpxmacro_8h}{\section{cpxmacro.\-h File Reference}
+\label{cpxmacro_8h}\index{cpxmacro.\-h@{cpxmacro.\-h}}
+}
+{\ttfamily \#include $<$cstring$>$}\\*
+{\ttfamily \#include $<$string$>$}\\*
+{\ttfamily \#include $<$stdexcept$>$}\\*
+{\ttfamily \#include $<$ilcplex/cplex.\-h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{cpxmacro_8h_afa54a989c52f5dd40f0c75f30a54018f}{\#define {\bfseries S\-T\-R\-I\-N\-G\-I\-Z\-E}(something)~S\-T\-R\-I\-N\-G\-I\-Z\-E\-\_\-\-H\-E\-L\-P\-E\-R(something)}\label{cpxmacro_8h_afa54a989c52f5dd40f0c75f30a54018f}
+
+\item 
+\hypertarget{cpxmacro_8h_a3f3aa701e9ce5d5d92ad534a671ed40b}{\#define {\bfseries S\-T\-R\-I\-N\-G\-I\-Z\-E\-\_\-\-H\-E\-L\-P\-E\-R}(something)~\#something}\label{cpxmacro_8h_a3f3aa701e9ce5d5d92ad534a671ed40b}
+
+\item 
+\#define {\bfseries D\-E\-C\-L\-\_\-\-E\-N\-V}(env\-Ptr)
+\item 
+\#define {\bfseries D\-E\-C\-L\-\_\-\-P\-R\-O\-B}(c\-Env\-Ptr, lp\-Ptr, probl\-Name)
+\item 
+\#define {\bfseries C\-H\-E\-C\-K\-E\-D\-\_\-\-C\-P\-X\-\_\-\-C\-A\-L\-L}(func, env,...)
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef C\-P\-X\-E\-N\-Vptr \hyperlink{cpxmacro_8h_a107ba0818625d3c06e6b250f0fb1cbad}{Env}
+\item 
+\hypertarget{cpxmacro_8h_af02d95a4343f10f04987bcceed80c96c}{typedef C\-P\-X\-C\-E\-N\-Vptr {\bfseries C\-Env}}\label{cpxmacro_8h_af02d95a4343f10f04987bcceed80c96c}
+
+\item 
+\hypertarget{cpxmacro_8h_aa2944ab568b9c07d09d71c9713250a29}{typedef C\-P\-X\-L\-Pptr {\bfseries Prob}}\label{cpxmacro_8h_aa2944ab568b9c07d09d71c9713250a29}
+
+\item 
+\hypertarget{cpxmacro_8h_a36ca29b239c895c0d4683fb8dc38f3ed}{typedef C\-P\-X\-C\-L\-Pptr {\bfseries C\-Prob}}\label{cpxmacro_8h_a36ca29b239c895c0d4683fb8dc38f3ed}
+
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{cpxmacro_8h_a6e27f49150e9a14580fb313cc2777e00}{int {\bfseries status}}\label{cpxmacro_8h_a6e27f49150e9a14580fb313cc2777e00}
+
+\item 
+\hypertarget{cpxmacro_8h_a2b45a280e68a3294155e1d921f5ec101}{const unsigned int {\bfseries B\-U\-F\-\_\-\-S\-I\-Z\-E} = 4096}\label{cpxmacro_8h_a2b45a280e68a3294155e1d921f5ec101}
+
+\item 
+\hypertarget{cpxmacro_8h_a32b1d8227a805154c90d0603d58581d7}{char {\bfseries errmsg} \mbox{[}B\-U\-F\-\_\-\-S\-I\-Z\-E\mbox{]}}\label{cpxmacro_8h_a32b1d8227a805154c90d0603d58581d7}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+C\-P\-L\-E\-X Helper Macros 
+
+\subsection{Macro Definition Documentation}
+\hypertarget{cpxmacro_8h_a2d1bd4b20917a4ef74c463da7b4b4b3d}{\index{cpxmacro.\-h@{cpxmacro.\-h}!C\-H\-E\-C\-K\-E\-D\-\_\-\-C\-P\-X\-\_\-\-C\-A\-L\-L@{C\-H\-E\-C\-K\-E\-D\-\_\-\-C\-P\-X\-\_\-\-C\-A\-L\-L}}
+\index{C\-H\-E\-C\-K\-E\-D\-\_\-\-C\-P\-X\-\_\-\-C\-A\-L\-L@{C\-H\-E\-C\-K\-E\-D\-\_\-\-C\-P\-X\-\_\-\-C\-A\-L\-L}!cpxmacro.h@{cpxmacro.\-h}}
+\subsubsection[{C\-H\-E\-C\-K\-E\-D\-\_\-\-C\-P\-X\-\_\-\-C\-A\-L\-L}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-H\-E\-C\-K\-E\-D\-\_\-\-C\-P\-X\-\_\-\-C\-A\-L\-L(
+\begin{DoxyParamCaption}
+\item[{}]{func, }
+\item[{}]{env, }
+\item[{}]{...}
+\end{DoxyParamCaption}
+)}}\label{cpxmacro_8h_a2d1bd4b20917a4ef74c463da7b4b4b3d}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\textcolor{keywordflow}{do} \{\(\backslash\)
+    status = func(env, \_\_VA\_ARGS\_\_);\(\backslash\)
+    if (status) \{\(\backslash\)
+        CPXgeterrorstring(env, status, errmsg);\(\backslash\)
+        int trailer = std::strlen(errmsg) - 1;\(\backslash\)
+        if (trailer >= 0)\(\backslash\)
+            errmsg[trailer] = \textcolor{charliteral}{'\(\backslash\)0'};\(\backslash\)
+        throw std::runtime\_error(std::string(\_\_FILE\_\_) + \textcolor{stringliteral}{":"} + STRINGIZE(\_\_LINE\_\_) + \textcolor{stringliteral}{": "} + errmsg);\(\backslash\)
+    \}\(\backslash\)
+\} \textcolor{keywordflow}{while}(\textcolor{keyword}{false})
+\end{DoxyCode}
+\hypertarget{cpxmacro_8h_af7c19ae720d4f11c00fa633863fc2e3c}{\index{cpxmacro.\-h@{cpxmacro.\-h}!D\-E\-C\-L\-\_\-\-E\-N\-V@{D\-E\-C\-L\-\_\-\-E\-N\-V}}
+\index{D\-E\-C\-L\-\_\-\-E\-N\-V@{D\-E\-C\-L\-\_\-\-E\-N\-V}!cpxmacro.h@{cpxmacro.\-h}}
+\subsubsection[{D\-E\-C\-L\-\_\-\-E\-N\-V}]{\setlength{\rightskip}{0pt plus 5cm}\#define D\-E\-C\-L\-\_\-\-E\-N\-V(
+\begin{DoxyParamCaption}
+\item[{}]{env\-Ptr}
+\end{DoxyParamCaption}
+)}}\label{cpxmacro_8h_af7c19ae720d4f11c00fa633863fc2e3c}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\hyperlink{cpxmacro_8h_a107ba0818625d3c06e6b250f0fb1cbad}{Env} envPtr = CPXopenCPLEX(&status);\(\backslash\)
+if (status) \{\(\backslash\)
+    CPXgeterrorstring(NULL, status, errmsg);\(\backslash\)
+    int trailer = std::strlen(errmsg) - 1;\(\backslash\)
+    if (trailer >= 0)\(\backslash\)
+        errmsg[trailer] = \textcolor{charliteral}{'\(\backslash\)0'};\(\backslash\)
+    throw std::runtime\_error(std::string(\_\_FILE\_\_) + \textcolor{stringliteral}{":"} + STRINGIZE(\_\_LINE\_\_) + \textcolor{stringliteral}{": "} + errmsg);\(\backslash\)
+\}
+\end{DoxyCode}
+\hypertarget{cpxmacro_8h_a94bf7dbc76757b5d28d399be629d644d}{\index{cpxmacro.\-h@{cpxmacro.\-h}!D\-E\-C\-L\-\_\-\-P\-R\-O\-B@{D\-E\-C\-L\-\_\-\-P\-R\-O\-B}}
+\index{D\-E\-C\-L\-\_\-\-P\-R\-O\-B@{D\-E\-C\-L\-\_\-\-P\-R\-O\-B}!cpxmacro.h@{cpxmacro.\-h}}
+\subsubsection[{D\-E\-C\-L\-\_\-\-P\-R\-O\-B}]{\setlength{\rightskip}{0pt plus 5cm}\#define D\-E\-C\-L\-\_\-\-P\-R\-O\-B(
+\begin{DoxyParamCaption}
+\item[{}]{c\-Env\-Ptr, }
+\item[{}]{lp\-Ptr, }
+\item[{}]{probl\-Name}
+\end{DoxyParamCaption}
+)}}\label{cpxmacro_8h_a94bf7dbc76757b5d28d399be629d644d}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+Prob lpPtr = CPXcreateprob(cEnvPtr, &status, std::string(problName).c\_str());\(\backslash\)
+if (status) \{\(\backslash\)
+    CPXgeterrorstring(NULL, status, errmsg);\(\backslash\)
+    int trailer = std::strlen(errmsg) - 1;\(\backslash\)
+    if (trailer >= 0)\(\backslash\)
+        errmsg[trailer] = \textcolor{charliteral}{'\(\backslash\)0'};\(\backslash\)
+    throw std::runtime\_error(std::string(\_\_FILE\_\_) + \textcolor{stringliteral}{":"} + STRINGIZE(\_\_LINE\_\_) + \textcolor{stringliteral}{": "} + errmsg);\(\backslash\)
+\}
+\end{DoxyCode}
+
+
+\subsection{Typedef Documentation}
+\hypertarget{cpxmacro_8h_a107ba0818625d3c06e6b250f0fb1cbad}{\index{cpxmacro.\-h@{cpxmacro.\-h}!Env@{Env}}
+\index{Env@{Env}!cpxmacro.h@{cpxmacro.\-h}}
+\subsubsection[{Env}]{\setlength{\rightskip}{0pt plus 5cm}typedef C\-P\-X\-E\-N\-Vptr {\bf Env}}}\label{cpxmacro_8h_a107ba0818625d3c06e6b250f0fb1cbad}
+typedefs of basic Callable Library entities, i.\-e. environment (Env) and problem pointers (Prob). 

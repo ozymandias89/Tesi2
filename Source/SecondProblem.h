@@ -132,7 +132,6 @@ public:
 	vector<double> rt;
 	vector<double> y_tilde;
 	bool verbose;
-	bool violated_constraint;
 
 };
 
