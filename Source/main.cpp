@@ -113,6 +113,7 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			sec_prob->evaluate_rT();
 
+
 			if (verbose) {
 				print_vect_c();
 				cout << "min sol:" << endl << min_sol << endl;
@@ -138,6 +139,7 @@ int main(int argc, char const *argv[]) {
 					throw std::runtime_error("Timeout!");
 				}
 
+
 				sec_prob->step8_1(env_dual, lp_dual);
 
 				sec_prob->step8_2(env_dual, lp_dual);
@@ -146,11 +148,7 @@ int main(int argc, char const *argv[]) {
 						"../data/second_problem.lp", 0);
 
 				int num_constraint = CPXgetnumrows(env_dual, lp_dual);
-//
-//				CPXsetintparam (env, CPXPARAM_Conflict_Display, 2);
-//				CHECKED_CPX_CALL(CPXlpopt, env_dual, lp_dual);
-//
-//
+
 				sec_prob->solve(env_dual, lp_dual);
 
 				// --------------------------------------------------
@@ -172,6 +170,7 @@ int main(int argc, char const *argv[]) {
 							CPXPARAM_Simplex_Tolerances_Optimality, 1e-5);
 					CHECKED_CPX_CALL(CPXwriteprob, env_third, lp_third,
 							"../data/third_problem.lp", 0);
+
 					third_prob->solve(env_third, lp_third);
 					third_prob->update_y_bar(env_third, lp_third,
 							sec_prob->cost);
