@@ -94,6 +94,7 @@ int main(int argc, char const *argv[]) {
 		// --------------------------------------------------
 		// 2. program (first part)
 		// --------------------------------------------------
+
 		do {
 			//solve_integer_problem(env, lp, true);
 
@@ -173,7 +174,7 @@ int main(int argc, char const *argv[]) {
 								"No detect constraint to add to the second problem!");
 
 					CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
-																	"../data/second_problem.lp", 0);
+							"../data/second_problem.lp", 0);
 					if (!third_infeasiable) {
 						third_prob->update_y_bar(sec_prob->cost);
 
@@ -184,7 +185,7 @@ int main(int argc, char const *argv[]) {
 					}
 
 					free(third_prob);
-					exit(0);
+
 				}
 
 			} while (!flag && !(third_infeasiable));
