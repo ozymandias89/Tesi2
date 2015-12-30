@@ -21,10 +21,11 @@ public:
 
 	/**
 	 Print vector
-	 @param  (vector<double> vector)
+	 @param  (vector<template T> vector)
 	 @return void
 	 */
-	void print_vector(vector<double> vector);
+	template<typename T>
+	void print_vector(vector<T> vector);
 
 	/**
 	 Calculate y bar minimum y tilde
@@ -35,29 +36,34 @@ public:
 
 	/**
 	 Method that set the third problem
-	 @param  (CEnv env, Prob lp)
+	 @param none
 	 @return void
 	 */
-	void setup(CEnv env, Prob lp);
+	void setup();
 
 	/**
 	 solve third problem and calculate lambda
-	 @param  (CEnv env, Prob lp, vector<double>& c)
-	 @return void
+	 @param  set<int> constraints
+	 @return bool
 	 */
-	void solve(CEnv env, Prob lp);
+	bool solve(set<int> constraints);
 
 	/**
 	 update y_bar step 8.4
 	 @param  (CEnv env, Prob lp, vector<double>& c)
 	 @return void
 	 */
-	void update_y_bar(CEnv env, Prob lp, vector<double>& c);
+	void update_y_bar(vector<double>& c);
 
 	// ATTRIBUTES:
 	vector<double> y_tilde;
 	vector<double> t;
+	vector<double> result;
+	vector<char> sense;
+	double ub, lb;
+	int constraint_to_add;
 	double lambda;
+
 	bool verbose;
 };
 

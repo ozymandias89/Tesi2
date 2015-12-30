@@ -113,7 +113,6 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			sec_prob->evaluate_rT();
 
-
 			if (verbose) {
 				print_vect_c();
 				cout << "min sol:" << endl << min_sol << endl;
@@ -125,14 +124,13 @@ int main(int argc, char const *argv[]) {
 			// 6. Cycle step 8
 			// --------------------------------------------------
 			bool flag;
+			bool third_infeasiable;
 			CPXsetdblparam(env_dual, CPXPARAM_Simplex_Tolerances_Feasibility,
 					1e-5);
 			CPXsetdblparam(env_dual, CPXPARAM_Simplex_Tolerances_Optimality,
 					1e-5);
 
 			sec_prob->step8_1(env_dual, lp_dual);
-
-			exit(0);
 
 			do {
 
@@ -143,15 +141,10 @@ int main(int argc, char const *argv[]) {
 					throw std::runtime_error("Timeout!");
 				}
 
-
-				sec_prob->step8_1(env_dual, lp_dual);
-
 				sec_prob->step8_2(env_dual, lp_dual);
 
 				CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
 						"../data/second_problem.lp", 0);
-
-				int num_constraint = CPXgetnumrows(env_dual, lp_dual);
 
 				sec_prob->solve(env_dual, lp_dual);
 
@@ -161,34 +154,40 @@ int main(int argc, char const *argv[]) {
 				flag = sec_prob->y_tilde_EQ_y_bar();
 
 				if (!flag) {
-					DECL_ENV(env_third);
-					DECL_PROB(env_third, lp_third, "resolve third problem");
 					ThirdProblem* third_prob = new ThirdProblem(
 							sec_prob->y_tilde, sec_prob->cost, verbose);
 					if (verbose)
 						print_vect_b();
-					third_prob->setup(env_third, lp_third);
-					CPXsetdblparam(env_third,
-							CPXPARAM_Simplex_Tolerances_Feasibility, 1e-5);
-					CPXsetdblparam(env_third,
-							CPXPARAM_Simplex_Tolerances_Optimality, 1e-5);
-					CHECKED_CPX_CALL(CPXwriteprob, env_third, lp_third,
-							"../data/third_problem.lp", 0);
 
-					third_prob->solve(env_third, lp_third);
-					third_prob->update_y_bar(env_third, lp_third,
-							sec_prob->cost);
+					third_prob->setup();
 
-					CPXfreeprob(env_third, &lp_third);
-					CPXcloseCPLEX(&env_third);
+					third_infeasiable = third_prob->solve(
+							sec_prob->satisfy_constraint_list);
+
+					if (third_prob->constraint_to_add != -1) {
+						sec_prob->add_constraint(env_dual, lp_dual,
+								third_prob->constraint_to_add);
+					} else if (third_prob->constraint_to_add == -1
+							&& !(third_infeasiable))
+						throw std::runtime_error(
+								"No detect constraint to add to the second problem!");
+
+					CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
+																	"../data/second_problem.lp", 0);
+					if (!third_infeasiable) {
+						third_prob->update_y_bar(sec_prob->cost);
+
+						//delete last constraint ry=ry
+						int num_constraint = CPXgetnumrows(env_dual, lp_dual);
+						CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual,
+								num_constraint - 2, num_constraint - 2);
+					}
+
 					free(third_prob);
-
+					exit(0);
 				}
-				//delete last constraint ry=ry
-				CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual,
-						num_constraint - 1, num_constraint - 1);
 
-			} while (!flag && !(sec_prob->violated_constraint));
+			} while (!flag && !(third_infeasiable));
 
 			// --------------------------------------------------
 			// 8. ADD constraint R in the first problem
@@ -208,13 +207,18 @@ int main(int argc, char const *argv[]) {
 
 		} while (iteration - iter != 0);
 
-		cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints << endl;
+		cout << "Number of constraints added: "
+				<< CPXgetnumrows(env, lp) - Num_original_constraints << endl;
 		CPXfreeprob(env, &lp);
 		CPXcloseCPLEX(&env);
 
 	} catch (std::exception& e) {
-		cout << "Number of constraints added: " << CPXgetnumrows(env, lp) - Num_original_constraints << endl;
+		cout << "Number of constraints added: "
+				<< CPXgetnumrows(env, lp) - Num_original_constraints << endl;
 		std::cout << ">>>EXCEPTION: " << e.what() << std::endl;
+		CPXfreeprob(env, &lp);
+		CPXcloseCPLEX(&env);
+
 	}
 
 	return 0;

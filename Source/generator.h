@@ -7,8 +7,7 @@ using namespace std;
 
 string generate_canonical_matrix(const int m, const int limit_number_generate) {
 
-	srand(time(NULL));
-	int number = rand() % 100 + 10;
+	srand (time(NULL));int number = rand() % 100 + 10;
 	ostringstream convert;
 	convert << number;
 
@@ -22,13 +21,13 @@ string generate_canonical_matrix(const int m, const int limit_number_generate) {
 
 		//cost coefficients
 		for (int i = 0; i < m * 2; ++i)
-			myfile << rand() % limit_number_generate << " ";
+		myfile << rand() % limit_number_generate << " ";
 
 		myfile << endl << endl;
 
 		//b coefficients
 		for (int i = 0; i < m; ++i)
-			myfile << rand() % 31 << " ";
+		myfile << rand() % 31 << " ";
 
 		myfile << endl << endl;
 
@@ -37,7 +36,7 @@ string generate_canonical_matrix(const int m, const int limit_number_generate) {
 				if (j < m) {
 					(j == i) ? myfile << 1 << " " : myfile << 0 << " ";
 				} else
-					myfile << rand() % 41 +(-20) << " ";
+				myfile << rand() % 41 +(-20) << " ";
 
 			}
 			myfile << endl;

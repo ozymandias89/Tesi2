@@ -44,8 +44,6 @@ static int iter;
 //integer solution
 static double integer=-CPX_INFBOUND;
 
-//lambda count
-static int count_lambda=0;
 
 //number of variable
 int N;

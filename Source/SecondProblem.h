@@ -48,6 +48,8 @@ public:
 	 */
 	void solve(CEnv env, Prob lp);
 
+	void add_constraint(CEnv env, Prob lp, int constraint_to_add);
+
 	/**
 	 Method that creates tight C'y >= d subsystem and adds to dual problem
 	 @param  CEnv env, Prob lp, bool verbose
@@ -132,7 +134,6 @@ public:
 	vector<double> rt;
 	vector<double> y_tilde;
 	bool verbose;
-	bool violated_constraint;
 
 };
 

@@ -96,7 +96,8 @@ void ThirdProblem::y_bar_MIN_y_tilde(vector<double> c) {
 
 }
 
-void ThirdProblem::print_vector(vector<double> vector) {
+template<typename T>
+void ThirdProblem::print_vector(vector<T> vector) {
 
 	for (unsigned int i = 0; i < vector.size(); i++)
 		cout << vector[i] << " ";
@@ -105,355 +106,349 @@ void ThirdProblem::print_vector(vector<double> vector) {
 
 }
 
-void ThirdProblem::setup(CEnv env, Prob lp) {
+void ThirdProblem::setup() {
 
+	double cof, rhs;
 	{
-		// lambda variable
-		static const char* varType = NULL;
-		double obj = 1.0;
-		double lb = -CPX_INFBOUND;
-		double ub = CPX_INFBOUND;
-
-		snprintf(name, NAME_SIZE, "lambda");
-		char* varName = (char*) (&name[0]);
-		CHECKED_CPX_CALL(CPXnewcols, env, lp, 1, &obj, &lb, &ub, varType,
-				&varName);
-
-		CPXchgobjsen(env, lp, CPX_MAX);
-	}
-
-	{
-
-		// constraints
-
-		std::vector<int> idx;
-		std::vector<double> coef;
-
-		char sense = 'G';
-		int matbeg = 0;
-		double rhs;
-		int nzcnt = 1;
-		idx.push_back(0);
-
-		double cof;
-
-		{
-			//first constraint (second problem)
-			for (int i = 0; i < N; i++) {
-				cof = 0;
-				rhs = 0;
-
-				//1* y_tilde[a] && 1*t[a]
-				cof += t[i];
-				rhs += y_tilde[i];
-
-				int j = N;
-				//beta are 0... skip
-				j++;
-
-				//A_T * y_tilde[u] && A_T * t[u]
-				for (int iter = 0; iter < num_constraint; iter++) {
-					cof += A[iter][i] * t[j];
-					rhs += A[iter][i] * y_tilde[j];
-					j++;
-				}
-
-				if (i == k) {
-					cof -= t[j];
-					rhs -= y_tilde[j];
-				}
-				//v and v_0 are 0.. skip
-
-				rhs = -rhs;
-
-				//tolerance error
-				if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
-					rhs = 0.0;
-
-				if (cof < epsilon_8_4 && cof > -epsilon_8_4)
-					cof = 0.0;
-
-				coef.push_back(cof);
-
-				//add constraints
-				if (cof!=0)
-				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-						&matbeg, &idx[0], &coef[0], 0, 0);
-
-				idx.clear();
-				coef.clear();
-			}
-		}
-		{	//Second constraint
+		//first constraint (second problem)
+		for (int i = 0; i < N; i++) {
 			cof = 0;
 			rhs = 0;
 
-			//a is 0...skip
-			int j = N;
+			//1* y_tilde[a] && 1*t[a]
+			cof += t[i];
+			rhs += y_tilde[i];
 
-			//-beta
-			cof -= t[j];
-			rhs -= y_tilde[j];
+			int j = N;
+			//beta are 0... skip
 			j++;
 
-			//u
-
-			for (int i = 0; i < num_constraint; i++) {
-				cof += b[i] * t[j];
-				rhs += b[i] * y_tilde[j];
+			//A_T * y_tilde[u] && A_T * t[u]
+			for (int iter = 0; iter < num_constraint; iter++) {
+				cof += A[iter][i] * t[j];
+				rhs += A[iter][i] * y_tilde[j];
 				j++;
 			}
 
-			//u_0
-			cof += gam * t[j];
-			rhs += gam * y_tilde[j];
+			if (i == k) {
+				cof -= t[j];
+				rhs -= y_tilde[j];
+			}
+			//v and v_0 are 0.. skip
 
-			//v and v_0 are 0... skip
 			rhs = -rhs;
 
-//			//tolerance error
+			//tolerance error
 			if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
 				rhs = 0.0;
 
 			if (cof < epsilon_8_4 && cof > -epsilon_8_4)
 				cof = 0.0;
 
-			coef.push_back(cof);
+			if (cof >= 0) {
+				sense.push_back('g');
+			} else
+				sense.push_back('l');
 
+			double ris;
 			//add constraints
-			if (cof!=0)
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-					&matbeg, &idx[0], &coef[0], 0, 0);
-
-			idx.clear();
-			coef.clear();
-		}
-
-		{
-			//for each lines of matrix (third constraint)
-			for (int i = 0; i < N; i++) {
-
-				cof = 0;
-				rhs = 0;
-				//1* y_tilde[a] && 1*t[a]
-
-				cof += t[i];
-				rhs += y_tilde[i];
-
-				int j = N;
-				//beta are 0... skip
-				j++;
-
-				//u && u_0 are 0... skip
-				j += num_constraint + 1;
-
-				//A_T * y_tilde[v] && A_T * t[v]
-				for (int iter = 0; iter < num_constraint; iter++) {
-					cof += A[iter][i] * t[j];
-					rhs += A[iter][i] * y_tilde[j];
-					j++;
-				}
-
-				//v_0
-				if (i == k) {
-					cof -= t[j];
-					rhs -= y_tilde[j];
-				}
-
-				rhs = -rhs;
-
-//				//tolerance error
-				if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
-					rhs = 0.0;
-
-				if (cof < epsilon_8_4 && cof > -epsilon_8_4)
-					cof = 0.0;
-
-				coef.push_back(cof);
-
-				//add constraints
-				if (cof != 0)
-				CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-						&matbeg, &idx[0], &coef[0], 0, 0);
-
-				idx.clear();
-				coef.clear();
+			if (cof != 0) {
+				ris = rhs / cof;
+			} else {
+				ris = -CPX_INFBOUND;
 			}
 
+			result.push_back(ris);
+
+		}
+	}
+	{	//Second constraint
+		cof = 0;
+		rhs = 0;
+
+		//a is 0...skip
+		int j = N;
+
+		//-beta
+		cof -= t[j];
+		rhs -= y_tilde[j];
+		j++;
+
+		//u
+
+		for (int i = 0; i < num_constraint; i++) {
+			cof += b[i] * t[j];
+			rhs += b[i] * y_tilde[j];
+			j++;
 		}
 
-		{
-			//fourth constraint
+		//u_0
+		cof += gam * t[j];
+		rhs += gam * y_tilde[j];
+
+		//v and v_0 are 0... skip
+		rhs = -rhs;
+
+//			//tolerance error
+		if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
+			rhs = 0.0;
+
+		if (cof < epsilon_8_4 && cof > -epsilon_8_4)
+			cof = 0.0;
+
+		if (cof >= 0) {
+			sense.push_back('g');
+		} else
+			sense.push_back('l');
+
+		double ris;
+		//add constraints
+		if (cof != 0) {
+			ris = rhs / cof;
+		} else {
+			ris = -CPX_INFBOUND;
+		}
+
+		result.push_back(ris);
+
+	}
+
+	{
+		//for each lines of matrix (third constraint)
+		for (int i = 0; i < N; i++) {
+
 			cof = 0;
 			rhs = 0;
+			//1* y_tilde[a] && 1*t[a]
 
-			//a is 0...skip
+			cof += t[i];
+			rhs += y_tilde[i];
+
 			int j = N;
-
-			//-beta
-			cof -= t[j];
-			rhs -= y_tilde[j];
+			//beta are 0... skip
 			j++;
 
-			//u and u_0 are 0... skip
+			//u && u_0 are 0... skip
 			j += num_constraint + 1;
 
-			//b_t * t[v]
-			for (int i = 0; i < num_constraint; i++) {
-				cof += b[i] * t[j];
-				rhs += b[i] * y_tilde[j];
+			//A_T * y_tilde[v] && A_T * t[v]
+			for (int iter = 0; iter < num_constraint; iter++) {
+				cof += A[iter][i] * t[j];
+				rhs += A[iter][i] * y_tilde[j];
 				j++;
 			}
 
 			//v_0
-			cof += (gam + 1) * t[j];
-			rhs += (gam + 1) * y_tilde[j];
+			if (i == k) {
+				cof -= t[j];
+				rhs -= y_tilde[j];
+			}
+
 			rhs = -rhs;
+
+//				//tolerance error
+			if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
+				rhs = 0.0;
+
+			if (cof < epsilon_8_4 && cof > -epsilon_8_4)
+				cof = 0.0;
+
+			if (cof >= 0) {
+				sense.push_back('g');
+			} else
+				sense.push_back('l');
+
+			double ris;
+			//add constraints
+			if (cof != 0) {
+				ris = rhs / cof;
+			} else {
+				ris = -CPX_INFBOUND;
+			}
+
+			result.push_back(ris);
+
+		}
+
+	}
+
+	{
+		//fourth constraint
+		cof = 0;
+		rhs = 0;
+
+		//a is 0...skip
+		int j = N;
+
+		//-beta
+		cof -= t[j];
+		rhs -= y_tilde[j];
+		j++;
+
+		//u and u_0 are 0... skip
+		j += num_constraint + 1;
+
+		//b_t * t[v]
+		for (int i = 0; i < num_constraint; i++) {
+			cof += b[i] * t[j];
+			rhs += b[i] * y_tilde[j];
+			j++;
+		}
+
+		//v_0
+		cof += (gam + 1) * t[j];
+		rhs += (gam + 1) * y_tilde[j];
+		rhs = -rhs;
 
 //			//tolerance error
-			if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
-				rhs = 0.0;
+		if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
+			rhs = 0.0;
 
-			if (cof < epsilon_8_4 && cof > -epsilon_8_4)
-				cof = 0.0;
+		if (cof < epsilon_8_4 && cof > -epsilon_8_4)
+			cof = 0.0;
 
-			coef.push_back(cof);
+		if (cof >= 0) {
+			sense.push_back('g');
+		} else
+			sense.push_back('l');
 
-			//add constraints
-			if (cof != 0)
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-					&matbeg, &idx[0], &coef[0], 0, 0);
-
-			idx.clear();
-			coef.clear();
-
+		double ris;
+		//add constraints
+		if (cof != 0) {
+			ris = rhs / cof;
+		} else {
+			ris = -CPX_INFBOUND;
 		}
 
-		{
-			// constraint -u_0 >= 0
-			cof = 0;
-			rhs = 0;
+		result.push_back(ris);
 
-			int j = N + 1 + num_constraint;
-			//-u
-			cof -= t[j];
-			rhs -= y_tilde[j];
-
-			rhs = -rhs;
-			//tolerance error
-			if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
-				rhs = 0.0;
-
-			if (cof < epsilon_8_4 && cof > -epsilon_8_4)
-				cof = 0.0;
-
-			coef.push_back(cof);
-
-			if (cof != 0)
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-					&matbeg, &idx[0], &coef[0], 0, 0);
-
-			idx.clear();
-			coef.clear();
-
-		}
-
-		{
-			// constraint v_0 >= 0
-			cof = 0;
-			rhs = 0;
-
-			//v
-			cof += t.back();
-			rhs += y_tilde.back();
-
-			rhs = -rhs;
-			//tolerance error
-			if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
-				rhs = 0.0;
-
-			if (cof < epsilon_8_4 && cof > -epsilon_8_4)
-				cof = 0.0;
-			coef.push_back(cof);
-
-			if (cof != 0)
-			CHECKED_CPX_CALL(CPXaddrows, env, lp, 0, 1, nzcnt, &rhs, &sense,
-					&matbeg, &idx[0], &coef[0], 0, 0);
-
-			idx.clear();
-			coef.clear();
-
-		}
 	}
 
-}
+	{
+		// constraint -u_0 >= 0
+		cof = 0;
+		rhs = 0;
 
-void ThirdProblem::solve(CEnv env, Prob lp) {
+		int j = N + 1 + num_constraint;
+		//-u
+		cof -= t[j];
+		rhs -= y_tilde[j];
 
-	CHECKED_CPX_CALL(CPXlpopt, env, lp);
+		rhs = -rhs;
+		//tolerance error
+		if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
+			rhs = 0.0;
 
-	int stat = CPXgetstat(env, lp);
+		if (cof < epsilon_8_4 && cof > -epsilon_8_4)
+			cof = 0.0;
 
-	if (stat == CPX_STAT_UNBOUNDED)
-		throw std::runtime_error("Third problem are unbounded");
+		if (cof >= 0) {
+			sense.push_back('g');
+		} else
+			sense.push_back('l');
 
-	if (stat == CPX_STAT_INForUNBD)
-		throw std::runtime_error("Third problem are unbounded or infeasible");
+		double ris;
+		//add constraints
+		if (cof != 0) {
+			ris = rhs / cof;
+		} else {
+			ris = -CPX_INFBOUND;
+		}
 
-	//bool infeasible = test_problem_infeasible(env, lp, verbose);
+		result.push_back(ris);
 
-	if (stat != CPX_STAT_INFEASIBLE) {
-
-//		print_objval(env, lp);
-
-		vector<double> varibles;
-
-		if (verbose)
-			cout << "VARIABLES THIRD PROBLEM: " << endl;
-
-		int cur_numcols = 1;
-
-		varibles.resize(cur_numcols);
-		CHECKED_CPX_CALL(CPXgetx, env, lp, &varibles[0], 0, cur_numcols - 1);
-		int surplus;
-		status = CPXgetcolname(env, lp, NULL, NULL, 0, &surplus, 0,
-				cur_numcols - 1);
-		int cur_colnamespace = -surplus; // the space needed to save the names
-
-		// allocate memory
-		char** cur_colname = (char **) malloc(sizeof(char *) * cur_numcols);
-		char* cur_colnamestore = (char *) malloc(cur_colnamespace);
-
-		// get the names
-		CPXgetcolname(env, lp, cur_colname, cur_colnamestore, cur_colnamespace,
-				&surplus, 0, cur_numcols - 1);
-
-		//  print index, name and value of lambda
-		if (verbose)
-			cout << cur_colname[0] << " = " << varibles[0] << endl;
-
-		lambda = varibles[0];
-
-		//  if problem generate lambda = 1 in continuous STOP
-		if (fabs(lambda - 1) < epsilon_8_1) {
-			count_lambda++;
-			if(count_lambda == 5)
-					throw std::runtime_error("lambda =1. STOP");
-		}else
-			count_lambda=0;
-
-
-		// free
-		free(cur_colname);
-		free(cur_colnamestore);
-
-	} else {
-		throw std::runtime_error("Third  problem has conflict or unbounded!!!!!");
 	}
 
+	{
+		// constraint v_0 >= 0
+		cof = 0;
+		rhs = 0;
+
+		//v
+		cof += t.back();
+		rhs += y_tilde.back();
+
+		rhs = -rhs;
+		//tolerance error
+		if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
+			rhs = 0.0;
+
+		if (cof < epsilon_8_4 && cof > -epsilon_8_4)
+			cof = 0.0;
+
+		if (cof >= 0) {
+			sense.push_back('g');
+		} else
+			sense.push_back('l');
+
+		double ris;
+		//add constraints
+		if (cof != 0) {
+			ris = rhs / cof;
+		} else {
+			ris = -CPX_INFBOUND;
+		}
+
+		result.push_back(ris);
+
+	}
 }
 
-void ThirdProblem::update_y_bar(CEnv env, Prob lp, vector<double>& c) {
+bool ThirdProblem::solve(set<int> constraints) {
+
+	bool infeasible = false;
+	ub = CPX_INFBOUND;
+	lb = -CPX_INFBOUND;
+	constraint_to_add = -1;
+
+	for (unsigned int i = 0; i < result.size(); ++i) {
+		if (sense[i] == 'g') {
+			if ((result[i] - lb) > 1.e-6L) {
+				lb = result[i];
+			}
+		} else {
+			if ((result[i] - ub) < 1.e-6L) {
+				ub = result[i];
+			}
+		}
+
+	}
+
+	//test if third problem is infeasible
+	if ((ub - lb) < -1.e-6L) {
+		if (verbose)
+			cout << "Problem third is infeasible! " << endl;
+		infeasible = true;
+	}
+
+	if (!infeasible) {
+		for (unsigned int i = 0; i < result.size(); ++i) {
+			if ((result[i] - ub) < 1.e-6L && sense[i] == 'l') {
+				if (constraints.count(i) != 0)
+					continue;
+				else {
+					constraint_to_add = i;
+					break;
+				}
+
+			}
+		}
+
+		if (verbose) {
+			cout << endl;
+			cout << "lower bound " << lb << endl;
+			cout << "upper bound " << ub << endl;
+			cout << "index constraint to add: " << constraint_to_add << endl;
+		}
+
+		lambda = ub;
+
+	}
+
+	return infeasible;
+}
+
+void ThirdProblem::update_y_bar(vector<double>& c) {
 
 	vector<double> r_mul_lamb;
 
