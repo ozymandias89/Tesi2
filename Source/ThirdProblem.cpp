@@ -402,11 +402,12 @@ bool ThirdProblem::solve(set<int> constraints) {
 	constraint_to_add = -1;
 
 	for (unsigned int i = 0; i < result.size(); ++i) {
+
 		if (sense[i] == 'g') {
 			if ((result[i] - lb) > 1.e-6L) {
 				lb = result[i];
 			}
-		} else {
+		} else {	
 			if ((result[i] - ub) < 1.e-6L) {
 				ub = result[i];
 			}
@@ -442,6 +443,7 @@ bool ThirdProblem::solve(set<int> constraints) {
 		}
 
 		lambda = ub;
+		
 
 	}
 

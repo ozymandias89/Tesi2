@@ -170,8 +170,7 @@ int main(int argc, char const *argv[]) {
 								third_prob->constraint_to_add);
 					} else if (third_prob->constraint_to_add == -1
 							&& !(third_infeasiable))
-						throw std::runtime_error(
-								"No detect constraint to add to the second problem!");
+						third_infeasiable = true;
 
 					CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
 							"../data/second_problem.lp", 0);
@@ -205,6 +204,10 @@ int main(int argc, char const *argv[]) {
 
 			iter++;
 			cout << "Number of iteration: " << iter << endl;
+			clock_t t2;
+			t2 = clock();
+			double elapsed_secs = double(t2 - t1) / CLOCKS_PER_SEC;
+			cout << "Elapsed time: " << elapsed_secs << endl;
 
 		} while (iteration - iter != 0);
 
@@ -217,8 +220,15 @@ int main(int argc, char const *argv[]) {
 		cout << "Number of constraints added: "
 				<< CPXgetnumrows(env, lp) - Num_original_constraints << endl;
 		std::cout << ">>>EXCEPTION: " << e.what() << std::endl;
+		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
+
 		CPXfreeprob(env, &lp);
 		CPXcloseCPLEX(&env);
+
+		clock_t t2;
+		t2 = clock();
+		double elapsed_secs = double(t2 - t1) / CLOCKS_PER_SEC;
+		cout << "Elapsed time: " << elapsed_secs << endl;
 
 	}
 

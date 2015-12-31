@@ -418,15 +418,8 @@ void step1(CEnv env, Prob lp, bool verbose) {
 
 	} else {
 		cout << endl;
-		cout << " STOP CONDITION STEP 1 " << endl;
 		cout << " Iteration number: " << iter << endl;
-		cout << "Number of constraints added: "
-				<< CPXgetnumrows(env, lp) - Num_original_constraints;
-		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-		// free allocate memory
-		CPXfreeprob(env, &lp);
-		CPXcloseCPLEX(const_cast<cpxenv **>(&env));
-		exit(0);
+		throw std::runtime_error(" STOP CONDITION STEP 1 ");
 	}
 
 }
@@ -453,13 +446,7 @@ void solve(CEnv env, Prob lp, bool verbose) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 3 " << endl;
 		cout << " Iteration number: " << iter << endl;
-		cout << "Number of constraints added: "
-				<< CPXgetnumrows(env, lp) - Num_original_constraints << endl;
-		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-		// free allocate memory
-		CPXfreeprob(env, &lp);
-		CPXcloseCPLEX(const_cast<cpxenv **>(&env));
-		exit(0);
+		throw std::runtime_error("  STOP CONDITION STEP 3 ");
 	}
 
 	cout << endl << "PROBLEM MASTER:" << endl;
@@ -518,18 +505,8 @@ void solve(CEnv env, Prob lp, bool verbose) {
 		}
 
 	} else {
-		CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
-		cout
-				<< "The last solution is the best integer solution. STOP CONDITION STEP 4 "
-				<< endl;
-		cout << " Iteration number: " << iter << endl;
-		cout << "Number of constraints added: "
-				<< CPXgetnumrows(env, lp) - Num_original_constraints << endl;
-		CHECKED_CPX_CALL(CPXsolwrite, env, lp, "../data/problem.sol");
-		// free allocate memory
-		CPXfreeprob(env, &lp);
-		CPXcloseCPLEX(const_cast<cpxenv **>(&env));
-		exit(0);
+		 cout << " Iteration number: " << iter << endl;
+		 throw std::runtime_error(" The last solution is the best integer solution. STOP CONDITION STEP 4 ");
 	}
 
 }

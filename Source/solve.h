@@ -75,8 +75,8 @@ void step1(CEnv env, Prob lp, bool verbose);
 /**
  Method solve, solve the original problem, then branch in P_1 and P_2 problem
  and resolve recursively the two sub_problems.
- @param  (CEnv env, Prob lp, index),
- Environment of the problem, problem and index of fractional variables selected
+ @param  (CEnv env, Prob lp, bool verbose = false),
+ Environment of the problem, problem and verbose bool
  @return void
  */
 void solve(CEnv env, Prob lp, bool verbose = false);

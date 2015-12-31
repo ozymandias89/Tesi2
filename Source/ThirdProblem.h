@@ -42,7 +42,7 @@ public:
 	void setup();
 
 	/**
-	 solve third problem and calculate lambda
+	 solve third problem and calculate lambda, return bool infeasible problem
 	 @param  set<int> constraints
 	 @return bool
 	 */
