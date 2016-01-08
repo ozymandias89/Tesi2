@@ -505,8 +505,9 @@ void solve(CEnv env, Prob lp, bool verbose) {
 		}
 
 	} else {
-		 cout << " Iteration number: " << iter << endl;
-		 throw std::runtime_error(" The last solution is the best integer solution. STOP CONDITION STEP 4 ");
+		cout << " Iteration number: " << iter << endl;
+		throw std::runtime_error(
+				" The last solution is the best integer solution. STOP CONDITION STEP 4 ");
 	}
 
 }

@@ -407,7 +407,7 @@ bool ThirdProblem::solve(set<int> constraints) {
 			if ((result[i] - lb) > 1.e-6L) {
 				lb = result[i];
 			}
-		} else {	
+		} else {
 			if ((result[i] - ub) < 1.e-6L) {
 				ub = result[i];
 			}
@@ -443,7 +443,6 @@ bool ThirdProblem::solve(set<int> constraints) {
 		}
 
 		lambda = ub;
-		
 
 	}
 
