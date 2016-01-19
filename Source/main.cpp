@@ -126,6 +126,8 @@ int main(int argc, char const *argv[]) {
 			// --------------------------------------------------
 			bool flag;
 			bool third_infeasiable;
+			bool second_infeasible;
+
 			CPXsetdblparam(env_dual, CPXPARAM_Simplex_Tolerances_Feasibility,
 					1e-5);
 			CPXsetdblparam(env_dual, CPXPARAM_Simplex_Tolerances_Optimality,
@@ -135,9 +137,15 @@ int main(int argc, char const *argv[]) {
 
 			do {
 
+				if (verbose)
+					cout << endl
+							<< "Number of constraints inserted in the cicle 8: "
+							<< sec_prob->satisfy_constraint_list.size() << endl;
+
 				clock_t t2;
 				t2 = clock();
 				double elapsed_secs = double(t2 - t1) / CLOCKS_PER_SEC;
+
 				if (elapsed_secs > 120.0) {
 					throw std::runtime_error("Timeout!");
 				}
@@ -147,58 +155,62 @@ int main(int argc, char const *argv[]) {
 				CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
 						"../data/second_problem.lp", 0);
 
-				sec_prob->solve(env_dual, lp_dual);
+				second_infeasible = sec_prob->solve(env_dual, lp_dual);
 
-				// --------------------------------------------------
-				// 7. STOP condition
-				// --------------------------------------------------
-				flag = sec_prob->y_tilde_EQ_y_bar();
+				if (!second_infeasible) {
+					// --------------------------------------------------
+					// 7. STOP condition
+					// --------------------------------------------------
+					flag = sec_prob->y_tilde_EQ_y_bar();
 
-				if (!flag) {
-					ThirdProblem* third_prob = new ThirdProblem(
-							sec_prob->y_tilde, sec_prob->cost, verbose);
-					if (verbose)
-						print_vect_b();
+					if (!flag) {
+						ThirdProblem* third_prob = new ThirdProblem(
+								sec_prob->y_tilde, sec_prob->cost, verbose);
+						if (verbose)
+							print_vect_b();
 
-					third_prob->setup();
+						third_prob->setup();
 
-					third_infeasiable = third_prob->solve(
-							sec_prob->satisfy_constraint_list);
+						third_infeasiable = third_prob->solve(
+								sec_prob->satisfy_constraint_list);
 
-					if (third_prob->constraint_to_add != -1) {
-						sec_prob->add_constraint(env_dual, lp_dual,
-								third_prob->constraint_to_add);
-					} else if (third_prob->constraint_to_add == -1
-							&& !(third_infeasiable))
-						third_infeasiable = true;
+						if (third_prob->constraint_to_add != -1) {
+							sec_prob->add_constraint(env_dual, lp_dual,
+									third_prob->constraint_to_add);
+						} else if (third_prob->constraint_to_add == -1
+								&& !(third_infeasiable)) {
+							third_infeasiable = true;
+						}
 
-					CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
-							"../data/second_problem.lp", 0);
-					if (!third_infeasiable) {
-						third_prob->update_y_bar(sec_prob->cost);
+						CHECKED_CPX_CALL(CPXwriteprob, env_dual, lp_dual,
+								"../data/second_problem.lp", 0);
 
-						//delete last constraint ry=ry
-						int num_constraint = CPXgetnumrows(env_dual, lp_dual);
-						CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual,
-								num_constraint - 2, num_constraint - 2);
+						if (!third_infeasiable) {
+							third_prob->update_y_bar(sec_prob->cost);
+
+							//delete last constraint ry=ry
+							int num_constraint = CPXgetnumrows(env_dual,
+									lp_dual);
+							CHECKED_CPX_CALL(CPXdelrows, env_dual, lp_dual,
+									num_constraint - 2, num_constraint - 2);
+						}
+
+						free(third_prob);
+
 					}
-
-					free(third_prob);
-
 				}
-
-			} while (!flag && !(third_infeasiable));
+			} while (!flag && !(third_infeasiable) && !(second_infeasible));
 
 			// --------------------------------------------------
 			// 8. ADD constraint R in the first problem
 			// --------------------------------------------------
+
 			add_constraint_R(env, lp, sec_prob->R);
 
 			CPXfreeprob(env_dual, &lp_dual);
 			CPXcloseCPLEX(&env_dual);
 			free(sec_prob);
 			flag_find = true;
-			flag_step1 = false;
 
 			CHECKED_CPX_CALL(CPXwriteprob, env, lp, "../data/problem.lp", 0);
 

@@ -44,9 +44,9 @@ public:
 	/**
 	 Method that solve the second problem (13-19) + 21)
 	 @param  CEnv env, Prob lp, bool verbose
-	 @return none
+	 @return bool infeasibility of problem
 	 */
-	void solve(CEnv env, Prob lp);
+	bool solve(CEnv env, Prob lp);
 
 	void add_constraint(CEnv env, Prob lp, int constraint_to_add);
 

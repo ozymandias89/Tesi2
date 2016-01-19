@@ -152,7 +152,7 @@ double* solve_P1_Problem(CEnv env, Prob lp, int index, bool verbose) {
 			cout << "Restart from step 1 with new problem master: " << endl;
 		}
 
-		flag_step1 = true;
+		
 		solve(env, lp, verbose);
 
 	}
@@ -256,7 +256,6 @@ double solve_P2_Problem(CEnv env, Prob lp, int index, bool verbose) {
 		}
 
 		b.push_back(rhs);
-		flag_step1 = true;
 		solve(env, lp, verbose);
 	}
 
@@ -364,6 +363,8 @@ void remove_constraint(CEnv env, Prob lp, int constraint, bool verbose) {
 
 void step1(CEnv env, Prob lp, bool verbose) {
 
+	flag_step1 = false;
+	
 	if (verbose) {
 		cout << endl;
 		cout << "STEP 1:" << endl;
@@ -442,12 +443,13 @@ void solve(CEnv env, Prob lp, bool verbose) {
 	// --------------------------------------------------
 	// 3. STOP CONDITION
 	// --------------------------------------------------
-	if (stat == CPX_STAT_UNBOUNDED) {
+	if (stat == CPX_STAT_UNBOUNDED || stat == CPX_STAT_INFEASIBLE) {
 		cout << endl;
 		cout << " STOP CONDITION STEP 3 " << endl;
 		cout << " Iteration number: " << iter << endl;
 		throw std::runtime_error("  STOP CONDITION STEP 3 ");
 	}
+	
 
 	cout << endl << "PROBLEM MASTER:" << endl;
 
@@ -455,6 +457,7 @@ void solve(CEnv env, Prob lp, bool verbose) {
 	// 4. print solution
 	// --------------------------------------------------
 	print_objval(env, lp, true);
+	
 
 	// --------------------------------------------------
 	// 5. set number and value of variable

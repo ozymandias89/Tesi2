@@ -108,6 +108,8 @@ void ThirdProblem::print_vector(vector<T> vector) {
 
 void ThirdProblem::setup() {
 
+	//cout << endl << "TERZO PROBLEMA: " << endl;
+
 	double cof, rhs;
 	{
 		//first constraint (second problem)
@@ -137,6 +139,8 @@ void ThirdProblem::setup() {
 			//v and v_0 are 0.. skip
 
 			rhs = -rhs;
+
+			//cout << cof << " >= " << rhs << endl;
 
 			//tolerance error
 			if (rhs < epsilon_8_4 && rhs > -epsilon_8_4)
@@ -195,6 +199,8 @@ void ThirdProblem::setup() {
 
 		if (cof < epsilon_8_4 && cof > -epsilon_8_4)
 			cof = 0.0;
+
+		//	cout << cof << " >= " << rhs << endl;
 
 		if (cof >= 0) {
 			sense.push_back('g');
@@ -258,6 +264,8 @@ void ThirdProblem::setup() {
 			} else
 				sense.push_back('l');
 
+			//	cout << cof << " >= " << rhs << endl;
+
 			double ris;
 			//add constraints
 			if (cof != 0) {
@@ -312,6 +320,8 @@ void ThirdProblem::setup() {
 		} else
 			sense.push_back('l');
 
+		//	cout << cof << " >= " << rhs << endl;
+
 		double ris;
 		//add constraints
 		if (cof != 0) {
@@ -347,6 +357,8 @@ void ThirdProblem::setup() {
 		} else
 			sense.push_back('l');
 
+		//	cout << cof << " >= " << rhs << endl;
+
 		double ris;
 		//add constraints
 		if (cof != 0) {
@@ -381,6 +393,8 @@ void ThirdProblem::setup() {
 		} else
 			sense.push_back('l');
 
+		//	cout << cof << " >= " << rhs << endl;
+
 		double ris;
 		//add constraints
 		if (cof != 0) {
@@ -404,11 +418,11 @@ bool ThirdProblem::solve(set<int> constraints) {
 	for (unsigned int i = 0; i < result.size(); ++i) {
 
 		if (sense[i] == 'g') {
-			if ((result[i] - lb) > 1.e-6L) {
+			if ((result[i] - lb) > epsilon_8_4) {
 				lb = result[i];
 			}
 		} else {
-			if ((result[i] - ub) < 1.e-6L) {
+			if ((result[i] - ub) < epsilon_8_4) {
 				ub = result[i];
 			}
 		}
@@ -416,22 +430,31 @@ bool ThirdProblem::solve(set<int> constraints) {
 	}
 
 	//test if third problem is infeasible
-	if ((ub - lb) < -1.e-6L) {
+	if ((ub - lb) < -epsilon_8_4) {
 		if (verbose)
 			cout << "Problem third is infeasible! " << endl;
 		infeasible = true;
 	}
 
 	if (!infeasible) {
+
+		//std::set<int>::iterator it;
+		//for (it = constraints.begin(); it != constraints.end(); ++it){
+
+		//int i = *it;
+		//if (result[i] != -CPX_INFBOUND)
+		//cout << "il vincolo i appartiene dunque deve esserci un valore  -inf " << i << " " << result[i] << endl;
+		//}
+
 		for (unsigned int i = 0; i < result.size(); ++i) {
-			if ((result[i] - ub) < 1.e-6L && sense[i] == 'l') {
+
+			if ((result[i] - ub) < epsilon_8_4 && sense[i] == 'l') {
 				if (constraints.count(i) != 0)
 					continue;
 				else {
 					constraint_to_add = i;
 					break;
 				}
-
 			}
 		}
 
@@ -441,6 +464,15 @@ bool ThirdProblem::solve(set<int> constraints) {
 			cout << "upper bound " << ub << endl;
 			cout << "index constraint to add: " << constraint_to_add << endl;
 		}
+
+		//if (!infeasible && constraint_to_add == -1){
+
+		//for (unsigned int i = 0; i < result.size(); ++i) {
+		//if (sense[i] == 'l'){
+		//cout << "vincoli < " << i << " " << result[i] << endl;
+		//}
+		//}
+		//}
 
 		lambda = ub;
 

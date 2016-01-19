@@ -34,7 +34,7 @@ char errmsg[BUF_SIZE];
 const int NAME_SIZE = 512;
 char name[NAME_SIZE];
 
-const double epsilon_8_1 = 1.e-5L;
+const double epsilon_8_1 = 1.e-7L;
 const double epsilon_8_3 = 1.e-6L;
 const double epsilon_8_4 = 1.e-6L;
 
@@ -42,8 +42,7 @@ const double epsilon_8_4 = 1.e-6L;
 static int iter;
 
 //integer solution
-static double integer=-CPX_INFBOUND;
-
+static double integer = -CPX_INFBOUND;
 
 //number of variable
 int N;
@@ -476,6 +475,7 @@ void add_constraint_R(CEnv env, Prob lp, std::set<std::vector<double> > R) {
 	//for each element in a set insert a new constraint
 	for (std::set<std::vector<double> >::iterator it = R.begin(); it != R.end();
 			++it) {
+
 		nzcnt = 0;
 
 		// add Slack variables
